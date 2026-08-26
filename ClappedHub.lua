@@ -14,20 +14,20 @@ local Library = {}
 Library.__index = Library
 
 Library.Theme = {
-	Background = Color3.fromRGB(8, 10, 15),
-	Window = Color3.fromRGB(16, 20, 29),
-	Sidebar = Color3.fromRGB(13, 17, 25),
-	Surface = Color3.fromRGB(25, 30, 42),
-	SurfaceRaised = Color3.fromRGB(31, 37, 52),
-	SurfaceHover = Color3.fromRGB(38, 45, 62),
-	Stroke = Color3.fromRGB(48, 56, 72),
-	StrokeSoft = Color3.fromRGB(34, 40, 53),
+	Background = Color3.fromRGB(7, 6, 11),
+	Window = Color3.fromRGB(13, 10, 19),
+	Sidebar = Color3.fromRGB(10, 8, 15),
+	Surface = Color3.fromRGB(21, 15, 28),
+	SurfaceRaised = Color3.fromRGB(31, 20, 40),
+	SurfaceHover = Color3.fromRGB(45, 24, 48),
+	Stroke = Color3.fromRGB(107, 27, 84),
+	StrokeSoft = Color3.fromRGB(57, 30, 60),
 	Text = Color3.fromRGB(239, 243, 250),
 	TextMuted = Color3.fromRGB(151, 161, 180),
 	TextFaint = Color3.fromRGB(96, 107, 128),
-	Accent = Color3.fromRGB(122, 101, 255),
-	AccentBright = Color3.fromRGB(157, 143, 255),
-	AccentDeep = Color3.fromRGB(79, 62, 192),
+	Accent = Color3.fromRGB(232, 54, 153),
+	AccentBright = Color3.fromRGB(255, 111, 195),
+	AccentDeep = Color3.fromRGB(171, 22, 105),
 	Success = Color3.fromRGB(74, 205, 143),
 	Warning = Color3.fromRGB(245, 183, 73),
 	Danger = Color3.fromRGB(235, 92, 112),
@@ -129,7 +129,7 @@ function Library.new(options: {[string]: any}?)
 	shadow.Name = "AmbientShadow"
 	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
 	shadow.Position = UDim2.fromScale(0.5, 0.5)
-	shadow.Size = UDim2.new(0.78, 0, 0.82, 0)
+	shadow.Size = UDim2.new(0.72, 0, 0.72, 0)
 	shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	shadow.BackgroundTransparency = 0.52
 	shadow.BorderSizePixel = 0
@@ -145,7 +145,7 @@ function Library.new(options: {[string]: any}?)
 	window.Name = "Window"
 	window.AnchorPoint = Vector2.new(0.5, 0.5)
 	window.Position = UDim2.fromScale(0.5, 0.5)
-	window.Size = UDim2.new(0.78, 0, 0.82, 0)
+	window.Size = UDim2.new(0.72, 0, 0.72, 0)
 	window.BackgroundColor3 = self.Theme.Window
 	window.BackgroundTransparency = 0.06
 	window.BorderSizePixel = 0
@@ -164,7 +164,7 @@ function Library.new(options: {[string]: any}?)
 	windowGradient.Parent = window
 
 	local topGlow = Instance.new("Frame")
-	topGlow.Size = UDim2.new(1, 0, 0, 2)
+	topGlow.Size = UDim2.new(1, 0, 0, 3)
 	topGlow.BackgroundColor3 = self.Theme.Accent
 	topGlow.BackgroundTransparency = 0.18
 	topGlow.BorderSizePixel = 0
@@ -175,7 +175,7 @@ function Library.new(options: {[string]: any}?)
 
 	local header = Instance.new("Frame")
 	header.Name = "Header"
-	header.Size = UDim2.new(1, 0, 0, 76)
+	header.Size = UDim2.new(1, 0, 0, 68)
 	header.BackgroundColor3 = self.Theme.Window
 	header.BackgroundTransparency = 0.18
 	header.BorderSizePixel = 0
@@ -183,7 +183,7 @@ function Library.new(options: {[string]: any}?)
 	padding(header, 28, 22, 15, 12)
 
 	local brandMark = Instance.new("Frame")
-	brandMark.Size = UDim2.fromOffset(38, 38)
+	brandMark.Size = UDim2.fromOffset(36, 36)
 	brandMark.BackgroundColor3 = self.Theme.AccentDeep
 	brandMark.BorderSizePixel = 0
 	brandMark.Parent = header
@@ -243,14 +243,14 @@ function Library.new(options: {[string]: any}?)
 
 	local body = Instance.new("Frame")
 	body.Name = "Body"
-	body.Position = UDim2.fromOffset(0, 76)
-	body.Size = UDim2.new(1, 0, 1, -76)
+	body.Position = UDim2.fromOffset(0, 68)
+	body.Size = UDim2.new(1, 0, 1, -68)
 	body.BackgroundTransparency = 1
 	body.Parent = window
 
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
-	sidebar.Size = UDim2.fromOffset(208, 0)
+	sidebar.Size = UDim2.fromOffset(184, 0)
 	sidebar.SizeConstraint = Enum.SizeConstraint.RelativeYY
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
 	sidebar.BackgroundTransparency = 0.12
@@ -306,8 +306,8 @@ function Library.new(options: {[string]: any}?)
 
 	local content = Instance.new("Frame")
 	content.Name = "Content"
-	content.Position = UDim2.fromOffset(208, 0)
-	content.Size = UDim2.new(1, -208, 1, 0)
+	content.Position = UDim2.fromOffset(184, 0)
+	content.Size = UDim2.new(1, -184, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
 	content.BackgroundTransparency = 0.08
 	content.BorderSizePixel = 0
@@ -336,7 +336,7 @@ function Library.new(options: {[string]: any}?)
 
 	minimize.MouseButton1Click:Connect(function()
 		self.Minimized = not self.Minimized
-		if self.Minimized then tween(window, 0.32, {Size = UDim2.new(0.78, 0, 0, 76)}) else tween(window, 0.32, {Size = UDim2.new(0.78, 0, 0.82, 0)}) end
+		if self.Minimized then tween(window, 0.32, {Size = UDim2.new(0.72, 0, 0, 68)}) else tween(window, 0.32, {Size = UDim2.new(0.72, 0, 0.72, 0)}) end
 	end)
 
 	local dragging, dragStart, startPosition
@@ -364,15 +364,15 @@ end
 
 function Library:_addResponsiveConstraints(window: Frame, content: Frame, sidebar: Frame)
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(620, 420)
-	sizeConstraint.MaxSize = Vector2.new(1180, 760)
+	sizeConstraint.MinSize = Vector2.new(560, 380)
+	sizeConstraint.MaxSize = Vector2.new(1040, 700)
 	sizeConstraint.Parent = window
 	local sidebarConstraint = Instance.new("UISizeConstraint")
 	sidebarConstraint.MinSize = Vector2.new(176, 0)
 	sidebarConstraint.MaxSize = Vector2.new(224, math.huge)
 	sidebarConstraint.Parent = sidebar
 	local aspect = Instance.new("UIAspectRatioConstraint")
-	aspect.AspectRatio = 1.46
+	aspect.AspectRatio = 1.58
 	aspect.DominantAxis = Enum.DominantAxis.Width
 	aspect.Parent = window
 end
