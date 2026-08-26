@@ -15,11 +15,11 @@ Library.__index = Library
 
 Library.Theme = {
 	Background = Color3.fromRGB(8, 10, 15),
-	Window = Color3.fromRGB(14, 17, 24),
-	Sidebar = Color3.fromRGB(11, 14, 20),
-	Surface = Color3.fromRGB(19, 23, 32),
-	SurfaceRaised = Color3.fromRGB(24, 29, 40),
-	SurfaceHover = Color3.fromRGB(29, 35, 48),
+	Window = Color3.fromRGB(16, 20, 29),
+	Sidebar = Color3.fromRGB(13, 17, 25),
+	Surface = Color3.fromRGB(25, 30, 42),
+	SurfaceRaised = Color3.fromRGB(31, 37, 52),
+	SurfaceHover = Color3.fromRGB(38, 45, 62),
 	Stroke = Color3.fromRGB(48, 56, 72),
 	StrokeSoft = Color3.fromRGB(34, 40, 53),
 	Text = Color3.fromRGB(239, 243, 250),
@@ -131,7 +131,7 @@ function Library.new(options: {[string]: any}?)
 	shadow.Position = UDim2.fromScale(0.5, 0.5)
 	shadow.Size = UDim2.new(0.78, 0, 0.82, 0)
 	shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	shadow.BackgroundTransparency = 0.38
+	shadow.BackgroundTransparency = 0.52
 	shadow.BorderSizePixel = 0
 	shadow.Parent = gui
 	corner(shadow, 18)
@@ -147,12 +147,21 @@ function Library.new(options: {[string]: any}?)
 	window.Position = UDim2.fromScale(0.5, 0.5)
 	window.Size = UDim2.new(0.78, 0, 0.82, 0)
 	window.BackgroundColor3 = self.Theme.Window
+	window.BackgroundTransparency = 0.06
 	window.BorderSizePixel = 0
 	window.ClipsDescendants = true
 	window.Parent = gui
 	corner(window, 16)
 	stroke(window, self.Theme.Stroke, 0.3)
 	self.Window = window
+	local windowGradient = Instance.new("UIGradient")
+	windowGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(24, 29, 41)),
+		ColorSequenceKeypoint.new(0.48, self.Theme.Window),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(11, 14, 21)),
+	})
+	windowGradient.Rotation = 118
+	windowGradient.Parent = window
 
 	local topGlow = Instance.new("Frame")
 	topGlow.Size = UDim2.new(1, 0, 0, 2)
@@ -168,6 +177,7 @@ function Library.new(options: {[string]: any}?)
 	header.Name = "Header"
 	header.Size = UDim2.new(1, 0, 0, 76)
 	header.BackgroundColor3 = self.Theme.Window
+	header.BackgroundTransparency = 0.18
 	header.BorderSizePixel = 0
 	header.Parent = window
 	padding(header, 28, 22, 15, 12)
@@ -243,6 +253,7 @@ function Library.new(options: {[string]: any}?)
 	sidebar.Size = UDim2.fromOffset(208, 0)
 	sidebar.SizeConstraint = Enum.SizeConstraint.RelativeYY
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
+	sidebar.BackgroundTransparency = 0.12
 	sidebar.BorderSizePixel = 0
 	sidebar.Parent = body
 	padding(sidebar, 14, 14, 18, 18)
@@ -255,6 +266,11 @@ function Library.new(options: {[string]: any}?)
 	sideLine.BackgroundTransparency = 0.38
 	sideLine.BorderSizePixel = 0
 	sideLine.Parent = sidebar
+	local sidebarGradient = Instance.new("UIGradient")
+	sidebarGradient.Color = ColorSequence.new({Color3.fromRGB(22, 27, 39), self.Theme.Sidebar})
+	sidebarGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.04), NumberSequenceKeypoint.new(1, 0.42)})
+	sidebarGradient.Rotation = 90
+	sidebarGradient.Parent = sidebar
 
 	local nav = Instance.new("ScrollingFrame")
 	nav.Name = "Navigation"
@@ -293,9 +309,29 @@ function Library.new(options: {[string]: any}?)
 	content.Position = UDim2.fromOffset(208, 0)
 	content.Size = UDim2.new(1, -208, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
+	content.BackgroundTransparency = 0.08
 	content.BorderSizePixel = 0
 	content.Parent = body
 	self.Content = content
+	local contentGradient = Instance.new("UIGradient")
+	contentGradient.Color = ColorSequence.new({Color3.fromRGB(13, 17, 25), self.Theme.Background})
+	contentGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.02), NumberSequenceKeypoint.new(1, 0.18)})
+	contentGradient.Rotation = 25
+	contentGradient.Parent = content
+	local contentGlow = Instance.new("Frame")
+	contentGlow.Name = "AmbientAccent"
+	contentGlow.AnchorPoint = Vector2.new(1, 0)
+	contentGlow.Position = UDim2.new(1, 80, 0, -80)
+	contentGlow.Size = UDim2.fromOffset(360, 360)
+	contentGlow.BackgroundColor3 = self.Theme.Accent
+	contentGlow.BackgroundTransparency = 0.93
+	contentGlow.BorderSizePixel = 0
+	contentGlow.Parent = content
+	corner(contentGlow, 360)
+	local contentGlowGradient = Instance.new("UIGradient")
+	contentGlowGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1)})
+	contentGlowGradient.Rotation = 135
+	contentGlowGradient.Parent = contentGlow
 	self.Nav = nav
 
 	minimize.MouseButton1Click:Connect(function()
@@ -357,6 +393,10 @@ function Library:Tab(config: {[string]: any})
 	button.BorderSizePixel = 0
 	button.Parent = self.Nav
 	corner(button, 9)
+	local navGradient = Instance.new("UIGradient")
+	navGradient.Color = ColorSequence.new({self.Theme.SurfaceRaised, self.Theme.Sidebar})
+	navGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.58), NumberSequenceKeypoint.new(1, 0.94)})
+	navGradient.Parent = button
 
 	local indicator = Instance.new("Frame")
 	indicator.Size = UDim2.fromOffset(3, 20)
@@ -505,10 +545,12 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	local row = Instance.new("Frame")
 	row.Size = UDim2.new(1, 0, 0, descriptionValue and 62 or 48)
 	row.BackgroundColor3 = self.Theme.Surface
+	row.BackgroundTransparency = 0.12
 	row.BorderSizePixel = 0
 	row.Parent = parent
 	corner(row, 10)
 	stroke(row, self.Theme.StrokeSoft, 0.3)
+	hover(row, self.Theme.Surface, self.Theme.SurfaceHover)
 	local titleLabel = text(row, titleValue, 11, self.Theme.Text, Enum.Font.GothamMedium)
 	titleLabel.Position = UDim2.fromOffset(16, descriptionValue and 11 or 0)
 	titleLabel.Size = UDim2.new(0.55, 0, 0, 20)
@@ -532,11 +574,17 @@ function Library:Section(config: {[string]: any})
 	card.Size = UDim2.new(1, 0, 0, 0)
 	card.AutomaticSize = Enum.AutomaticSize.Y
 	card.BackgroundColor3 = self.Theme.Surface
+	card.BackgroundTransparency = 0.08
 	card.BorderSizePixel = 0
 	card.Parent = config.Tab.Scroller
 	corner(card, 12)
 	stroke(card, self.Theme.StrokeSoft, 0.22)
 	padding(card, 14, 14, 14, 14)
+	local cardGradient = Instance.new("UIGradient")
+	cardGradient.Color = ColorSequence.new({self.Theme.SurfaceRaised, self.Theme.Surface})
+	cardGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.18), NumberSequenceKeypoint.new(1, 0.52)})
+	cardGradient.Rotation = 105
+	cardGradient.Parent = card
 	local heading = text(card, config.Name, 12, self.Theme.Text, Enum.Font.GothamBold)
 	heading.Size = UDim2.new(1, 0, 0, 22)
 	local caption = text(card, config.Description or "", 9, self.Theme.TextMuted, Enum.Font.Gotham)
