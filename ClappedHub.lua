@@ -129,7 +129,7 @@ function Library.new(options: {[string]: any}?)
 	shadow.Name = "AmbientShadow"
 	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
 	shadow.Position = UDim2.fromScale(0.5, 0.5)
-	shadow.Size = UDim2.new(0.72, 0, 0.72, 0)
+	shadow.Size = UDim2.new(0.44, 0, 0.78, 0)
 	shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	shadow.BackgroundTransparency = 0.52
 	shadow.BorderSizePixel = 0
@@ -146,7 +146,7 @@ function Library.new(options: {[string]: any}?)
 	window.Name = "Window"
 	window.AnchorPoint = Vector2.new(0.5, 0.5)
 	window.Position = UDim2.fromScale(0.5, 0.5)
-	window.Size = UDim2.new(0.72, 0, 0.72, 0)
+	window.Size = UDim2.new(0.44, 0, 0.78, 0)
 	window.BackgroundColor3 = self.Theme.Window
 	window.BackgroundTransparency = 1
 	window.BorderSizePixel = 0
@@ -163,7 +163,7 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.Size = window.Size
 	backgroundImage.BackgroundTransparency = 1
 	backgroundImage.Image = options.BackgroundImage or "rbxassetid://78664802433772"
-	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.18
+	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.06
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
 	backgroundImage.Parent = gui
@@ -210,7 +210,7 @@ function Library.new(options: {[string]: any}?)
 	header.Name = "Header"
 	header.Size = UDim2.new(1, 0, 0, 68)
 	header.BackgroundColor3 = Color3.fromRGB(4, 8, 16)
-	header.BackgroundTransparency = 0.58
+	header.BackgroundTransparency = 0.62
 	header.BorderSizePixel = 0
 	header.ZIndex = 2
 	header.Parent = window
@@ -345,7 +345,7 @@ function Library.new(options: {[string]: any}?)
 	content.Position = UDim2.fromOffset(64, 0)
 	content.Size = UDim2.new(1, -64, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
-	content.BackgroundTransparency = 0.58
+	content.BackgroundTransparency = 0.64
 	content.BorderSizePixel = 0
 	content.Parent = body
 	self.Content = content
@@ -362,7 +362,7 @@ function Library.new(options: {[string]: any}?)
 	contentGlow.Position = UDim2.new(1, 80, 0, -80)
 	contentGlow.Size = UDim2.fromOffset(360, 360)
 	contentGlow.BackgroundColor3 = self.Theme.Accent
-	contentGlow.BackgroundTransparency = 0.93
+	contentGlow.BackgroundTransparency = 1
 	contentGlow.BorderSizePixel = 0
 	contentGlow.Parent = content
 	corner(contentGlow, 360)
@@ -374,7 +374,7 @@ function Library.new(options: {[string]: any}?)
 
 	minimize.MouseButton1Click:Connect(function()
 		self.Minimized = not self.Minimized
-		local nextSize = self.Minimized and UDim2.new(0.72, 0, 0, 68) or UDim2.new(0.72, 0, 0.72, 0)
+		local nextSize = self.Minimized and UDim2.new(0.44, 0, 0, 68) or UDim2.new(0.44, 0, 0.78, 0)
 		tween(window, 0.32, {Size = nextSize})
 		tween(backgroundImage, 0.32, {Size = nextSize})
 		tween(glassWash, 0.32, {Size = nextSize})
@@ -410,15 +410,15 @@ end
 
 function Library:_addResponsiveConstraints(window: Frame, content: Frame, sidebar: Frame)
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(560, 380)
-	sizeConstraint.MaxSize = Vector2.new(1040, 700)
+	sizeConstraint.MinSize = Vector2.new(360, 470)
+	sizeConstraint.MaxSize = Vector2.new(620, 820)
 	sizeConstraint.Parent = window
 	local sidebarConstraint = Instance.new("UISizeConstraint")
 	sidebarConstraint.MinSize = Vector2.new(64, 0)
 	sidebarConstraint.MaxSize = Vector2.new(184, math.huge)
 	sidebarConstraint.Parent = sidebar
 	local aspect = Instance.new("UIAspectRatioConstraint")
-	aspect.AspectRatio = 1.58
+	aspect.AspectRatio = 0.72
 	aspect.DominantAxis = Enum.DominantAxis.Width
 	aspect.Parent = window
 end
@@ -610,11 +610,11 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	local row = Instance.new("Frame")
 	row.Size = UDim2.new(1, 0, 0, descriptionValue and 62 or 48)
 	row.BackgroundColor3 = self.Theme.Surface
-	row.BackgroundTransparency = 0.72
+	row.BackgroundTransparency = 0.78
 	row.BorderSizePixel = 0
 	row.Parent = parent
 	corner(row, 10)
-	stroke(row, self.Theme.StrokeSoft, 0.6)
+	stroke(row, self.Theme.StrokeSoft, 0.72)
 	hover(row, self.Theme.Surface, self.Theme.SurfaceHover)
 	local titleLabel = text(row, titleValue, 11, self.Theme.Text, Enum.Font.GothamMedium)
 	titleLabel.Position = UDim2.fromOffset(16, descriptionValue and 11 or 0)
@@ -639,11 +639,11 @@ function Library:Section(config: {[string]: any})
 	card.Size = UDim2.new(1, 0, 0, 0)
 	card.AutomaticSize = Enum.AutomaticSize.Y
 	card.BackgroundColor3 = self.Theme.Surface
-	card.BackgroundTransparency = 0.54
+	card.BackgroundTransparency = 0.7
 	card.BorderSizePixel = 0
 	card.Parent = config.Tab.Scroller
 	corner(card, 12)
-	stroke(card, self.Theme.Stroke, 0.58)
+	stroke(card, self.Theme.Stroke, 0.78)
 	padding(card, 14, 14, 14, 14)
 	local cardGradient = Instance.new("UIGradient")
 	cardGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, self.Theme.SurfaceRaised), ColorSequenceKeypoint.new(1, self.Theme.Surface)})
