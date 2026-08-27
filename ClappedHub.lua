@@ -150,28 +150,33 @@ function Library.new(options: {[string]: any}?)
 	window.BackgroundTransparency = 0.06
 	window.BorderSizePixel = 0
 	window.ClipsDescendants = true
+	window.ZIndex = 2
 	window.Parent = gui
 	corner(window, 16)
 	stroke(window, self.Theme.Stroke, 0.3)
 	self.Window = window
 	local backgroundImage = Instance.new("ImageLabel")
 	backgroundImage.Name = "GlassBackdrop"
-	backgroundImage.Size = UDim2.fromScale(1, 1)
+	backgroundImage.AnchorPoint = Vector2.new(0.5, 0.5)
+	backgroundImage.Position = window.Position
+	backgroundImage.Size = window.Size
 	backgroundImage.BackgroundTransparency = 1
 	backgroundImage.Image = options.BackgroundImage or "rbxassetid://78664802433772"
 	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.18
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
-	backgroundImage.Parent = window
+	backgroundImage.Parent = gui
 	corner(backgroundImage, 16)
 	local glassWash = Instance.new("Frame")
 	glassWash.Name = "GlassWash"
-	glassWash.Size = UDim2.fromScale(1, 1)
+	glassWash.AnchorPoint = Vector2.new(0.5, 0.5)
+	glassWash.Position = window.Position
+	glassWash.Size = window.Size
 	glassWash.BackgroundColor3 = Color3.fromRGB(8, 7, 15)
 	glassWash.BackgroundTransparency = 0.38
 	glassWash.BorderSizePixel = 0
 	glassWash.ZIndex = 0
-	glassWash.Parent = window
+	glassWash.Parent = gui
 	corner(glassWash, 16)
 	local washGradient = Instance.new("UIGradient")
 	washGradient.Color = ColorSequence.new({Color3.fromRGB(10, 8, 20), Color3.fromRGB(20, 7, 19)})
@@ -363,7 +368,10 @@ function Library.new(options: {[string]: any}?)
 
 	minimize.MouseButton1Click:Connect(function()
 		self.Minimized = not self.Minimized
-		if self.Minimized then tween(window, 0.32, {Size = UDim2.new(0.72, 0, 0, 68)}) else tween(window, 0.32, {Size = UDim2.new(0.72, 0, 0.72, 0)}) end
+		local nextSize = self.Minimized and UDim2.new(0.72, 0, 0, 68) or UDim2.new(0.72, 0, 0.72, 0)
+		tween(window, 0.32, {Size = nextSize})
+		tween(backgroundImage, 0.32, {Size = nextSize})
+		tween(glassWash, 0.32, {Size = nextSize})
 	end)
 
 	local dragging, dragStart, startPosition
@@ -380,8 +388,11 @@ function Library.new(options: {[string]: any}?)
 	UserInputService.InputChanged:Connect(function(input)
 		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 			local delta = input.Position - dragStart
-			window.Position = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
-			shadow.Position = window.Position
+			local nextPosition = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
+			window.Position = nextPosition
+			shadow.Position = nextPosition
+			backgroundImage.Position = nextPosition
+			glassWash.Position = nextPosition
 		end
 	end)
 
