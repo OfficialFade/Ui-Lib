@@ -1,7 +1,28 @@
--- Clapped Hub UI Lib - local showcase
--- UI demonstration only. All callbacks print state or display notifications.
+-- Clapped Hub UI Lib - test example
+-- Works when ClappedHub is next to this script, in ReplicatedStorage, or
+-- when the example is executed through an environment that provides loadstring.
 
-local Library = require(script.Parent:WaitForChild("ClappedHub"))
+local Library
+
+local function findLocalLibrary()
+	if script and script.Parent then
+		local sibling = script.Parent:FindFirstChild("ClappedHub")
+		if sibling then return sibling end
+	end
+
+	local replicatedStorage = game:GetService("ReplicatedStorage")
+	return replicatedStorage:FindFirstChild("ClappedHub")
+end
+
+local localLibrary = findLocalLibrary()
+if localLibrary then
+	Library = require(localLibrary)
+else
+	local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/main/ClappedHub.lua")
+	local loader = loadstring(source)
+	assert(loader, "Could not compile ClappedHub.lua from GitHub")
+	Library = loader()
+end
 
 local UI = Library.new({
 	Name = "CLAPPED HUB",
