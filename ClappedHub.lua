@@ -164,7 +164,7 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.Size = window.Size
 	backgroundImage.BackgroundTransparency = 1
 	backgroundImage.Image = options.BackgroundImage or "rbxassetid://78664802433772"
-	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.18
+	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.34
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
 	backgroundImage.Visible = false
@@ -223,7 +223,7 @@ function Library.new(options: {[string]: any}?)
 	header.Name = "Header"
 	header.Size = UDim2.new(1, 0, 0, 68)
 	header.BackgroundColor3 = Color3.fromRGB(4, 8, 16)
-	header.BackgroundTransparency = 1
+	header.BackgroundTransparency = 0.24
 	header.BorderSizePixel = 0
 	header.ZIndex = 2
 	header.Parent = window
@@ -303,7 +303,7 @@ function Library.new(options: {[string]: any}?)
 	sidebar.Size = UDim2.fromOffset(58, 0)
 	sidebar.SizeConstraint = Enum.SizeConstraint.RelativeYY
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
-	sidebar.BackgroundTransparency = 0.42
+	sidebar.BackgroundTransparency = 0.3
 	sidebar.BorderSizePixel = 0
 	sidebar.Parent = body
 	padding(sidebar, 8, 8, 14, 14)
@@ -361,7 +361,7 @@ function Library.new(options: {[string]: any}?)
 	content.Position = UDim2.fromOffset(58, 0)
 	content.Size = UDim2.new(1, -58, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
-	content.BackgroundTransparency = 0.34
+	content.BackgroundTransparency = 0.24
 	content.BorderSizePixel = 0
 	content.Parent = body
 	self.Content = content
@@ -449,7 +449,7 @@ function Library:_addResponsiveConstraints(window: Frame, content: Frame, sideba
 	sidebarConstraint.MaxSize = Vector2.new(184, math.huge)
 	sidebarConstraint.Parent = sidebar
 	local aspect = Instance.new("UIAspectRatioConstraint")
-	aspect.AspectRatio = 0.95
+	aspect.AspectRatio = 1.04
 	aspect.DominantAxis = Enum.DominantAxis.Width
 	aspect.Parent = window
 end
@@ -646,8 +646,8 @@ function Library:_revealMainWindow()
 	windowScale.Scale = 0.16
 	windowScale.Parent = self.Window
 	tween(windowScale, 0.62, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.18})
-	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.34})
+	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.34})
+	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.24})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
 end
 
@@ -708,7 +708,7 @@ function Library:PlayMusic(config: {[string]: any})
 		loadingBackground.Size = UDim2.fromScale(1, 1)
 		loadingBackground.BackgroundTransparency = 1
 		loadingBackground.Image = "rbxassetid://78664802433772"
-		loadingBackground.ImageTransparency = 0
+		loadingBackground.ImageTransparency = 0.26
 		loadingBackground.ScaleType = Enum.ScaleType.Crop
 		loadingBackground.ZIndex = 101
 		loadingBackground.Parent = panel
@@ -716,7 +716,7 @@ function Library:PlayMusic(config: {[string]: any})
 		local loadingWash = Instance.new("Frame")
 		loadingWash.Size = UDim2.fromScale(1, 1)
 		loadingWash.BackgroundColor3 = self.Theme.Window
-		loadingWash.BackgroundTransparency = 0.62
+		loadingWash.BackgroundTransparency = 0.38
 		loadingWash.BorderSizePixel = 0
 		loadingWash.ZIndex = 102
 		loadingWash.Parent = panel
@@ -857,7 +857,7 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	local row = Instance.new("Frame")
 	row.Size = UDim2.new(1, 0, 0, descriptionValue and 55 or 44)
 	row.BackgroundColor3 = self.Theme.Surface
-	row.BackgroundTransparency = 0.48
+	row.BackgroundTransparency = 0.36
 	row.BorderSizePixel = 0
 	row.Parent = parent
 	corner(row, 6)
@@ -886,7 +886,7 @@ function Library:Section(config: {[string]: any})
 	card.Size = UDim2.new(1, 0, 0, 0)
 	card.AutomaticSize = Enum.AutomaticSize.Y
 	card.BackgroundColor3 = self.Theme.Surface
-	card.BackgroundTransparency = 0.42
+	card.BackgroundTransparency = 0.32
 	card.BorderSizePixel = 0
 	card.Parent = config.Tab.Scroller
 	corner(card, 3)
