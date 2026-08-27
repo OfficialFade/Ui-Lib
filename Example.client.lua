@@ -6,7 +6,7 @@ local Library = require(script.Parent:WaitForChild("ClappedHub"))
 local UI = Library.new({
 	Name = "CLAPPED HUB",
 	Subtitle = "UI LIBRARY SHOWCASE",
-	Accent = Color3.fromRGB(232, 54, 153),
+	Accent = Color3.fromRGB(78, 160, 255),
 })
 
 local dashboard = UI:Tab({

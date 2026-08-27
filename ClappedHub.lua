@@ -25,9 +25,9 @@ Library.Theme = {
 	Text = Color3.fromRGB(239, 243, 250),
 	TextMuted = Color3.fromRGB(151, 161, 180),
 	TextFaint = Color3.fromRGB(96, 107, 128),
-	Accent = Color3.fromRGB(232, 54, 153),
-	AccentBright = Color3.fromRGB(255, 111, 195),
-	AccentDeep = Color3.fromRGB(171, 22, 105),
+	Accent = Color3.fromRGB(78, 160, 255),
+	AccentBright = Color3.fromRGB(156, 211, 255),
+	AccentDeep = Color3.fromRGB(31, 96, 184),
 	Success = Color3.fromRGB(74, 205, 143),
 	Warning = Color3.fromRGB(245, 183, 73),
 	Danger = Color3.fromRGB(235, 92, 112),
@@ -134,6 +134,7 @@ function Library.new(options: {[string]: any}?)
 	shadow.BackgroundTransparency = 0.52
 	shadow.BorderSizePixel = 0
 	shadow.Parent = gui
+	shadow.Visible = false
 	corner(shadow, 18)
 	local shadowGradient = Instance.new("UIGradient")
 	shadowGradient.Color = ColorSequence.new(self.Theme.AccentDeep, Color3.fromRGB(0, 0, 0))
@@ -147,7 +148,7 @@ function Library.new(options: {[string]: any}?)
 	window.Position = UDim2.fromScale(0.5, 0.5)
 	window.Size = UDim2.new(0.72, 0, 0.72, 0)
 	window.BackgroundColor3 = self.Theme.Window
-	window.BackgroundTransparency = 0.06
+	window.BackgroundTransparency = 1
 	window.BorderSizePixel = 0
 	window.ClipsDescendants = true
 	window.ZIndex = 2
@@ -167,17 +168,19 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.ZIndex = 0
 	backgroundImage.Parent = gui
 	corner(backgroundImage, 16)
+	stroke(backgroundImage, self.Theme.Stroke, 0.18)
 	local glassWash = Instance.new("Frame")
 	glassWash.Name = "GlassWash"
 	glassWash.AnchorPoint = Vector2.new(0.5, 0.5)
 	glassWash.Position = window.Position
 	glassWash.Size = window.Size
 	glassWash.BackgroundColor3 = Color3.fromRGB(8, 7, 15)
-	glassWash.BackgroundTransparency = 0.38
+	glassWash.BackgroundTransparency = 1
 	glassWash.BorderSizePixel = 0
 	glassWash.ZIndex = 0
 	glassWash.Parent = gui
 	corner(glassWash, 16)
+	glassWash.Visible = false
 	local washGradient = Instance.new("UIGradient")
 	washGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 8, 20)), ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 7, 19))})
 	washGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.14), NumberSequenceKeypoint.new(0.52, 0.34), NumberSequenceKeypoint.new(1, 0.1)})
@@ -194,8 +197,8 @@ function Library.new(options: {[string]: any}?)
 
 	local topGlow = Instance.new("Frame")
 	topGlow.Size = UDim2.new(1, 0, 0, 3)
-	topGlow.BackgroundColor3 = self.Theme.Accent
-	topGlow.BackgroundTransparency = 0.18
+	topGlow.BackgroundColor3 = self.Theme.AccentBright
+	topGlow.BackgroundTransparency = 0.62
 	topGlow.BorderSizePixel = 0
 	topGlow.ZIndex = 3
 	topGlow.Parent = window
@@ -206,8 +209,8 @@ function Library.new(options: {[string]: any}?)
 	local header = Instance.new("Frame")
 	header.Name = "Header"
 	header.Size = UDim2.new(1, 0, 0, 68)
-	header.BackgroundColor3 = self.Theme.Window
-	header.BackgroundTransparency = 0.18
+	header.BackgroundColor3 = Color3.fromRGB(4, 8, 16)
+	header.BackgroundTransparency = 0.58
 	header.BorderSizePixel = 0
 	header.ZIndex = 2
 	header.Parent = window
@@ -342,7 +345,7 @@ function Library.new(options: {[string]: any}?)
 	content.Position = UDim2.fromOffset(64, 0)
 	content.Size = UDim2.new(1, -64, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
-	content.BackgroundTransparency = 0.48
+	content.BackgroundTransparency = 0.58
 	content.BorderSizePixel = 0
 	content.Parent = body
 	self.Content = content
@@ -705,7 +708,7 @@ function Library:Toggle(config: {[string]: any})
 	toggle.AnchorPoint = Vector2.new(1, 0.5)
 	toggle.Position = UDim2.new(1, -16, 0.5, 0)
 	toggle.Size = UDim2.fromOffset(42, 23)
-	toggle.BackgroundColor3 = self.Theme.SurfaceRaised
+	toggle.BackgroundColor3 = Color3.fromRGB(8, 13, 23)
 	toggle.BorderSizePixel = 0
 	toggle.Parent = row
 	corner(toggle, 13)
@@ -713,15 +716,15 @@ function Library:Toggle(config: {[string]: any})
 	local knob = Instance.new("Frame")
 	knob.Size = UDim2.fromOffset(17, 17)
 	knob.Position = UDim2.fromOffset(3, 3)
-	knob.BackgroundColor3 = self.Theme.TextMuted
+	knob.BackgroundColor3 = self.Theme.Text
 	knob.BorderSizePixel = 0
 	knob.Parent = toggle
 	corner(knob, 9)
 	local function set(nextValue: boolean, silent: boolean?)
 		value = nextValue
 		self.Flags[config.Flag or config.Name or "Toggle"] = value
-		tween(toggle, 0.2, {BackgroundColor3 = value and self.Theme.AccentDeep or self.Theme.SurfaceRaised})
-		tween(knob, 0.24, {Position = value and UDim2.fromOffset(22, 3) or UDim2.fromOffset(3, 3), BackgroundColor3 = value and self.Theme.Text or self.Theme.TextMuted})
+		tween(toggle, 0.2, {BackgroundColor3 = value and self.Theme.AccentDeep or Color3.fromRGB(8, 13, 23)})
+		tween(knob, 0.24, {Position = value and UDim2.fromOffset(22, 3) or UDim2.fromOffset(3, 3), BackgroundColor3 = self.Theme.Text})
 		if not silent and config.Callback then config.Callback(value) end
 	end
 	toggle.MouseButton1Click:Connect(function() set(not value) end)
