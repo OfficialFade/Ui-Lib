@@ -671,8 +671,14 @@ function Library:PlayMusic(config: {[string]: any})
 	local generation = (self.MusicGeneration or 0) + 1
 	self.MusicGeneration = generation
 	local startedAt = os.clock()
-	local writeFile = rawget(_G, "writefile")
-	local getCustomAsset = rawget(_G, "getcustomasset")
+	local getGlobalEnvironment = rawget(_G, "getgenv")
+	local executorGlobals = _G
+	if type(getGlobalEnvironment) == "function" then
+		local globalSuccess, globalEnvironment = pcall(getGlobalEnvironment)
+		if globalSuccess and type(globalEnvironment) == "table" then executorGlobals = globalEnvironment end
+	end
+	local writeFile = rawget(executorGlobals, "writefile")
+	local getCustomAsset = rawget(executorGlobals, "getcustomasset") or rawget(executorGlobals, "getsynasset")
 	local overlay
 	local loadingSubtitle
 
@@ -731,10 +737,19 @@ function Library:PlayMusic(config: {[string]: any})
 		if config.ShowLoadingScreen then self:_revealMainWindow() end
 	end
 
-	if type(writeFile) ~= "function" or type(getCustomAsset) ~= "function" or type(game.HttpGet) ~= "function" then
-		closeLoadingScreen()
-		if config.OnError then config.OnError("This environment does not support local audio assets.") end
+	local function failLoading(message: string)
+		setLoadingStatus(message)
+		if config.OnError then config.OnError(message) end
+		-- Keep the loading transition visible instead of destroying it instantly
+		-- when local-audio support is unavailable or the download fails.
+		task.delay(loadingDuration, function()
+			if generation == self.MusicGeneration then closeLoadingScreen() end
+		end)
 		return false
+	end
+
+	if type(writeFile) ~= "function" or type(getCustomAsset) ~= "function" or type(game.HttpGet) ~= "function" then
+		return failLoading("Local audio is unavailable in this environment")
 	end
 
 	setLoadingStatus("Loading audio...")
@@ -747,27 +762,21 @@ function Library:PlayMusic(config: {[string]: any})
 		return false
 	end
 	if not success or type(audioData) ~= "string" or audioData == "" then
-		closeLoadingScreen()
-		if config.OnError then config.OnError("Failed to download the audio file.") end
-		return false
+		return failLoading("Failed to download the audio file")
 	end
 
 	local saved = pcall(function()
 		writeFile(fileName, audioData)
 	end)
 	if not saved then
-		closeLoadingScreen()
-		if config.OnError then config.OnError("Failed to save the audio file.") end
-		return false
+		return failLoading("Failed to save the audio file")
 	end
 
 	local assetSuccess, assetId = pcall(function()
 		return getCustomAsset(fileName)
 	end)
 	if not assetSuccess or type(assetId) ~= "string" then
-		closeLoadingScreen()
-		if config.OnError then config.OnError("Failed to create a local audio asset.") end
-		return false
+		return failLoading("Failed to create a local audio asset")
 	end
 
 	local sound = Instance.new("Sound")
@@ -776,8 +785,11 @@ function Library:PlayMusic(config: {[string]: any})
 	sound.Volume = config.Volume or 1
 	sound.Parent = workspace
 	self.MusicSound = sound
-	sound.TimePosition = startTime
 	sound:Play()
+	task.spawn(function()
+		if not sound.IsLoaded then sound.Loaded:Wait() end
+		if sound.Parent and generation == self.MusicGeneration then sound.TimePosition = startTime end
+	end)
 	setLoadingStatus("Playing audio")
 
 	-- Keep the loading screen visible while the selected audio segment plays.
