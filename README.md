@@ -1,8 +1,8 @@
 # Clapped Hub UI Lib
 
-Clapped Hub is a premium, UI-only Roblox interface library. It provides a dark futuristic window, responsive tabs, polished sections, controls, notifications, theming, and subtle motion.
+Clapped Hub is a premium Roblox interface library. It provides a dark futuristic window, responsive tabs, polished sections, controls, notifications, theming, subtle motion, and an optional built-in loading music transition.
 
-The library intentionally contains no gameplay, exploit, cheat, automation, bypass, or game-manipulation functionality. Callbacks are UI events for the host application to interpret.
+The library contains no gameplay, exploit, cheat, automation, bypass, or game-manipulation functionality. Its built-in music transition is a client-side presentation effect.
 
 ## Quick start
 
@@ -61,3 +61,4 @@ UI:Notify({
 - Sections, labels, buttons, toggles, sliders, and notification stacks
 - Centralized accent theme with optional custom accent color
 - UI state flags and callbacks only
+- Built-in slim loading screen with timed client-side music transition

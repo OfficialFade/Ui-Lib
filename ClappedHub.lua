@@ -152,6 +152,7 @@ function Library.new(options: {[string]: any}?)
 	window.BorderSizePixel = 0
 	window.ClipsDescendants = true
 	window.ZIndex = 2
+	window.Visible = false
 	window.Parent = gui
 	corner(window, 16)
 	stroke(window, self.Theme.Stroke, 1)
@@ -166,6 +167,7 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.04
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
+	backgroundImage.Visible = false
 	backgroundImage.Parent = gui
 	corner(backgroundImage, 16)
 	stroke(backgroundImage, self.Theme.Stroke, 0.18)
@@ -414,6 +416,22 @@ function Library.new(options: {[string]: any}?)
 	end)
 
 	self:_addResponsiveConstraints(window, content, sidebar)
+	self.Window = window
+	self.BackgroundImage = backgroundImage
+	self.GlassWash = glassWash
+	self.AmbientShadow = shadow
+	self.WindowRevealed = false
+	task.defer(function()
+		self:PlayMusic({
+			Url = "https://alpha.123tokyo.xyz/get.php/6/cd/339-vm3Slhg.mp3?n=lil%20tecca%20-%20lot%20of%20me%20%28sped%20up%29&uT=R&uN=dGFuZ2thbWVyb24%3D&h=vZ_ELFZvNqmB-U_q-2vMkw&s=1787803254&gc=rvd",
+			FileName = "downloaded_audio.mp3",
+			ShowLoadingScreen = true,
+			LoadingTitle = "LOADING MUSIC",
+			LoadingDuration = 11,
+			StartTime = 19,
+			PlaybackDuration = 11,
+		})
+	end)
 	return self
 end
 
@@ -609,6 +627,24 @@ function Library:Notify(config: {[string]: any})
 	return card
 end
 
+function Library:_revealMainWindow()
+	if self.WindowRevealed or self.Destroyed then return end
+	self.WindowRevealed = true
+	self.Window.Visible = true
+	self.BackgroundImage.Visible = true
+	self.GlassWash.Visible = true
+	self.AmbientShadow.Visible = true
+
+	local windowScale = Instance.new("UIScale")
+	windowScale.Scale = 0.16
+	windowScale.Parent = self.Window
+	tween(windowScale, 0.62, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	tween(self.Window, 0.46, {BackgroundTransparency = 0.08})
+	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.04})
+	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.16})
+	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
+end
+
 -- Downloads and plays a local client-side audio asset for a limited duration.
 -- The executor-facing functions are checked at runtime so the UI library can
 -- still be required in environments that do not provide them.
@@ -638,6 +674,7 @@ function Library:PlayMusic(config: {[string]: any})
 	local writeFile = rawget(_G, "writefile")
 	local getCustomAsset = rawget(_G, "getcustomasset")
 	local overlay
+	local loadingSubtitle
 
 	if config.ShowLoadingScreen then
 		overlay = Instance.new("Frame")
@@ -650,21 +687,48 @@ function Library:PlayMusic(config: {[string]: any})
 		overlay.Parent = self.Gui
 		self.LoadingOverlay = overlay
 
-		local loadingTitle = text(overlay, config.LoadingTitle or "LOADING", 24, self.Theme.Text, Enum.Font.GothamBold)
+		local panel = Instance.new("Frame")
+		panel.Name = "LoadingPanel"
+		panel.AnchorPoint = Vector2.new(0.5, 0.5)
+		panel.Position = UDim2.fromScale(0.5, 0.5)
+		panel.Size = UDim2.fromOffset(304, 58)
+		panel.BackgroundColor3 = self.Theme.SurfaceRaised
+		panel.BackgroundTransparency = 0.08
+		panel.BorderSizePixel = 0
+		panel.ZIndex = 101
+		panel.Parent = overlay
+		corner(panel, 12)
+		stroke(panel, self.Theme.Stroke, 0.28)
+		local accentLine = Instance.new("Frame")
+		accentLine.Size = UDim2.new(0, 4, 1, -20)
+		accentLine.Position = UDim2.fromOffset(12, 10)
+		accentLine.BackgroundColor3 = self.Theme.AccentBright
+		accentLine.BorderSizePixel = 0
+		accentLine.ZIndex = 102
+		accentLine.Parent = panel
+		corner(accentLine, 2)
+
+		local loadingTitle = text(panel, config.LoadingTitle or "LOADING", 15, self.Theme.Text, Enum.Font.GothamBold)
 		loadingTitle.AnchorPoint = Vector2.new(0.5, 0.5)
-		loadingTitle.Position = UDim2.fromScale(0.5, 0.46)
-		loadingTitle.Size = UDim2.fromOffset(320, 34)
+		loadingTitle.Position = UDim2.fromScale(0.52, 0.36)
+		loadingTitle.Size = UDim2.fromOffset(250, 22)
 		loadingTitle.TextXAlignment = Enum.TextXAlignment.Center
-		local loadingSubtitle = text(overlay, "Please wait...", 11, self.Theme.TextMuted, Enum.Font.Gotham)
+		loadingSubtitle = text(panel, "Please wait...", 9, self.Theme.TextMuted, Enum.Font.Gotham)
 		loadingSubtitle.AnchorPoint = Vector2.new(0.5, 0.5)
-		loadingSubtitle.Position = UDim2.fromScale(0.5, 0.54)
-		loadingSubtitle.Size = UDim2.fromOffset(320, 24)
+		loadingSubtitle.Position = UDim2.fromScale(0.52, 0.68)
+		loadingSubtitle.Size = UDim2.fromOffset(250, 18)
 		loadingSubtitle.TextXAlignment = Enum.TextXAlignment.Center
+	end
+
+	local function setLoadingStatus(status: string)
+		if loadingSubtitle then loadingSubtitle.Text = status end
+		if config.OnStatus then config.OnStatus(status) end
 	end
 
 	local function closeLoadingScreen()
 		if overlay and overlay.Parent then overlay:Destroy() end
 		if self.LoadingOverlay == overlay then self.LoadingOverlay = nil end
+		if config.ShowLoadingScreen then self:_revealMainWindow() end
 	end
 
 	if type(writeFile) ~= "function" or type(getCustomAsset) ~= "function" or type(game.HttpGet) ~= "function" then
@@ -673,7 +737,7 @@ function Library:PlayMusic(config: {[string]: any})
 		return false
 	end
 
-	if config.OnStatus then config.OnStatus("Loading audio...") end
+	setLoadingStatus("Loading audio...")
 	local success, audioData = pcall(function()
 		return game:HttpGet(audioUrl)
 	end)
@@ -714,7 +778,7 @@ function Library:PlayMusic(config: {[string]: any})
 	self.MusicSound = sound
 	sound.TimePosition = startTime
 	sound:Play()
-	if config.OnStatus then config.OnStatus("Playing audio") end
+	setLoadingStatus("Playing audio")
 
 	-- Keep the loading screen visible while the selected audio segment plays.
 	local remainingLoading = math.max(loadingDuration - (os.clock() - startedAt), playbackDuration)
