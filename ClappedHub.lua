@@ -179,7 +179,7 @@ function Library.new(options: {[string]: any}?)
 	glassWash.Parent = gui
 	corner(glassWash, 16)
 	local washGradient = Instance.new("UIGradient")
-	washGradient.Color = ColorSequence.new({Color3.fromRGB(10, 8, 20), Color3.fromRGB(20, 7, 19)})
+	washGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 8, 20)), ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 7, 19))})
 	washGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.14), NumberSequenceKeypoint.new(0.52, 0.34), NumberSequenceKeypoint.new(1, 0.1)})
 	washGradient.Rotation = 25
 	washGradient.Parent = glassWash
@@ -299,7 +299,7 @@ function Library.new(options: {[string]: any}?)
 	sideLine.BorderSizePixel = 0
 	sideLine.Parent = sidebar
 	local sidebarGradient = Instance.new("UIGradient")
-	sidebarGradient.Color = ColorSequence.new({Color3.fromRGB(22, 27, 39), self.Theme.Sidebar})
+	sidebarGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 27, 39)), ColorSequenceKeypoint.new(1, self.Theme.Sidebar)})
 	sidebarGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.04), NumberSequenceKeypoint.new(1, 0.42)})
 	sidebarGradient.Rotation = 90
 	sidebarGradient.Parent = sidebar
@@ -346,7 +346,7 @@ function Library.new(options: {[string]: any}?)
 	content.Parent = body
 	self.Content = content
 	local contentGradient = Instance.new("UIGradient")
-	contentGradient.Color = ColorSequence.new({Color3.fromRGB(13, 17, 25), self.Theme.Background})
+	contentGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(13, 17, 25)), ColorSequenceKeypoint.new(1, self.Theme.Background)})
 	contentGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.02), NumberSequenceKeypoint.new(1, 0.18)})
 	contentGradient.Rotation = 25
 	contentGradient.Parent = content
@@ -432,7 +432,7 @@ function Library:Tab(config: {[string]: any})
 	button.Parent = self.Nav
 	corner(button, 9)
 	local navGradient = Instance.new("UIGradient")
-	navGradient.Color = ColorSequence.new({self.Theme.SurfaceRaised, self.Theme.Sidebar})
+	navGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, self.Theme.SurfaceRaised), ColorSequenceKeypoint.new(1, self.Theme.Sidebar)})
 	navGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.58), NumberSequenceKeypoint.new(1, 0.94)})
 	navGradient.Parent = button
 
@@ -619,7 +619,7 @@ function Library:Section(config: {[string]: any})
 	stroke(card, self.Theme.StrokeSoft, 0.22)
 	padding(card, 14, 14, 14, 14)
 	local cardGradient = Instance.new("UIGradient")
-	cardGradient.Color = ColorSequence.new({self.Theme.SurfaceRaised, self.Theme.Surface})
+	cardGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, self.Theme.SurfaceRaised), ColorSequenceKeypoint.new(1, self.Theme.Surface)})
 	cardGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.18), NumberSequenceKeypoint.new(1, 0.52)})
 	cardGradient.Rotation = 105
 	cardGradient.Parent = card
