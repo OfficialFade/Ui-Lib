@@ -159,41 +159,28 @@ function Library.new(options: {[string]: any}?)
 	self.Window = window
 	local backgroundImage = Instance.new("ImageLabel")
 	backgroundImage.Name = "GlassBackdrop"
-	backgroundImage.AnchorPoint = Vector2.new(0.5, 0.5)
-	backgroundImage.Position = window.Position
-	backgroundImage.Size = window.Size
+	backgroundImage.Position = UDim2.fromScale(0, 0)
+	backgroundImage.Size = UDim2.fromScale(1, 1)
 	backgroundImage.BackgroundTransparency = 1
 	backgroundImage.Image = options.BackgroundImage or "rbxassetid://78664802433772"
 	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.52
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
 	backgroundImage.Visible = false
-	backgroundImage.Parent = gui
+	backgroundImage.Parent = window
 	corner(backgroundImage, 16)
 	stroke(backgroundImage, self.Theme.Stroke, 0.18)
 	local glassWash = Instance.new("Frame")
 	glassWash.Name = "GlassWash"
-	glassWash.AnchorPoint = Vector2.new(0.5, 0.5)
-	glassWash.Position = window.Position
-	glassWash.Size = window.Size
+	glassWash.Position = UDim2.fromScale(0, 0)
+	glassWash.Size = UDim2.fromScale(1, 1)
 	glassWash.BackgroundColor3 = Color3.fromRGB(8, 7, 15)
 	glassWash.BackgroundTransparency = 1
 	glassWash.BorderSizePixel = 0
 	glassWash.ZIndex = 0
-	glassWash.Parent = gui
+	glassWash.Parent = window
 	corner(glassWash, 16)
 	glassWash.Visible = false
-	local function syncBackdrop()
-		local size = window.AbsoluteSize
-		local position = window.AbsolutePosition + (size / 2)
-		backgroundImage.Position = UDim2.fromOffset(position.X, position.Y)
-		backgroundImage.Size = UDim2.fromOffset(size.X, size.Y)
-		glassWash.Position = UDim2.fromOffset(position.X, position.Y)
-		glassWash.Size = UDim2.fromOffset(size.X, size.Y)
-	end
-	window:GetPropertyChangedSignal("AbsoluteSize"):Connect(syncBackdrop)
-	window:GetPropertyChangedSignal("AbsolutePosition"):Connect(syncBackdrop)
-	task.defer(syncBackdrop)
 	local washGradient = Instance.new("UIGradient")
 	washGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 8, 20)), ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 7, 19))})
 	washGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.14), NumberSequenceKeypoint.new(0.52, 0.34), NumberSequenceKeypoint.new(1, 0.1)})
@@ -417,7 +404,6 @@ function Library.new(options: {[string]: any}?)
 			local nextPosition = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
 			window.Position = nextPosition
 			shadow.Position = nextPosition
-			syncBackdrop()
 		end
 	end)
 
