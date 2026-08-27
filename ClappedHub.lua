@@ -647,7 +647,7 @@ function Library:_revealMainWindow()
 	windowScale.Parent = self.Window
 	tween(windowScale, 0.62, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.04})
-	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.16})
+	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.48})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
 end
 
@@ -716,7 +716,7 @@ function Library:PlayMusic(config: {[string]: any})
 		local loadingWash = Instance.new("Frame")
 		loadingWash.Size = UDim2.fromScale(1, 1)
 		loadingWash.BackgroundColor3 = self.Theme.Window
-		loadingWash.BackgroundTransparency = 0.28
+		loadingWash.BackgroundTransparency = 0.46
 		loadingWash.BorderSizePixel = 0
 		loadingWash.ZIndex = 102
 		loadingWash.Parent = panel
@@ -766,7 +766,7 @@ function Library:PlayMusic(config: {[string]: any})
 		return false
 	end
 
-	setLoadingStatus("Loading audio...")
+	setLoadingStatus("Initializing...")
 	print("Downloading audio file...")
 	local success, fileData = pcall(function()
 		return game:HttpGet(audioUrl)
@@ -811,7 +811,7 @@ function Library:PlayMusic(config: {[string]: any})
 		sound.TimePosition = startTime
 		sound:Play()
 	end
-	setLoadingStatus("Playing audio")
+	setLoadingStatus("Initializing...")
 
 	-- Keep the loading screen visible while the selected audio segment plays.
 	local remainingLoading = math.max(loadingDuration - (os.clock() - startedAt), playbackDuration)
