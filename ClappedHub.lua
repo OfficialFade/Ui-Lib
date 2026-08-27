@@ -20,8 +20,8 @@ Library.Theme = {
 	Surface = Color3.fromRGB(21, 15, 28),
 	SurfaceRaised = Color3.fromRGB(31, 20, 40),
 	SurfaceHover = Color3.fromRGB(45, 24, 48),
-	Stroke = Color3.fromRGB(107, 27, 84),
-	StrokeSoft = Color3.fromRGB(57, 30, 60),
+	Stroke = Color3.fromRGB(54, 112, 174),
+	StrokeSoft = Color3.fromRGB(30, 66, 104),
 	Text = Color3.fromRGB(239, 243, 250),
 	TextMuted = Color3.fromRGB(151, 161, 180),
 	TextFaint = Color3.fromRGB(96, 107, 128),
@@ -129,7 +129,7 @@ function Library.new(options: {[string]: any}?)
 	shadow.Name = "AmbientShadow"
 	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
 	shadow.Position = UDim2.fromScale(0.5, 0.5)
-	shadow.Size = UDim2.new(0.44, 0, 0.78, 0)
+	shadow.Size = UDim2.new(0.38, 0, 0.68, 0)
 	shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	shadow.BackgroundTransparency = 0.52
 	shadow.BorderSizePixel = 0
@@ -146,7 +146,7 @@ function Library.new(options: {[string]: any}?)
 	window.Name = "Window"
 	window.AnchorPoint = Vector2.new(0.5, 0.5)
 	window.Position = UDim2.fromScale(0.5, 0.5)
-	window.Size = UDim2.new(0.44, 0, 0.78, 0)
+	window.Size = UDim2.new(0.38, 0, 0.68, 0)
 	window.BackgroundColor3 = self.Theme.Window
 	window.BackgroundTransparency = 1
 	window.BorderSizePixel = 0
@@ -154,7 +154,7 @@ function Library.new(options: {[string]: any}?)
 	window.ZIndex = 2
 	window.Parent = gui
 	corner(window, 16)
-	stroke(window, self.Theme.Stroke, 0.3)
+	stroke(window, self.Theme.Stroke, 1)
 	self.Window = window
 	local backgroundImage = Instance.new("ImageLabel")
 	backgroundImage.Name = "GlassBackdrop"
@@ -163,7 +163,7 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.Size = window.Size
 	backgroundImage.BackgroundTransparency = 1
 	backgroundImage.Image = options.BackgroundImage or "rbxassetid://78664802433772"
-	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.06
+	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.04
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
 	backgroundImage.Parent = gui
@@ -198,7 +198,7 @@ function Library.new(options: {[string]: any}?)
 	local topGlow = Instance.new("Frame")
 	topGlow.Size = UDim2.new(1, 0, 0, 3)
 	topGlow.BackgroundColor3 = self.Theme.AccentBright
-	topGlow.BackgroundTransparency = 0.62
+	topGlow.BackgroundTransparency = 0.82
 	topGlow.BorderSizePixel = 0
 	topGlow.ZIndex = 3
 	topGlow.Parent = window
@@ -273,7 +273,7 @@ function Library.new(options: {[string]: any}?)
 	close.TextSize = 20
 	close.Parent = controls
 	close.MouseButton1Click:Connect(function() self:Destroy() end)
-	hover(close, self.Theme.Surface, Color3.fromRGB(79, 32, 49))
+	hover(close, self.Theme.Surface, Color3.fromRGB(22, 48, 78))
 
 	local body = Instance.new("Frame")
 	body.Name = "Body"
@@ -374,7 +374,7 @@ function Library.new(options: {[string]: any}?)
 
 	minimize.MouseButton1Click:Connect(function()
 		self.Minimized = not self.Minimized
-		local nextSize = self.Minimized and UDim2.new(0.44, 0, 0, 68) or UDim2.new(0.44, 0, 0.78, 0)
+		local nextSize = self.Minimized and UDim2.new(0.38, 0, 0, 64) or UDim2.new(0.38, 0, 0.68, 0)
 		tween(window, 0.32, {Size = nextSize})
 		tween(backgroundImage, 0.32, {Size = nextSize})
 		tween(glassWash, 0.32, {Size = nextSize})
@@ -410,15 +410,15 @@ end
 
 function Library:_addResponsiveConstraints(window: Frame, content: Frame, sidebar: Frame)
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(360, 470)
-	sizeConstraint.MaxSize = Vector2.new(620, 820)
+	sizeConstraint.MinSize = Vector2.new(340, 440)
+	sizeConstraint.MaxSize = Vector2.new(560, 720)
 	sizeConstraint.Parent = window
 	local sidebarConstraint = Instance.new("UISizeConstraint")
 	sidebarConstraint.MinSize = Vector2.new(64, 0)
 	sidebarConstraint.MaxSize = Vector2.new(184, math.huge)
 	sidebarConstraint.Parent = sidebar
 	local aspect = Instance.new("UIAspectRatioConstraint")
-	aspect.AspectRatio = 0.72
+	aspect.AspectRatio = 0.76
 	aspect.DominantAxis = Enum.DominantAxis.Width
 	aspect.Parent = window
 end
@@ -642,7 +642,7 @@ function Library:Section(config: {[string]: any})
 	card.BackgroundTransparency = 0.7
 	card.BorderSizePixel = 0
 	card.Parent = config.Tab.Scroller
-	corner(card, 12)
+	corner(card, 4)
 	stroke(card, self.Theme.Stroke, 0.78)
 	padding(card, 14, 14, 14, 14)
 	local cardGradient = Instance.new("UIGradient")
