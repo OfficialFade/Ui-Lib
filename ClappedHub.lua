@@ -164,7 +164,7 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.Size = window.Size
 	backgroundImage.BackgroundTransparency = 1
 	backgroundImage.Image = options.BackgroundImage or "rbxassetid://78664802433772"
-	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.04
+	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
 	backgroundImage.Visible = false
@@ -646,8 +646,8 @@ function Library:_revealMainWindow()
 	windowScale.Scale = 0.16
 	windowScale.Parent = self.Window
 	tween(windowScale, 0.62, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.04})
-	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.48})
+	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0})
+	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.62})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
 end
 
@@ -708,7 +708,7 @@ function Library:PlayMusic(config: {[string]: any})
 		loadingBackground.Size = UDim2.fromScale(1, 1)
 		loadingBackground.BackgroundTransparency = 1
 		loadingBackground.Image = "rbxassetid://78664802433772"
-		loadingBackground.ImageTransparency = 0.12
+		loadingBackground.ImageTransparency = 0
 		loadingBackground.ScaleType = Enum.ScaleType.Crop
 		loadingBackground.ZIndex = 101
 		loadingBackground.Parent = panel
@@ -716,7 +716,7 @@ function Library:PlayMusic(config: {[string]: any})
 		local loadingWash = Instance.new("Frame")
 		loadingWash.Size = UDim2.fromScale(1, 1)
 		loadingWash.BackgroundColor3 = self.Theme.Window
-		loadingWash.BackgroundTransparency = 0.46
+		loadingWash.BackgroundTransparency = 0.62
 		loadingWash.BorderSizePixel = 0
 		loadingWash.ZIndex = 102
 		loadingWash.Parent = panel
