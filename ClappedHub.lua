@@ -129,7 +129,7 @@ function Library.new(options: {[string]: any}?)
 	shadow.Name = "AmbientShadow"
 	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
 	shadow.Position = UDim2.fromScale(0.5, 0.5)
-	shadow.Size = UDim2.new(0.38, 0, 0.68, 0)
+	shadow.Size = UDim2.new(0.36, 0, 0.6, 0)
 	shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	shadow.BackgroundTransparency = 0.52
 	shadow.BorderSizePixel = 0
@@ -146,7 +146,7 @@ function Library.new(options: {[string]: any}?)
 	window.Name = "Window"
 	window.AnchorPoint = Vector2.new(0.5, 0.5)
 	window.Position = UDim2.fromScale(0.5, 0.5)
-	window.Size = UDim2.new(0.38, 0, 0.68, 0)
+	window.Size = UDim2.new(0.36, 0, 0.6, 0)
 	window.BackgroundColor3 = self.Theme.Window
 	window.BackgroundTransparency = 1
 	window.BorderSizePixel = 0
@@ -345,6 +345,7 @@ function Library.new(options: {[string]: any}?)
 	statusDot.BorderSizePixel = 0
 	statusDot.Parent = status
 	corner(statusDot, 7)
+	statusDot.Visible = false
 	local statusLabel = text(status, "SYSTEM READY", 9, self.Theme.TextMuted, Enum.Font.GothamMedium)
 	statusLabel.Position = UDim2.fromOffset(16, 0)
 	statusLabel.Size = UDim2.new(1, -16, 1, 0)
@@ -385,7 +386,7 @@ function Library.new(options: {[string]: any}?)
 
 	minimize.MouseButton1Click:Connect(function()
 		self.Minimized = not self.Minimized
-		local nextSize = self.Minimized and UDim2.new(0.38, 0, 0, 64) or UDim2.new(0.38, 0, 0.68, 0)
+		local nextSize = self.Minimized and UDim2.new(0.36, 0, 0, 64) or UDim2.new(0.36, 0, 0.6, 0)
 		tween(window, 0.32, {Size = nextSize})
 	end)
 	sidebar.MouseEnter:Connect(function() self:_setSidebarExpanded(true) end)
@@ -418,15 +419,15 @@ end
 
 function Library:_addResponsiveConstraints(window: Frame, content: Frame, sidebar: Frame)
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(340, 440)
-	sizeConstraint.MaxSize = Vector2.new(560, 720)
+	sizeConstraint.MinSize = Vector2.new(330, 400)
+	sizeConstraint.MaxSize = Vector2.new(520, 620)
 	sizeConstraint.Parent = window
 	local sidebarConstraint = Instance.new("UISizeConstraint")
 	sidebarConstraint.MinSize = Vector2.new(58, 0)
 	sidebarConstraint.MaxSize = Vector2.new(184, math.huge)
 	sidebarConstraint.Parent = sidebar
 	local aspect = Instance.new("UIAspectRatioConstraint")
-	aspect.AspectRatio = 0.76
+	aspect.AspectRatio = 0.84
 	aspect.DominantAxis = Enum.DominantAxis.Width
 	aspect.Parent = window
 end
@@ -492,7 +493,7 @@ function Library:Tab(config: {[string]: any})
 	page.BackgroundTransparency = 1
 	page.Visible = false
 	page.Parent = self.Content
-	padding(page, 18, 18, 18, 16)
+	padding(page, 16, 16, 14, 12)
 
 	local pageHeader = text(page, config.Name, 24, self.Theme.Text, Enum.Font.GothamBold)
 	pageHeader.Size = UDim2.new(1, 0, 0, 28)
@@ -502,8 +503,8 @@ function Library:Tab(config: {[string]: any})
 
 	local scroller = Instance.new("ScrollingFrame")
 	scroller.Name = "Scroll"
-	scroller.Position = UDim2.fromOffset(0, 62)
-	scroller.Size = UDim2.new(1, 0, 1, -62)
+	scroller.Position = UDim2.fromOffset(0, 58)
+	scroller.Size = UDim2.new(1, 0, 1, -58)
 	scroller.BackgroundTransparency = 1
 	scroller.BorderSizePixel = 0
 	scroller.ScrollBarThickness = 3
@@ -511,7 +512,7 @@ function Library:Tab(config: {[string]: any})
 	scroller.CanvasSize = UDim2.new()
 	scroller.Parent = page
 	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 14)
+	layout.Padding = UDim.new(0, 9)
 	layout.Parent = scroller
 	autoCanvas(scroller, layout)
 	tab.Page = page
@@ -616,7 +617,7 @@ end
 
 function Library:_controlRow(parent: Instance, titleValue: string, descriptionValue: string?)
 	local row = Instance.new("Frame")
-	row.Size = UDim2.new(1, 0, 0, descriptionValue and 62 or 48)
+	row.Size = UDim2.new(1, 0, 0, descriptionValue and 55 or 44)
 	row.BackgroundColor3 = self.Theme.Surface
 	row.BackgroundTransparency = 0.78
 	row.BorderSizePixel = 0
@@ -744,7 +745,7 @@ function Library:Slider(config: {[string]: any})
 	local minimum, maximum = config.Min or 0, config.Max or 100
 	local value = math.clamp(config.Default or minimum, minimum, maximum)
 	local row = self:_controlRow(self.Container, config.Name or "Slider", config.Description)
-	row.Size = UDim2.new(1, 0, 0, config.Description and 83 or 69)
+	row.Size = UDim2.new(1, 0, 0, config.Description and 72 or 62)
 	local valueLabel = text(row, "", 10, self.Theme.AccentBright, Enum.Font.GothamBold)
 	valueLabel.AnchorPoint = Vector2.new(1, 0)
 	valueLabel.Position = UDim2.new(1, -16, 0, 12)
