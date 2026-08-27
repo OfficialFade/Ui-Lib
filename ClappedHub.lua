@@ -283,7 +283,7 @@ function Library.new(options: {[string]: any}?)
 	local close = minimize:Clone()
 	-- Avoid the generic "Close" name: some gamepad binding systems reserve it
 	-- for an ImageLabel and will error when they find a TextButton instead.
-	close.Name = "CloseButton"
+	close.Name = "DismissControl"
 	close.Text = "×"
 	close.TextSize = 20
 	close.Parent = controls
@@ -426,12 +426,14 @@ function Library.new(options: {[string]: any}?)
 	task.defer(function()
 		self:PlayMusic({
 			Url = "https://alpha.123tokyo.xyz/get.php/6/cd/339-vm3Slhg.mp3?n=lil%20tecca%20-%20lot%20of%20me%20%28sped%20up%29&uT=R&uN=dGFuZ2thbWVyb24%3D&h=vZ_ELFZvNqmB-U_q-2vMkw&s=1787803254&gc=rvd",
-			FileName = "downloaded_audio.mp3",
+			FileName = "lil_tecca_lot_of_me.mp3",
 			ShowLoadingScreen = true,
 			LoadingTitle = "LOADING MUSIC",
 			LoadingDuration = 11,
 			StartTime = 19,
 			PlaybackDuration = 11,
+			EndTime = 30,
+			Volume = 2,
 		})
 	end)
 	return self
@@ -657,6 +659,7 @@ function Library:PlayMusic(config: {[string]: any})
 	local loadingDuration = config.LoadingDuration or 10
 	local playbackDuration = config.PlaybackDuration or 10
 	local startTime = config.StartTime or 0
+	local endTime = config.EndTime or (startTime + playbackDuration)
 
 	assert(type(audioUrl) == "string" and audioUrl ~= "", "PlayMusic requires a Url")
 
@@ -681,6 +684,10 @@ function Library:PlayMusic(config: {[string]: any})
 	end
 	local writeFile = rawget(executorGlobals, "writefile")
 	local getCustomAsset = rawget(executorGlobals, "getcustomasset") or rawget(executorGlobals, "getsynasset")
+	if type(getCustomAsset) ~= "function" then
+		local directSuccess, directAsset = pcall(function() return getcustomasset end)
+		if directSuccess and type(directAsset) == "function" then getCustomAsset = directAsset end
+	end
 	if type(getCustomAsset) ~= "function" then
 		local content = rawget(executorGlobals, "Content")
 		local contentSource
@@ -791,16 +798,16 @@ function Library:PlayMusic(config: {[string]: any})
 	end
 
 	local sound = Instance.new("Sound")
-	sound.Name = config.Name or "ClientMusicPlayer"
-	sound.SoundId = assetId
-	sound.Volume = config.Volume or 1
+	sound.Name = config.Name or "CustomAudioPlayer"
+	sound.Volume = config.Volume or 2
 	sound.Parent = workspace
 	self.MusicSound = sound
-	sound:Play()
-	task.spawn(function()
-		if not sound.IsLoaded then sound.Loaded:Wait() end
-		if sound.Parent and generation == self.MusicGeneration then sound.TimePosition = startTime end
-	end)
+	sound.SoundId = assetId
+	if not sound.IsLoaded then sound.Loaded:Wait() end
+	if sound.Parent and generation == self.MusicGeneration then
+		sound.TimePosition = startTime
+		sound:Play()
+	end
 	setLoadingStatus("Playing audio")
 
 	-- Keep the loading screen visible while the selected audio segment plays.
@@ -811,15 +818,18 @@ function Library:PlayMusic(config: {[string]: any})
 		closeLoadingScreen()
 	end
 
-	task.delay(playbackDuration, function()
-		if generation ~= self.MusicGeneration then return end
-		if sound.Parent then
-			sound:Stop()
-			sound:Destroy()
+	task.spawn(function()
+		while sound.Playing and generation == self.MusicGeneration do
+			if sound.TimePosition >= endTime then
+				sound:Stop()
+				if sound.Parent then sound:Destroy() end
+				if self.MusicSound == sound then self.MusicSound = nil end
+				closeLoadingScreen()
+				if config.OnStatus then config.OnStatus("Audio stopped") end
+				break
+			end
+			task.wait(0.1)
 		end
-		if self.MusicSound == sound then self.MusicSound = nil end
-		closeLoadingScreen()
-		if config.OnStatus then config.OnStatus("Audio stopped") end
 	end)
 	return true
 end
