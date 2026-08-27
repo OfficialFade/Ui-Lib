@@ -235,12 +235,16 @@ function Library.new(options: {[string]: any}?)
 	brandMark.BorderSizePixel = 0
 	brandMark.Parent = header
 	corner(brandMark, 11)
-	local mark = icon(brandMark, "✦", 20, self.Theme.Text)
-	mark.Size = UDim2.fromScale(1, 1)
-	local markGradient = Instance.new("UIGradient")
-	markGradient.Color = ColorSequence.new(self.Theme.AccentBright, self.Theme.Text)
-	markGradient.Rotation = 90
-	markGradient.Parent = mark
+	local logo = Instance.new("ImageLabel")
+	logo.Name = "Logo"
+	logo.Size = UDim2.fromScale(0.68, 0.68)
+	logo.AnchorPoint = Vector2.new(0.5, 0.5)
+	logo.Position = UDim2.fromScale(0.5, 0.5)
+	logo.BackgroundTransparency = 1
+	logo.Image = "rbxassetid://101595980825854"
+	logo.ScaleType = Enum.ScaleType.Fit
+	logo.ZIndex = 2
+	logo.Parent = brandMark
 
 	local brand = Instance.new("Frame")
 	brand.BackgroundTransparency = 1
