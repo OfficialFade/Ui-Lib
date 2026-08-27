@@ -281,7 +281,9 @@ function Library.new(options: {[string]: any}?)
 	hover(minimize, self.Theme.Surface, self.Theme.SurfaceHover)
 
 	local close = minimize:Clone()
-	close.Name = "Close"
+	-- Avoid the generic "Close" name: some gamepad binding systems reserve it
+	-- for an ImageLabel and will error when they find a TextButton instead.
+	close.Name = "CloseButton"
 	close.Text = "×"
 	close.TextSize = 20
 	close.Parent = controls
@@ -679,6 +681,15 @@ function Library:PlayMusic(config: {[string]: any})
 	end
 	local writeFile = rawget(executorGlobals, "writefile")
 	local getCustomAsset = rawget(executorGlobals, "getcustomasset") or rawget(executorGlobals, "getsynasset")
+	if type(getCustomAsset) ~= "function" then
+		local content = rawget(executorGlobals, "Content")
+		local contentSource
+		if content then
+			local contentSuccess, source = pcall(function() return content.Source end)
+			if contentSuccess then contentSource = source end
+		end
+		if type(contentSource) == "function" then getCustomAsset = contentSource end
+	end
 	local overlay
 	local loadingSubtitle
 
