@@ -638,12 +638,14 @@ function Library:_revealMainWindow()
 	self.BackgroundImage.Visible = true
 	self.GlassWash.Visible = true
 	self.AmbientShadow.Visible = true
+	-- Keep the frame itself transparent so the 78664802433772 backdrop can
+	-- show through the glass surfaces and content cards.
+	self.Window.BackgroundTransparency = 1
 
 	local windowScale = Instance.new("UIScale")
 	windowScale.Scale = 0.16
 	windowScale.Parent = self.Window
 	tween(windowScale, 0.62, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-	tween(self.Window, 0.46, {BackgroundTransparency = 0.08})
 	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.04})
 	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.16})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
