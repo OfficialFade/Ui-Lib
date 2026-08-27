@@ -649,9 +649,7 @@ function Library:_revealMainWindow()
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
 end
 
--- Downloads and plays a local client-side audio asset for a limited duration.
--- The executor-facing functions are checked at runtime so the UI library can
--- still be required in environments that do not provide them.
+-- Downloads and plays the built-in client-side audio segment during loading.
 function Library:PlayMusic(config: {[string]: any})
 	config = config or {}
 	local audioUrl = config.Url
@@ -676,27 +674,6 @@ function Library:PlayMusic(config: {[string]: any})
 	local generation = (self.MusicGeneration or 0) + 1
 	self.MusicGeneration = generation
 	local startedAt = os.clock()
-	local getGlobalEnvironment = rawget(_G, "getgenv")
-	local executorGlobals = _G
-	if type(getGlobalEnvironment) == "function" then
-		local globalSuccess, globalEnvironment = pcall(getGlobalEnvironment)
-		if globalSuccess and type(globalEnvironment) == "table" then executorGlobals = globalEnvironment end
-	end
-	local writeFile = rawget(executorGlobals, "writefile")
-	local getCustomAsset = rawget(executorGlobals, "getcustomasset") or rawget(executorGlobals, "getsynasset")
-	if type(getCustomAsset) ~= "function" then
-		local directSuccess, directAsset = pcall(function() return getcustomasset end)
-		if directSuccess and type(directAsset) == "function" then getCustomAsset = directAsset end
-	end
-	if type(getCustomAsset) ~= "function" then
-		local content = rawget(executorGlobals, "Content")
-		local contentSource
-		if content then
-			local contentSuccess, source = pcall(function() return content.Source end)
-			if contentSuccess then contentSource = source end
-		end
-		if type(contentSource) == "function" then getCustomAsset = contentSource end
-	end
 	local overlay
 	local loadingSubtitle
 
@@ -766,12 +743,9 @@ function Library:PlayMusic(config: {[string]: any})
 		return false
 	end
 
-	if type(writeFile) ~= "function" or type(getCustomAsset) ~= "function" or type(game.HttpGet) ~= "function" then
-		return failLoading("Local audio is unavailable in this environment")
-	end
-
 	setLoadingStatus("Loading audio...")
-	local success, audioData = pcall(function()
+	print("Downloading audio file...")
+	local success, fileData = pcall(function()
 		return game:HttpGet(audioUrl)
 	end)
 
@@ -779,21 +753,27 @@ function Library:PlayMusic(config: {[string]: any})
 		closeLoadingScreen()
 		return false
 	end
-	if not success or type(audioData) ~= "string" or audioData == "" then
-		return failLoading("Failed to download the audio file")
+	if not success or not fileData or #fileData == 0 then
+		return failLoading("Failed to download audio. Check if the URL has expired.")
 	end
 
-	local saved = pcall(function()
-		writeFile(fileName, audioData)
+	print("Download finished. Preparing playback...")
+	local saved, saveError = pcall(function()
+		writefile(fileName, fileData)
 	end)
 	if not saved then
-		return failLoading("Failed to save the audio file")
+		warn(saveError)
+		return failLoading("Failed to save the downloaded audio file")
 	end
 
+	if not (getcustomasset or Content and Content.Source) then
+		return failLoading("Your executor does not support getcustomasset")
+	end
+	local getasset = getcustomasset or Content.Source
 	local assetSuccess, assetId = pcall(function()
-		return getCustomAsset(fileName)
+		return getasset(fileName)
 	end)
-	if not assetSuccess or type(assetId) ~= "string" then
+	if not assetSuccess or not assetId then
 		return failLoading("Failed to create a local audio asset")
 	end
 
