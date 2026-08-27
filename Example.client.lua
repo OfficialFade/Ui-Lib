@@ -1,28 +1,12 @@
 -- Clapped Hub UI Lib - test example
--- Works when ClappedHub is next to this script, in ReplicatedStorage, or
--- when the example is executed through an environment that provides loadstring.
-
-local Library
-
-local function findLocalLibrary()
-	if script and script.Parent then
-		local sibling = script.Parent:FindFirstChild("ClappedHub")
-		if sibling then return sibling end
-	end
-
-	local replicatedStorage = game:GetService("ReplicatedStorage")
-	return replicatedStorage:FindFirstChild("ClappedHub")
-end
-
-local localLibrary = findLocalLibrary()
-if localLibrary then
-	Library = require(localLibrary)
-else
-	local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/main/ClappedHub.lua")
-	local loader = loadstring(source)
-	assert(loader, "Could not compile ClappedHub.lua from GitHub")
-	Library = loader()
-end
+-- Always fetch the immutable commit so an old local ModuleScript or executor
+-- cache cannot silently load a previous version.
+local source = game:HttpGet(
+	"https://raw.githubusercontent.com/OfficialFade/Ui-Lib/5684e2f/ClappedHub.lua"
+)
+local loader = loadstring(source)
+assert(loader, "Could not compile ClappedHub.lua from GitHub")
+local Library = loader()
 
 local UI = Library.new({
 	Name = "CLAPPED HUB",
