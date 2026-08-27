@@ -428,7 +428,7 @@ function Library.new(options: {[string]: any}?)
 			Url = "https://alpha.123tokyo.xyz/get.php/6/cd/339-vm3Slhg.mp3?n=lil%20tecca%20-%20lot%20of%20me%20%28sped%20up%29&uT=R&uN=dGFuZ2thbWVyb24%3D&h=vZ_ELFZvNqmB-U_q-2vMkw&s=1787803254&gc=rvd",
 			FileName = "lil_tecca_lot_of_me.mp3",
 			ShowLoadingScreen = true,
-			LoadingTitle = "LOADING MUSIC",
+			LoadingTitle = "LOADING",
 			LoadingDuration = 11,
 			StartTime = 19,
 			PlaybackDuration = 11,
@@ -697,24 +697,45 @@ function Library:PlayMusic(config: {[string]: any})
 		panel.BackgroundTransparency = 0.08
 		panel.BorderSizePixel = 0
 		panel.ZIndex = 101
+		panel.ClipsDescendants = true
 		panel.Parent = overlay
 		corner(panel, 12)
 		stroke(panel, self.Theme.Stroke, 0.28)
+		local loadingBackground = Instance.new("ImageLabel")
+		loadingBackground.Name = "LoadingBackground"
+		loadingBackground.Size = UDim2.fromScale(1, 1)
+		loadingBackground.BackgroundTransparency = 1
+		loadingBackground.Image = "rbxassetid://78664802433772"
+		loadingBackground.ImageTransparency = 0.12
+		loadingBackground.ScaleType = Enum.ScaleType.Crop
+		loadingBackground.ZIndex = 101
+		loadingBackground.Parent = panel
+		corner(loadingBackground, 12)
+		local loadingWash = Instance.new("Frame")
+		loadingWash.Size = UDim2.fromScale(1, 1)
+		loadingWash.BackgroundColor3 = self.Theme.Window
+		loadingWash.BackgroundTransparency = 0.28
+		loadingWash.BorderSizePixel = 0
+		loadingWash.ZIndex = 102
+		loadingWash.Parent = panel
+		corner(loadingWash, 12)
 		local accentLine = Instance.new("Frame")
 		accentLine.Size = UDim2.new(0, 4, 1, -20)
 		accentLine.Position = UDim2.fromOffset(12, 10)
 		accentLine.BackgroundColor3 = self.Theme.AccentBright
 		accentLine.BorderSizePixel = 0
-		accentLine.ZIndex = 102
+		accentLine.ZIndex = 103
 		accentLine.Parent = panel
 		corner(accentLine, 2)
 
 		local loadingTitle = text(panel, config.LoadingTitle or "LOADING", 15, self.Theme.Text, Enum.Font.GothamBold)
+		loadingTitle.ZIndex = 104
 		loadingTitle.AnchorPoint = Vector2.new(0.5, 0.5)
 		loadingTitle.Position = UDim2.fromScale(0.52, 0.36)
 		loadingTitle.Size = UDim2.fromOffset(250, 22)
 		loadingTitle.TextXAlignment = Enum.TextXAlignment.Center
 		loadingSubtitle = text(panel, "Please wait...", 9, self.Theme.TextMuted, Enum.Font.Gotham)
+		loadingSubtitle.ZIndex = 104
 		loadingSubtitle.AnchorPoint = Vector2.new(0.5, 0.5)
 		loadingSubtitle.Position = UDim2.fromScale(0.52, 0.68)
 		loadingSubtitle.Size = UDim2.fromOffset(250, 18)
