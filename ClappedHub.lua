@@ -181,6 +181,17 @@ function Library.new(options: {[string]: any}?)
 	glassWash.Parent = gui
 	corner(glassWash, 16)
 	glassWash.Visible = false
+	local function syncBackdrop()
+		local size = window.AbsoluteSize
+		local position = window.AbsolutePosition + (size / 2)
+		backgroundImage.Position = UDim2.fromOffset(position.X, position.Y)
+		backgroundImage.Size = UDim2.fromOffset(size.X, size.Y)
+		glassWash.Position = UDim2.fromOffset(position.X, position.Y)
+		glassWash.Size = UDim2.fromOffset(size.X, size.Y)
+	end
+	window:GetPropertyChangedSignal("AbsoluteSize"):Connect(syncBackdrop)
+	window:GetPropertyChangedSignal("AbsolutePosition"):Connect(syncBackdrop)
+	task.defer(syncBackdrop)
 	local washGradient = Instance.new("UIGradient")
 	washGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 8, 20)), ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 7, 19))})
 	washGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.14), NumberSequenceKeypoint.new(0.52, 0.34), NumberSequenceKeypoint.new(1, 0.1)})
@@ -210,7 +221,7 @@ function Library.new(options: {[string]: any}?)
 	header.Name = "Header"
 	header.Size = UDim2.new(1, 0, 0, 68)
 	header.BackgroundColor3 = Color3.fromRGB(4, 8, 16)
-	header.BackgroundTransparency = 0.62
+	header.BackgroundTransparency = 1
 	header.BorderSizePixel = 0
 	header.ZIndex = 2
 	header.Parent = window
@@ -285,10 +296,10 @@ function Library.new(options: {[string]: any}?)
 
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
-	sidebar.Size = UDim2.fromOffset(64, 0)
+	sidebar.Size = UDim2.fromOffset(58, 0)
 	sidebar.SizeConstraint = Enum.SizeConstraint.RelativeYY
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
-	sidebar.BackgroundTransparency = 0.12
+	sidebar.BackgroundTransparency = 0.62
 	sidebar.BorderSizePixel = 0
 	sidebar.Parent = body
 	padding(sidebar, 8, 8, 14, 14)
@@ -342,8 +353,8 @@ function Library.new(options: {[string]: any}?)
 
 	local content = Instance.new("Frame")
 	content.Name = "Content"
-	content.Position = UDim2.fromOffset(64, 0)
-	content.Size = UDim2.new(1, -64, 1, 0)
+	content.Position = UDim2.fromOffset(58, 0)
+	content.Size = UDim2.new(1, -58, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
 	content.BackgroundTransparency = 0.64
 	content.BorderSizePixel = 0
@@ -376,8 +387,6 @@ function Library.new(options: {[string]: any}?)
 		self.Minimized = not self.Minimized
 		local nextSize = self.Minimized and UDim2.new(0.38, 0, 0, 64) or UDim2.new(0.38, 0, 0.68, 0)
 		tween(window, 0.32, {Size = nextSize})
-		tween(backgroundImage, 0.32, {Size = nextSize})
-		tween(glassWash, 0.32, {Size = nextSize})
 	end)
 	sidebar.MouseEnter:Connect(function() self:_setSidebarExpanded(true) end)
 	sidebar.MouseLeave:Connect(function() self:_setSidebarExpanded(false) end)
@@ -399,8 +408,7 @@ function Library.new(options: {[string]: any}?)
 			local nextPosition = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
 			window.Position = nextPosition
 			shadow.Position = nextPosition
-			backgroundImage.Position = nextPosition
-			glassWash.Position = nextPosition
+			syncBackdrop()
 		end
 	end)
 
@@ -414,7 +422,7 @@ function Library:_addResponsiveConstraints(window: Frame, content: Frame, sideba
 	sizeConstraint.MaxSize = Vector2.new(560, 720)
 	sizeConstraint.Parent = window
 	local sidebarConstraint = Instance.new("UISizeConstraint")
-	sidebarConstraint.MinSize = Vector2.new(64, 0)
+	sidebarConstraint.MinSize = Vector2.new(58, 0)
 	sidebarConstraint.MaxSize = Vector2.new(184, math.huge)
 	sidebarConstraint.Parent = sidebar
 	local aspect = Instance.new("UIAspectRatioConstraint")
@@ -426,7 +434,7 @@ end
 function Library:_setSidebarExpanded(expanded: boolean)
 	if self.SidebarExpanded == expanded then return end
 	self.SidebarExpanded = expanded
-	local width = expanded and 184 or 64
+		local width = expanded and 174 or 58
 	tween(self.Sidebar, 0.24, {Size = UDim2.fromOffset(width, 0)})
 	tween(self.Content, 0.24, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
 	for _, item in ipairs(self.SidebarNavButtons) do
@@ -484,18 +492,18 @@ function Library:Tab(config: {[string]: any})
 	page.BackgroundTransparency = 1
 	page.Visible = false
 	page.Parent = self.Content
-	padding(page, 28, 28, 25, 20)
+	padding(page, 18, 18, 18, 16)
 
 	local pageHeader = text(page, config.Name, 24, self.Theme.Text, Enum.Font.GothamBold)
-	pageHeader.Size = UDim2.new(1, 0, 0, 32)
+	pageHeader.Size = UDim2.new(1, 0, 0, 28)
 	local pageDescription = text(page, config.Description or "Configure this interface section.", 11, self.Theme.TextMuted, Enum.Font.Gotham)
-	pageDescription.Position = UDim2.fromOffset(0, 34)
+	pageDescription.Position = UDim2.fromOffset(0, 29)
 	pageDescription.Size = UDim2.new(1, 0, 0, 24)
 
 	local scroller = Instance.new("ScrollingFrame")
 	scroller.Name = "Scroll"
-	scroller.Position = UDim2.fromOffset(0, 72)
-	scroller.Size = UDim2.new(1, 0, 1, -72)
+	scroller.Position = UDim2.fromOffset(0, 62)
+	scroller.Size = UDim2.new(1, 0, 1, -62)
 	scroller.BackgroundTransparency = 1
 	scroller.BorderSizePixel = 0
 	scroller.ScrollBarThickness = 3
@@ -613,7 +621,7 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	row.BackgroundTransparency = 0.78
 	row.BorderSizePixel = 0
 	row.Parent = parent
-	corner(row, 10)
+	corner(row, 6)
 	stroke(row, self.Theme.StrokeSoft, 0.72)
 	hover(row, self.Theme.Surface, self.Theme.SurfaceHover)
 	local titleLabel = text(row, titleValue, 11, self.Theme.Text, Enum.Font.GothamMedium)
@@ -642,7 +650,7 @@ function Library:Section(config: {[string]: any})
 	card.BackgroundTransparency = 0.7
 	card.BorderSizePixel = 0
 	card.Parent = config.Tab.Scroller
-	corner(card, 4)
+	corner(card, 3)
 	stroke(card, self.Theme.Stroke, 0.78)
 	padding(card, 14, 14, 14, 14)
 	local cardGradient = Instance.new("UIGradient")
