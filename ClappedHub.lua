@@ -620,11 +620,34 @@ function Library:Notify(config: {[string]: any})
 	message.Position = UDim2.fromOffset(61, 30)
 	message.Size = UDim2.new(1, -75, 30, 0)
 	message.TextWrapped = true
-	tween(card, 0.3, {BackgroundTransparency = 0})
+	local function animateNotification(visible: boolean)
+		local duration = visible and 0.42 or 0.3
+		tween(card, duration, {
+			BackgroundTransparency = visible and 0 or 1,
+			Position = visible and UDim2.fromOffset(0, 0) or UDim2.fromOffset(18, 0),
+		}, Enum.EasingStyle.Quint, visible and Enum.EasingDirection.Out or Enum.EasingDirection.In)
+		for _, descendant in ipairs(card:GetDescendants()) do
+			if descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+				tween(descendant, duration, {TextTransparency = visible and 0 or 1}, Enum.EasingStyle.Quint, visible and Enum.EasingDirection.Out or Enum.EasingDirection.In)
+			elseif descendant:IsA("Frame") then
+				tween(descendant, duration, {BackgroundTransparency = visible and descendant:GetAttribute("ClappedOriginalTransparency") or 1}, Enum.EasingStyle.Quint, visible and Enum.EasingDirection.Out or Enum.EasingDirection.In)
+			elseif descendant:IsA("UIStroke") then
+				tween(descendant, duration, {Transparency = visible and descendant:GetAttribute("ClappedOriginalTransparency") or 1}, Enum.EasingStyle.Quint, visible and Enum.EasingDirection.Out or Enum.EasingDirection.In)
+			end
+		end
+	end
+	for _, descendant in ipairs(card:GetDescendants()) do
+		if descendant:IsA("Frame") then
+			descendant:SetAttribute("ClappedOriginalTransparency", descendant.BackgroundTransparency)
+		elseif descendant:IsA("UIStroke") then
+			descendant:SetAttribute("ClappedOriginalTransparency", descendant.Transparency)
+		end
+	end
+	animateNotification(true)
 	task.delay(config.Duration or 4, function()
 		if card.Parent then
-			tween(card, 0.24, {BackgroundTransparency = 1, Position = UDim2.fromOffset(26, 0)})
-			task.wait(0.25)
+			animateNotification(false)
+			task.wait(0.32)
 			card:Destroy()
 		end
 	end)
@@ -637,7 +660,9 @@ function Library:_revealMainWindow()
 	self.Window.Visible = true
 	self.BackgroundImage.Visible = true
 	self.GlassWash.Visible = true
-	self.AmbientShadow.Visible = true
+	-- The shadow uses a different aspect ratio than the responsive window and
+	-- can spill below it. Keep the panel edge clean at every size.
+	self.AmbientShadow.Visible = false
 	-- Keep the frame itself transparent so the 78664802433772 backdrop can
 	-- show through the glass surfaces and content cards.
 	self.Window.BackgroundTransparency = 1
