@@ -282,13 +282,13 @@ function Library.new(options: {[string]: any}?)
 
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
-	sidebar.Size = UDim2.fromOffset(184, 0)
+	sidebar.Size = UDim2.fromOffset(64, 0)
 	sidebar.SizeConstraint = Enum.SizeConstraint.RelativeYY
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
 	sidebar.BackgroundTransparency = 0.12
 	sidebar.BorderSizePixel = 0
 	sidebar.Parent = body
-	padding(sidebar, 14, 14, 18, 18)
+	padding(sidebar, 8, 8, 14, 14)
 
 	local sideLine = Instance.new("Frame")
 	sideLine.AnchorPoint = Vector2.new(1, 0)
@@ -334,17 +334,20 @@ function Library.new(options: {[string]: any}?)
 	local statusLabel = text(status, "SYSTEM READY", 9, self.Theme.TextMuted, Enum.Font.GothamMedium)
 	statusLabel.Position = UDim2.fromOffset(16, 0)
 	statusLabel.Size = UDim2.new(1, -16, 1, 0)
-	statusLabel.TextTransparency = 0.12
+	statusLabel.TextTransparency = 1
+	self.SidebarStatusLabel = statusLabel
 
 	local content = Instance.new("Frame")
 	content.Name = "Content"
-	content.Position = UDim2.fromOffset(184, 0)
-	content.Size = UDim2.new(1, -184, 1, 0)
+	content.Position = UDim2.fromOffset(64, 0)
+	content.Size = UDim2.new(1, -64, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
-	content.BackgroundTransparency = 0.08
+	content.BackgroundTransparency = 0.48
 	content.BorderSizePixel = 0
 	content.Parent = body
 	self.Content = content
+	self.Sidebar = sidebar
+	self.SidebarNavButtons = {}
 	local contentGradient = Instance.new("UIGradient")
 	contentGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(13, 17, 25)), ColorSequenceKeypoint.new(1, self.Theme.Background)})
 	contentGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.02), NumberSequenceKeypoint.new(1, 0.18)})
@@ -373,6 +376,8 @@ function Library.new(options: {[string]: any}?)
 		tween(backgroundImage, 0.32, {Size = nextSize})
 		tween(glassWash, 0.32, {Size = nextSize})
 	end)
+	sidebar.MouseEnter:Connect(function() self:_setSidebarExpanded(true) end)
+	sidebar.MouseLeave:Connect(function() self:_setSidebarExpanded(false) end)
 
 	local dragging, dragStart, startPosition
 	header.InputBegan:Connect(function(input)
@@ -406,13 +411,26 @@ function Library:_addResponsiveConstraints(window: Frame, content: Frame, sideba
 	sizeConstraint.MaxSize = Vector2.new(1040, 700)
 	sizeConstraint.Parent = window
 	local sidebarConstraint = Instance.new("UISizeConstraint")
-	sidebarConstraint.MinSize = Vector2.new(176, 0)
-	sidebarConstraint.MaxSize = Vector2.new(224, math.huge)
+	sidebarConstraint.MinSize = Vector2.new(64, 0)
+	sidebarConstraint.MaxSize = Vector2.new(184, math.huge)
 	sidebarConstraint.Parent = sidebar
 	local aspect = Instance.new("UIAspectRatioConstraint")
 	aspect.AspectRatio = 1.58
 	aspect.DominantAxis = Enum.DominantAxis.Width
 	aspect.Parent = window
+end
+
+function Library:_setSidebarExpanded(expanded: boolean)
+	if self.SidebarExpanded == expanded then return end
+	self.SidebarExpanded = expanded
+	local width = expanded and 184 or 64
+	tween(self.Sidebar, 0.24, {Size = UDim2.fromOffset(width, 0)})
+	tween(self.Content, 0.24, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
+	for _, item in ipairs(self.SidebarNavButtons) do
+		tween(item.Label, 0.18, {TextTransparency = expanded and 0 or 1})
+		tween(item.Button, 0.24, {BackgroundTransparency = expanded and 0.42 or 1})
+	end
+	if self.SidebarStatusLabel then tween(self.SidebarStatusLabel, 0.18, {TextTransparency = expanded and 0.12 or 1}) end
 end
 
 function Library:Tab(config: {[string]: any})
@@ -428,6 +446,7 @@ function Library:Tab(config: {[string]: any})
 	button.Text = ""
 	button.Size = UDim2.new(1, 0, 0, 42)
 	button.BackgroundColor3 = self.Theme.Sidebar
+	button.BackgroundTransparency = 1
 	button.BorderSizePixel = 0
 	button.Parent = self.Nav
 	corner(button, 9)
@@ -445,11 +464,16 @@ function Library:Tab(config: {[string]: any})
 	indicator.Parent = button
 	corner(indicator, 3)
 	local glyph = icon(button, tab.Icon, 15, self.Theme.TextMuted)
-	glyph.Position = UDim2.fromOffset(15, 0)
-	glyph.Size = UDim2.fromOffset(22, 42)
+	glyph.Position = UDim2.fromOffset(10, 0)
+	glyph.Size = UDim2.fromOffset(42, 42)
 	local label = text(button, config.Name, 11, self.Theme.TextMuted, Enum.Font.GothamMedium)
 	label.Position = UDim2.fromOffset(48, 0)
 	label.Size = UDim2.new(1, -58, 1, 0)
+	label.TextTransparency = 1
+	label.TextColor3 = self.Theme.Text
+	self.SidebarNavButtons = self.SidebarNavButtons or {}
+	table.insert(self.SidebarNavButtons, {Button = button, Label = label})
+	if self.SidebarExpanded then label.TextTransparency = 0 end
 
 	local page = Instance.new("Frame")
 	page.Name = config.Name .. "Page"
@@ -583,11 +607,11 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	local row = Instance.new("Frame")
 	row.Size = UDim2.new(1, 0, 0, descriptionValue and 62 or 48)
 	row.BackgroundColor3 = self.Theme.Surface
-	row.BackgroundTransparency = 0.12
+	row.BackgroundTransparency = 0.72
 	row.BorderSizePixel = 0
 	row.Parent = parent
 	corner(row, 10)
-	stroke(row, self.Theme.StrokeSoft, 0.3)
+	stroke(row, self.Theme.StrokeSoft, 0.6)
 	hover(row, self.Theme.Surface, self.Theme.SurfaceHover)
 	local titleLabel = text(row, titleValue, 11, self.Theme.Text, Enum.Font.GothamMedium)
 	titleLabel.Position = UDim2.fromOffset(16, descriptionValue and 11 or 0)
@@ -612,11 +636,11 @@ function Library:Section(config: {[string]: any})
 	card.Size = UDim2.new(1, 0, 0, 0)
 	card.AutomaticSize = Enum.AutomaticSize.Y
 	card.BackgroundColor3 = self.Theme.Surface
-	card.BackgroundTransparency = 0.08
+	card.BackgroundTransparency = 0.54
 	card.BorderSizePixel = 0
 	card.Parent = config.Tab.Scroller
 	corner(card, 12)
-	stroke(card, self.Theme.StrokeSoft, 0.22)
+	stroke(card, self.Theme.Stroke, 0.58)
 	padding(card, 14, 14, 14, 14)
 	local cardGradient = Instance.new("UIGradient")
 	cardGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, self.Theme.SurfaceRaised), ColorSequenceKeypoint.new(1, self.Theme.Surface)})
