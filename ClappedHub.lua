@@ -609,9 +609,147 @@ function Library:Notify(config: {[string]: any})
 	return card
 end
 
+-- Downloads and plays a local client-side audio asset for a limited duration.
+-- The executor-facing functions are checked at runtime so the UI library can
+-- still be required in environments that do not provide them.
+function Library:PlayMusic(config: {[string]: any})
+	config = config or {}
+	local audioUrl = config.Url
+	local fileName = config.FileName or "downloaded_audio.mp3"
+	local loadingDuration = config.LoadingDuration or 10
+	local playbackDuration = config.PlaybackDuration or 10
+	local startTime = config.StartTime or 0
+
+	assert(type(audioUrl) == "string" and audioUrl ~= "", "PlayMusic requires a Url")
+
+	if self.MusicSound then
+		self.MusicSound:Stop()
+		self.MusicSound:Destroy()
+		self.MusicSound = nil
+	end
+	if self.LoadingOverlay then
+		self.LoadingOverlay:Destroy()
+		self.LoadingOverlay = nil
+	end
+
+	local generation = (self.MusicGeneration or 0) + 1
+	self.MusicGeneration = generation
+	local startedAt = os.clock()
+	local writeFile = rawget(_G, "writefile")
+	local getCustomAsset = rawget(_G, "getcustomasset")
+	local overlay
+
+	if config.ShowLoadingScreen then
+		overlay = Instance.new("Frame")
+		overlay.Name = "MusicLoadingScreen"
+		overlay.Size = UDim2.fromScale(1, 1)
+		overlay.BackgroundColor3 = self.Theme.Background
+		overlay.BackgroundTransparency = 0.04
+		overlay.BorderSizePixel = 0
+		overlay.ZIndex = 100
+		overlay.Parent = self.Gui
+		self.LoadingOverlay = overlay
+
+		local loadingTitle = text(overlay, config.LoadingTitle or "LOADING", 24, self.Theme.Text, Enum.Font.GothamBold)
+		loadingTitle.AnchorPoint = Vector2.new(0.5, 0.5)
+		loadingTitle.Position = UDim2.fromScale(0.5, 0.46)
+		loadingTitle.Size = UDim2.fromOffset(320, 34)
+		loadingTitle.TextXAlignment = Enum.TextXAlignment.Center
+		local loadingSubtitle = text(overlay, "Please wait...", 11, self.Theme.TextMuted, Enum.Font.Gotham)
+		loadingSubtitle.AnchorPoint = Vector2.new(0.5, 0.5)
+		loadingSubtitle.Position = UDim2.fromScale(0.5, 0.54)
+		loadingSubtitle.Size = UDim2.fromOffset(320, 24)
+		loadingSubtitle.TextXAlignment = Enum.TextXAlignment.Center
+	end
+
+	local function closeLoadingScreen()
+		if overlay and overlay.Parent then overlay:Destroy() end
+		if self.LoadingOverlay == overlay then self.LoadingOverlay = nil end
+	end
+
+	if type(writeFile) ~= "function" or type(getCustomAsset) ~= "function" or type(game.HttpGet) ~= "function" then
+		closeLoadingScreen()
+		if config.OnError then config.OnError("This environment does not support local audio assets.") end
+		return false
+	end
+
+	if config.OnStatus then config.OnStatus("Loading audio...") end
+	local success, audioData = pcall(function()
+		return game:HttpGet(audioUrl)
+	end)
+
+	if self.Destroyed or generation ~= self.MusicGeneration then
+		closeLoadingScreen()
+		return false
+	end
+	if not success or type(audioData) ~= "string" or audioData == "" then
+		closeLoadingScreen()
+		if config.OnError then config.OnError("Failed to download the audio file.") end
+		return false
+	end
+
+	local saved = pcall(function()
+		writeFile(fileName, audioData)
+	end)
+	if not saved then
+		closeLoadingScreen()
+		if config.OnError then config.OnError("Failed to save the audio file.") end
+		return false
+	end
+
+	local assetSuccess, assetId = pcall(function()
+		return getCustomAsset(fileName)
+	end)
+	if not assetSuccess or type(assetId) ~= "string" then
+		closeLoadingScreen()
+		if config.OnError then config.OnError("Failed to create a local audio asset.") end
+		return false
+	end
+
+	local sound = Instance.new("Sound")
+	sound.Name = config.Name or "ClientMusicPlayer"
+	sound.SoundId = assetId
+	sound.Volume = config.Volume or 1
+	sound.Parent = workspace
+	self.MusicSound = sound
+	sound.TimePosition = startTime
+	sound:Play()
+	if config.OnStatus then config.OnStatus("Playing audio") end
+
+	-- Keep the loading screen visible while the selected audio segment plays.
+	local remainingLoading = math.max(loadingDuration - (os.clock() - startedAt), playbackDuration)
+	if remainingLoading > 0 then
+		task.delay(remainingLoading, closeLoadingScreen)
+	else
+		closeLoadingScreen()
+	end
+
+	task.delay(playbackDuration, function()
+		if generation ~= self.MusicGeneration then return end
+		if sound.Parent then
+			sound:Stop()
+			sound:Destroy()
+		end
+		if self.MusicSound == sound then self.MusicSound = nil end
+		closeLoadingScreen()
+		if config.OnStatus then config.OnStatus("Audio stopped") end
+	end)
+	return true
+end
+
 function Library:Destroy()
 	if self.Destroyed then return end
 	self.Destroyed = true
+	self.MusicGeneration = (self.MusicGeneration or 0) + 1
+	if self.MusicSound then
+		self.MusicSound:Stop()
+		self.MusicSound:Destroy()
+		self.MusicSound = nil
+	end
+	if self.LoadingOverlay then
+		self.LoadingOverlay:Destroy()
+		self.LoadingOverlay = nil
+	end
 	if self.Gui then self.Gui:Destroy() end
 end
 
