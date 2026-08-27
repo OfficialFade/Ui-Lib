@@ -163,14 +163,16 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
 	backgroundImage.Parent = window
+	corner(backgroundImage, 16)
 	local glassWash = Instance.new("Frame")
 	glassWash.Name = "GlassWash"
 	glassWash.Size = UDim2.fromScale(1, 1)
 	glassWash.BackgroundColor3 = Color3.fromRGB(8, 7, 15)
 	glassWash.BackgroundTransparency = 0.38
 	glassWash.BorderSizePixel = 0
-	glassWash.ZIndex = 1
+	glassWash.ZIndex = 0
 	glassWash.Parent = window
+	corner(glassWash, 16)
 	local washGradient = Instance.new("UIGradient")
 	washGradient.Color = ColorSequence.new({Color3.fromRGB(10, 8, 20), Color3.fromRGB(20, 7, 19)})
 	washGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.14), NumberSequenceKeypoint.new(0.52, 0.34), NumberSequenceKeypoint.new(1, 0.1)})
@@ -190,6 +192,7 @@ function Library.new(options: {[string]: any}?)
 	topGlow.BackgroundColor3 = self.Theme.Accent
 	topGlow.BackgroundTransparency = 0.18
 	topGlow.BorderSizePixel = 0
+	topGlow.ZIndex = 3
 	topGlow.Parent = window
 	local glowGradient = Instance.new("UIGradient")
 	glowGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, self.Theme.AccentDeep), ColorSequenceKeypoint.new(0.52, self.Theme.AccentBright), ColorSequenceKeypoint.new(1, self.Theme.AccentDeep)})
@@ -201,6 +204,7 @@ function Library.new(options: {[string]: any}?)
 	header.BackgroundColor3 = self.Theme.Window
 	header.BackgroundTransparency = 0.18
 	header.BorderSizePixel = 0
+	header.ZIndex = 2
 	header.Parent = window
 	padding(header, 28, 22, 15, 12)
 
@@ -268,6 +272,7 @@ function Library.new(options: {[string]: any}?)
 	body.Position = UDim2.fromOffset(0, 68)
 	body.Size = UDim2.new(1, 0, 1, -68)
 	body.BackgroundTransparency = 1
+	body.ZIndex = 2
 	body.Parent = window
 
 	local sidebar = Instance.new("Frame")
