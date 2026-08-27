@@ -154,6 +154,28 @@ function Library.new(options: {[string]: any}?)
 	corner(window, 16)
 	stroke(window, self.Theme.Stroke, 0.3)
 	self.Window = window
+	local backgroundImage = Instance.new("ImageLabel")
+	backgroundImage.Name = "GlassBackdrop"
+	backgroundImage.Size = UDim2.fromScale(1, 1)
+	backgroundImage.BackgroundTransparency = 1
+	backgroundImage.Image = options.BackgroundImage or "rbxassetid://78664802433772"
+	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.18
+	backgroundImage.ScaleType = Enum.ScaleType.Crop
+	backgroundImage.ZIndex = 0
+	backgroundImage.Parent = window
+	local glassWash = Instance.new("Frame")
+	glassWash.Name = "GlassWash"
+	glassWash.Size = UDim2.fromScale(1, 1)
+	glassWash.BackgroundColor3 = Color3.fromRGB(8, 7, 15)
+	glassWash.BackgroundTransparency = 0.38
+	glassWash.BorderSizePixel = 0
+	glassWash.ZIndex = 1
+	glassWash.Parent = window
+	local washGradient = Instance.new("UIGradient")
+	washGradient.Color = ColorSequence.new({Color3.fromRGB(10, 8, 20), Color3.fromRGB(20, 7, 19)})
+	washGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.14), NumberSequenceKeypoint.new(0.52, 0.34), NumberSequenceKeypoint.new(1, 0.1)})
+	washGradient.Rotation = 25
+	washGradient.Parent = glassWash
 	local windowGradient = Instance.new("UIGradient")
 	windowGradient.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(24, 29, 41)),
