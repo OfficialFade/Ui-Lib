@@ -137,6 +137,7 @@ function Library.new(options: {[string]: any}?)
 	self.ActiveKeybindPicker = nil
 	self.KeybindPanel = nil
 	self.KeybindPanelToggle = nil
+	self.Minimized = false
 	self.CollapsibleSidebar = options.CollapsibleSidebar == true
 	self.EnableLoadingMusic = options.EnableLoadingMusic ~= false
 
@@ -348,6 +349,7 @@ function Library.new(options: {[string]: any}?)
 	body.ClipsDescendants = true
 	body.Parent = window
 	corner(body, 20)
+	self.Body = body
 
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
@@ -532,11 +534,30 @@ function Library.new(options: {[string]: any}?)
 	self.SearchResultDescription = searchPageDescription
 	self.SearchResultsList = searchResultsList
 	self.SearchResultsEmpty = searchEmpty
+	self.Header = header
+	self.HeaderControls = controls
+	self.BrandTitle = title
+	self.BrandSubtitle = subtitle
+	self.TopGlow = topGlow
+	local minimizedHitbox = Instance.new("TextButton")
+	minimizedHitbox.Name = "RestoreWindow"
+	minimizedHitbox.Text = ""
+	minimizedHitbox.BackgroundTransparency = 1
+	minimizedHitbox.BorderSizePixel = 0
+	minimizedHitbox.Size = UDim2.fromScale(1, 1)
+	minimizedHitbox.Visible = false
+	minimizedHitbox.ZIndex = 10
+	minimizedHitbox.Parent = header
+	self.MinimizedHitbox = minimizedHitbox
+	minimizedHitbox.MouseButton1Click:Connect(function() self:_setMinimized(false) end)
 
 	minimize.MouseButton1Click:Connect(function()
-		self.Minimized = not self.Minimized
-		local nextSize = self.Minimized and UDim2.new(0.36, 0, 0, 64) or UDim2.new(0.36, 0, 0.6, 0)
-		tween(window, 0.32, {Size = nextSize})
+		self:_setMinimized(not self.Minimized)
+	end)
+	header.InputEnded:Connect(function(input)
+		if self.Minimized and input.UserInputType == Enum.UserInputType.MouseButton1 then
+			self:_setMinimized(false)
+		end
 	end)
 	sidebar.MouseEnter:Connect(function() self:_setSidebarExpanded(true) end)
 	sidebar.MouseLeave:Connect(function()
@@ -546,6 +567,7 @@ function Library.new(options: {[string]: any}?)
 	local dragging, dragStart, startPosition
 	header.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			if self.Minimized then return end
 			dragging = true
 			dragStart = input.Position
 			startPosition = window.Position
@@ -602,6 +624,7 @@ function Library:_addResponsiveConstraints(window: Frame, content: Frame, sideba
 	aspect.AspectRatio = 1.04
 	aspect.DominantAxis = Enum.DominantAxis.Width
 	aspect.Parent = window
+	self.WindowAspectConstraint = aspect
 end
 
 function Library:_setSidebarExpanded(expanded: boolean)
@@ -619,6 +642,34 @@ function Library:_setSidebarExpanded(expanded: boolean)
 		tween(self.SearchBox, 0.18, {PlaceholderColor3 = expanded and self.Theme.TextMuted or self.Theme.TextFaint})
 	end
 	if self.SidebarStatusLabel then tween(self.SidebarStatusLabel, 0.18, {TextTransparency = expanded and 0.12 or 1}) end
+end
+
+function Library:_setMinimized(minimized: boolean)
+	if self.Destroyed or self.Minimized == minimized then return end
+	self.Minimized = minimized
+	if minimized then
+		if self.WindowAspectConstraint then self.WindowAspectConstraint.Enabled = false end
+		self.Body.Visible = false
+		self.HeaderControls.Visible = false
+		self.TopGlow.Visible = false
+		self.MinimizedHitbox.Visible = true
+		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 58)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		tween(self.BrandSubtitle, 0.18, {TextTransparency = 1})
+		tween(self.Window, 0.36, {Size = UDim2.fromOffset(238, 58)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	else
+		self.HeaderControls.Visible = true
+		self.TopGlow.Visible = true
+		self.Body.Visible = true
+		self.MinimizedHitbox.Visible = false
+		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 68)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		tween(self.BrandSubtitle, 0.18, {TextTransparency = 0.08})
+		tween(self.Window, 0.42, {Size = UDim2.new(0.36, 0, 0.6, 0)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		task.delay(0.44, function()
+			if not self.Destroyed and not self.Minimized and self.WindowAspectConstraint then
+				self.WindowAspectConstraint.Enabled = true
+			end
+		end)
+	end
 end
 
 function Library:Tab(config: {[string]: any})
