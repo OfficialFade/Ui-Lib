@@ -241,7 +241,7 @@ function Library.new(options: {[string]: any}?)
 	brand.Parent = header
 	local title = text(brand, self.Name, 16, self.Theme.Text, Enum.Font.GothamBold)
 	title.Size = UDim2.new(1, 0, 0, 25)
-	local subtitle = text(brand, self.Subtitle, 9, self.Theme.TextMuted, Enum.Font.GothamMedium)
+	local subtitle = text(brand, self.Subtitle, 10, self.Theme.TextMuted, Enum.Font.GothamBold)
 	subtitle.Size = UDim2.new(1, 0, 0, 18)
 	subtitle.Position = UDim2.fromOffset(0, 27)
 	subtitle.TextTransparency = 0.08
@@ -316,7 +316,7 @@ function Library.new(options: {[string]: any}?)
 
 	local nav = Instance.new("ScrollingFrame")
 	nav.Name = "Navigation"
-	nav.Size = UDim2.new(1, 0, 1, -52)
+	nav.Size = UDim2.new(1, 0, 1, 0)
 	nav.BackgroundTransparency = 1
 	nav.BorderSizePixel = 0
 	nav.ScrollBarThickness = 2
@@ -327,26 +327,6 @@ function Library.new(options: {[string]: any}?)
 	navLayout.Padding = UDim.new(0, 6)
 	navLayout.Parent = nav
 	autoCanvas(nav, navLayout)
-
-	local status = Instance.new("Frame")
-	status.AnchorPoint = Vector2.new(0, 1)
-	status.Position = UDim2.new(0, 0, 1, 0)
-	status.Size = UDim2.new(1, 0, 0, 34)
-	status.BackgroundTransparency = 1
-	status.Parent = sidebar
-	local statusDot = Instance.new("Frame")
-	statusDot.Size = UDim2.fromOffset(7, 7)
-	statusDot.Position = UDim2.fromOffset(2, 14)
-	statusDot.BackgroundColor3 = self.Theme.Success
-	statusDot.BorderSizePixel = 0
-	statusDot.Parent = status
-	corner(statusDot, 7)
-	statusDot.Visible = false
-	local statusLabel = text(status, "SYSTEM READY", 9, self.Theme.TextMuted, Enum.Font.GothamMedium)
-	statusLabel.Position = UDim2.fromOffset(16, 0)
-	statusLabel.Size = UDim2.new(1, -16, 1, 0)
-	statusLabel.TextTransparency = 1
-	self.SidebarStatusLabel = statusLabel
 
 	local content = Instance.new("Frame")
 	content.Name = "Content"
