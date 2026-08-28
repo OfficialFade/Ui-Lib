@@ -139,6 +139,16 @@ settings:KeybindListToggle({
 	Default = false,
 })
 
+settings:HubToggleKeybind({
+	Name = "Toggle hub",
+	Description = "Press the selected key to show or hide the hub.",
+	Flag = "HubToggle",
+	Key = Enum.KeyCode.RightShift,
+	Callback = function(visible)
+		print("Hub visible:", visible)
+	end,
+})
+
 settings:Button({
 	Name = "Test notification",
 	Text = "SHOW",

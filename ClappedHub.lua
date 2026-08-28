@@ -157,6 +157,8 @@ function Library.new(options: {[string]: any}?)
 	self.ActiveDropdown = nil
 	self.ActiveColorPicker = nil
 	self.Minimized = false
+	self.HubVisible = true
+	self.HubToggleBind = nil
 	self.CollapsibleSidebar = options.CollapsibleSidebar == true
 	self.EnableLoadingMusic = options.EnableLoadingMusic ~= false
 
@@ -216,6 +218,15 @@ function Library.new(options: {[string]: any}?)
 	shadowGradient.Rotation = 35
 	shadowGradient.Parent = shadow
 
+	local windowGroup = Instance.new("CanvasGroup")
+	windowGroup.Name = "WindowGroup"
+	windowGroup.Size = UDim2.fromScale(1, 1)
+	windowGroup.BackgroundTransparency = 1
+	windowGroup.BorderSizePixel = 0
+	windowGroup.ZIndex = 2
+	windowGroup.Parent = gui
+	self.WindowGroup = windowGroup
+
 	local window = Instance.new("Frame")
 	window.Name = "Window"
 	window.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -227,7 +238,7 @@ function Library.new(options: {[string]: any}?)
 	window.ClipsDescendants = true
 	window.ZIndex = 2
 	window.Visible = false
-	window.Parent = gui
+	window.Parent = windowGroup
 	corner(window, 20)
 	stroke(window, self.Theme.Stroke, 0.24)
 	self.Window = window
@@ -761,6 +772,40 @@ function Library:_setMinimized(minimized: boolean)
 	end
 end
 
+function Library:SetHubVisible(visible: boolean)
+	if self.Destroyed or not self.Window or not self.WindowGroup then return end
+	visible = visible == true
+	if self.HubVisible == visible and self.WindowGroup.Visible == visible then return end
+	self.HubVisible = visible
+	if visible then
+		self.WindowGroup.Visible = true
+		self.Window.Visible = true
+		self.WindowGroup.GroupTransparency = 1
+		if self.WindowScale then
+			self.WindowScale.Scale = 0.96
+			tween(self.WindowScale, 0.24, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		end
+		tween(self.WindowGroup, 0.24, {GroupTransparency = 0}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	else
+		if self.ActiveDropdown then self.ActiveDropdown:Close() end
+		if self.ActiveColorPicker and self.ActiveColorPicker.Popup then
+			self.ActiveColorPicker.Popup.Visible = false
+			self.ActiveColorPicker = nil
+		end
+		if self.WindowScale then
+			tween(self.WindowScale, 0.2, {Scale = 0.96}, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+		end
+		tween(self.WindowGroup, 0.2, {GroupTransparency = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+		task.delay(0.2, function()
+			if not self.Destroyed and not self.HubVisible then self.WindowGroup.Visible = false end
+		end)
+	end
+end
+
+function Library:ToggleHub()
+	self:SetHubVisible(not self.HubVisible)
+end
+
 function Library:Tab(config: {[string]: any})
 	assert(config and config.Name, "Tab requires a Name")
 	local tab = {Library = self, Name = config.Name, Icon = config.Icon or "•", Sections = {}}
@@ -987,6 +1032,8 @@ function Library:_revealMainWindow()
 	if self.WindowRevealed or self.Destroyed then return end
 	self.WindowRevealed = true
 	self.Window.Visible = true
+	self.WindowGroup.Visible = true
+	self.WindowGroup.GroupTransparency = 1
 	self.BackgroundImage.Visible = true
 	self.GlassWash.Visible = true
 	-- The shadow uses a different aspect ratio than the responsive window and
@@ -996,10 +1043,15 @@ function Library:_revealMainWindow()
 	-- show through the glass surfaces and content cards.
 	self.Window.BackgroundTransparency = 1
 
-	local windowScale = Instance.new("UIScale")
+	local windowScale = self.WindowScale
+	if not windowScale then
+		windowScale = Instance.new("UIScale")
+		windowScale.Parent = self.Window
+		self.WindowScale = windowScale
+	end
 	windowScale.Scale = 0.16
-	windowScale.Parent = self.Window
 	tween(windowScale, 0.78, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	tween(self.WindowGroup, 0.68, {GroupTransparency = 0}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 	tween(self.BackgroundImage, 0.64, {ImageTransparency = 0.18})
 	tween(self.GlassWash, 0.64, {BackgroundTransparency = 0.3})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
@@ -1979,6 +2031,29 @@ function Library:Keybind(config: {[string]: any})
 	if library.KeybindPanel then library:_refreshKeybindPanel() end
 	return bind
 end
+
+function Library:HubToggleKeybind(config: {[string]: any})
+	config = config or {}
+	local library = self.Library or self
+	local callback = config.Callback
+	local bindConfig = table.clone(config)
+	bindConfig.Name = config.Name or "Toggle hub"
+	bindConfig.Description = config.Description or "Press this key to show or hide the hub."
+	bindConfig.Mode = "Toggle"
+	bindConfig.DefaultEnabled = false
+	bindConfig.Callback = function(enabled: boolean)
+		library:SetHubVisible(not enabled)
+		if callback then
+			local success, errorMessage = pcall(callback, not enabled)
+			if not success then warn("ClappedHub hub toggle callback failed:", errorMessage) end
+		end
+	end
+	local bind = self:Keybind(bindConfig)
+	library.HubToggleBind = bind
+	return bind
+end
+
+Library.ToggleHubKeybind = Library.HubToggleKeybind
 
 function Library:KeybindListToggle(config: {[string]: any})
 	config = config or {}

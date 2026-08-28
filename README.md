@@ -61,6 +61,14 @@ appearance:KeybindListToggle({
     Default = false,
 })
 
+appearance:HubToggleKeybind({
+    Name = "Toggle hub",
+    Key = Enum.KeyCode.RightShift,
+    Callback = function(visible)
+        print("Hub visible:", visible)
+    end,
+})
+
 appearance:Dropdown({
     Name = "Theme",
     Options = {"Ocean", "Midnight", "Violet"},
@@ -111,6 +119,8 @@ runButton.SetText("DISABLED")
 `Toggle` and `Slider` return `Set` and `Get` methods, and every callback receives the current value.
 
 The built-in search bar filters controls by name and description and switches to the first matching tab. Click a keybind value to choose a new key; press Escape to cancel. Keybinds are shown in a compact draggable panel and enabled entries are highlighted.
+
+`HubToggleKeybind` adds a key picker that smoothly shows or hides the entire hub. `ToggleHubKeybind` is available as an equivalent alias, and `UI:ToggleHub()` can be used from code.
 
 The sidebar profile card automatically displays the local player’s avatar and username. Set `ScriptType = "FREE"` or `ScriptType = "PAID"` in `Library.new` to control the badge.
 
