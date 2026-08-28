@@ -393,10 +393,32 @@ function Library.new(options: {[string]: any}?)
 	sidebarSearch.Parent = sidebar
 	corner(sidebarSearch, 9)
 	stroke(sidebarSearch, self.Theme.StrokeSoft, 0.42)
-	local searchIcon = icon(sidebarSearch, "⌕", 16, self.Theme.AccentBright)
-	searchIcon.Position = UDim2.fromOffset(8, 0)
-	searchIcon.Size = UDim2.fromOffset(22, 32)
+	local searchIcon = Instance.new("Frame")
+	searchIcon.Name = "SearchIcon"
+	searchIcon.Position = UDim2.fromOffset(10, 8)
+	searchIcon.Size = UDim2.fromOffset(18, 18)
+	searchIcon.BackgroundTransparency = 1
+	searchIcon.BorderSizePixel = 0
 	searchIcon.ZIndex = 6
+	searchIcon.Parent = sidebarSearch
+	local searchLens = Instance.new("Frame")
+	searchLens.Size = UDim2.fromOffset(11, 11)
+	searchLens.Position = UDim2.fromOffset(1, 1)
+	searchLens.BackgroundTransparency = 1
+	searchLens.BorderSizePixel = 0
+	searchLens.ZIndex = 6
+	searchLens.Parent = searchIcon
+	corner(searchLens, 6)
+	stroke(searchLens, self.Theme.AccentBright, 0.04, 1.5)
+	local searchHandle = Instance.new("Frame")
+	searchHandle.Size = UDim2.fromOffset(7, 2)
+	searchHandle.Position = UDim2.fromOffset(10, 12)
+	searchHandle.Rotation = 45
+	searchHandle.BackgroundColor3 = self.Theme.AccentBright
+	searchHandle.BorderSizePixel = 0
+	searchHandle.ZIndex = 6
+	searchHandle.Parent = searchIcon
+	corner(searchHandle, 1)
 	local searchBox = Instance.new("TextBox")
 	searchBox.Name = "SearchBox"
 	searchBox.Position = UDim2.fromOffset(32, 0)
