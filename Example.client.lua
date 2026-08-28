@@ -2,7 +2,7 @@
 -- Always fetch the immutable commit so an old local ModuleScript or executor
 -- cache cannot silently load a previous version.
 local source = game:HttpGet(
-	"https://raw.githubusercontent.com/OfficialFade/Ui-Lib/0a7e40e/ClappedHub.lua"
+	"https://raw.githubusercontent.com/OfficialFade/Ui-Lib/4bb3ef0/ClappedHub.lua"
 )
 local loader = loadstring(source)
 assert(loader, "Could not compile ClappedHub.lua from GitHub")
