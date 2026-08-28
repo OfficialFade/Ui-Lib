@@ -154,7 +154,7 @@ function Library.new(options: {[string]: any}?)
 	window.ZIndex = 2
 	window.Visible = false
 	window.Parent = gui
-	corner(window, 16)
+	corner(window, 20)
 	stroke(window, self.Theme.Stroke, 1)
 	self.Window = window
 	local backgroundImage = Instance.new("ImageLabel")
@@ -163,23 +163,23 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.Size = UDim2.fromScale(1, 1)
 	backgroundImage.BackgroundTransparency = 1
 	backgroundImage.Image = options.BackgroundImage or "rbxassetid://78664802433772"
-	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.52
+	backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.18
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
 	backgroundImage.Visible = false
 	backgroundImage.Parent = window
-	corner(backgroundImage, 16)
+	corner(backgroundImage, 20)
 	stroke(backgroundImage, self.Theme.Stroke, 0.18)
 	local glassWash = Instance.new("Frame")
 	glassWash.Name = "GlassWash"
 	glassWash.Position = UDim2.fromScale(0, 0)
 	glassWash.Size = UDim2.fromScale(1, 1)
-	glassWash.BackgroundColor3 = Color3.fromRGB(8, 7, 15)
+	glassWash.BackgroundColor3 = Color3.fromRGB(9, 18, 34)
 	glassWash.BackgroundTransparency = 1
 	glassWash.BorderSizePixel = 0
 	glassWash.ZIndex = 0
 	glassWash.Parent = window
-	corner(glassWash, 16)
+	corner(glassWash, 20)
 	glassWash.Visible = false
 	local washGradient = Instance.new("UIGradient")
 	washGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 8, 20)), ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 7, 19))})
@@ -352,7 +352,7 @@ function Library.new(options: {[string]: any}?)
 	content.Position = UDim2.fromOffset(58, 0)
 	content.Size = UDim2.new(1, -58, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
-	content.BackgroundTransparency = 0.58
+	content.BackgroundTransparency = 0.5
 	content.BorderSizePixel = 0
 	content.Parent = body
 	self.Content = content
@@ -684,8 +684,8 @@ function Library:_revealMainWindow()
 	windowScale.Scale = 0.16
 	windowScale.Parent = self.Window
 	tween(windowScale, 0.62, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.52})
-	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.42})
+	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.18})
+	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.3})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
 end
 
