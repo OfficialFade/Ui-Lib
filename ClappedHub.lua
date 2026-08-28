@@ -648,7 +648,7 @@ function Library:_setMinimized(minimized: boolean)
 	if self.Destroyed or self.Minimized == minimized then return end
 	self.Minimized = minimized
 	if minimized then
-		if self.WindowAspectConstraint then self.WindowAspectConstraint.Enabled = false end
+		if self.WindowAspectConstraint then self.WindowAspectConstraint.Parent = nil end
 		self.Body.Visible = false
 		self.HeaderControls.Visible = false
 		self.TopGlow.Visible = false
@@ -666,7 +666,7 @@ function Library:_setMinimized(minimized: boolean)
 		tween(self.Window, 0.42, {Size = UDim2.new(0.36, 0, 0.6, 0)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		task.delay(0.44, function()
 			if not self.Destroyed and not self.Minimized and self.WindowAspectConstraint then
-				self.WindowAspectConstraint.Enabled = true
+				self.WindowAspectConstraint.Parent = self.Window
 			end
 		end)
 	end
@@ -1548,7 +1548,9 @@ function Library:_ensureKeybindPanel()
 	header.BackgroundTransparency = 0.34
 	header.BorderSizePixel = 0
 	header.ZIndex = 21
+	header.ClipsDescendants = true
 	header.Parent = panel
+	corner(header, 20)
 	local title = text(header, "KEYBINDS", 13, self.Theme.Text, Enum.Font.GothamBold)
 	title.Position = UDim2.fromOffset(16, 4)
 	title.Size = UDim2.new(1, -62, 0, 23)
