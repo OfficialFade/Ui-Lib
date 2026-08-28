@@ -691,9 +691,9 @@ function Library:_revealMainWindow()
 	local windowScale = Instance.new("UIScale")
 	windowScale.Scale = 0.16
 	windowScale.Parent = self.Window
-	tween(windowScale, 0.62, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.18})
-	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.3})
+	tween(windowScale, 0.78, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	tween(self.BackgroundImage, 0.64, {ImageTransparency = 0.18})
+	tween(self.GlassWash, 0.64, {BackgroundTransparency = 0.3})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
 	-- Keep user-created tabs visible and easy to navigate after initialization.
 	self:_setSidebarExpanded(true)

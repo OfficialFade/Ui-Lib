@@ -26,12 +26,6 @@ local controls = UI:Section({
 	Description = "These controls demonstrate the interface system.",
 })
 
-controls:Label({
-	Title = "System",
-	Text = "READY",
-	Description = "Presentation layer is online.",
-})
-
 controls:Button({
 	Name = "Notification test",
 	Text = "SHOW",
