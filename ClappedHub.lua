@@ -1621,21 +1621,28 @@ function Library:ColorPicker(config: {[string]: any})
 	hueBar.Size = UDim2.fromOffset(20, 150)
 	hueBar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 	hueBar.BorderSizePixel = 0
+	hueBar.ClipsDescendants = true
 	hueBar.ZIndex = 51
 	hueBar.Parent = popup
 	corner(hueBar, 8)
-	local hueGradient = Instance.new("UIGradient")
-	hueGradient.Rotation = 90
-	hueGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-		ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
-		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-		ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
-		ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)),
-	})
-	hueGradient.Parent = hueBar
+	for index, hueColor in ipairs({
+		Color3.fromRGB(255, 0, 0),
+		Color3.fromRGB(255, 255, 0),
+		Color3.fromRGB(0, 255, 0),
+		Color3.fromRGB(0, 255, 255),
+		Color3.fromRGB(0, 0, 255),
+		Color3.fromRGB(255, 0, 255),
+		Color3.fromRGB(255, 0, 0),
+	}) do
+		local hueSegment = Instance.new("Frame")
+		hueSegment.Name = "HueSegment" .. index
+		hueSegment.Position = UDim2.fromScale(0, (index - 1) / 7)
+		hueSegment.Size = UDim2.fromScale(1, 1 / 7 + 0.002)
+		hueSegment.BackgroundColor3 = hueColor
+		hueSegment.BorderSizePixel = 0
+		hueSegment.ZIndex = 52
+		hueSegment.Parent = hueBar
+	end
 	local hueHit = Instance.new("TextButton")
 	hueHit.Name = "HueInput"
 	hueHit.Text = ""
