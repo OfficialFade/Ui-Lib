@@ -1625,20 +1625,13 @@ function Library:ColorPicker(config: {[string]: any})
 	hueBar.ZIndex = 51
 	hueBar.Parent = popup
 	corner(hueBar, 8)
-	for index, hueColor in ipairs({
-		Color3.fromRGB(255, 0, 0),
-		Color3.fromRGB(255, 255, 0),
-		Color3.fromRGB(0, 255, 0),
-		Color3.fromRGB(0, 255, 255),
-		Color3.fromRGB(0, 0, 255),
-		Color3.fromRGB(255, 0, 255),
-		Color3.fromRGB(255, 0, 0),
-	}) do
+	local hueSegments = 72
+	for index = 1, hueSegments do
 		local hueSegment = Instance.new("Frame")
 		hueSegment.Name = "HueSegment" .. index
-		hueSegment.Position = UDim2.fromScale(0, (index - 1) / 7)
-		hueSegment.Size = UDim2.fromScale(1, 1 / 7 + 0.002)
-		hueSegment.BackgroundColor3 = hueColor
+		hueSegment.Position = UDim2.fromScale(0, (index - 1) / hueSegments)
+		hueSegment.Size = UDim2.fromScale(1, (1 / hueSegments) + 0.004)
+		hueSegment.BackgroundColor3 = Color3.fromHSV((index - 1) / (hueSegments - 1), 1, 1)
 		hueSegment.BorderSizePixel = 0
 		hueSegment.ZIndex = 52
 		hueSegment.Parent = hueBar
