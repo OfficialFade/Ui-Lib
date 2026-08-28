@@ -223,13 +223,12 @@ function Library.new(options: {[string]: any}?)
 
 	local brandMark = Instance.new("Frame")
 	brandMark.Size = UDim2.fromOffset(36, 36)
-	brandMark.BackgroundColor3 = self.Theme.AccentDeep
+	brandMark.BackgroundTransparency = 1
 	brandMark.BorderSizePixel = 0
 	brandMark.Parent = header
-	corner(brandMark, 11)
 	local logo = Instance.new("ImageLabel")
 	logo.Name = "Logo"
-	logo.Size = UDim2.fromScale(0.68, 0.68)
+	logo.Size = UDim2.fromScale(0.86, 0.86)
 	logo.AnchorPoint = Vector2.new(0.5, 0.5)
 	logo.Position = UDim2.fromScale(0.5, 0.5)
 	logo.BackgroundTransparency = 1
@@ -237,6 +236,8 @@ function Library.new(options: {[string]: any}?)
 	logo.ScaleType = Enum.ScaleType.Fit
 	logo.ZIndex = 2
 	logo.Parent = brandMark
+	corner(logo, 10)
+	stroke(logo, self.Theme.AccentBright, 0.08, 1.5)
 
 	local brand = Instance.new("Frame")
 	brand.BackgroundTransparency = 1
@@ -298,11 +299,12 @@ function Library.new(options: {[string]: any}?)
 
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
-	sidebar.Size = UDim2.fromOffset(58, 0)
+	sidebar.Size = UDim2.new(0, 170, 1, 0)
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
 	sidebar.BackgroundTransparency = 0.55
 	sidebar.BorderSizePixel = 0
 	sidebar.ClipsDescendants = true
+	sidebar.ZIndex = 3
 	sidebar.Parent = body
 	corner(sidebar, 16)
 	padding(sidebar, 8, 8, 14, 14)
@@ -322,6 +324,7 @@ function Library.new(options: {[string]: any}?)
 	nav.ScrollBarImageColor3 = self.Theme.Accent
 	nav.CanvasSize = UDim2.new()
 	nav.ClipsDescendants = true
+	nav.ZIndex = 3
 	nav.Parent = sidebar
 	local navLayout = Instance.new("UIListLayout")
 	navLayout.Padding = UDim.new(0, 6)
@@ -330,8 +333,9 @@ function Library.new(options: {[string]: any}?)
 
 	local content = Instance.new("Frame")
 	content.Name = "Content"
-	content.Position = UDim2.fromOffset(58, 0)
-	content.Size = UDim2.new(1, -58, 1, 0)
+	content.Position = UDim2.fromOffset(170, 0)
+	content.Size = UDim2.new(1, -170, 1, 0)
+	content.ZIndex = 2
 	content.BackgroundColor3 = self.Theme.Background
 	content.BackgroundTransparency = 0.5
 	content.BorderSizePixel = 0
@@ -341,6 +345,7 @@ function Library.new(options: {[string]: any}?)
 	self.Content = content
 	self.Sidebar = sidebar
 	self.SidebarNavButtons = {}
+	self.SidebarExpanded = true
 	local contentGradient = Instance.new("UIGradient")
 	contentGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(13, 17, 25)), ColorSequenceKeypoint.new(1, self.Theme.Background)})
 	contentGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.02), NumberSequenceKeypoint.new(1, 0.18)})
@@ -436,8 +441,8 @@ end
 function Library:_setSidebarExpanded(expanded: boolean)
 	if self.SidebarExpanded == expanded then return end
 	self.SidebarExpanded = expanded
-		local width = expanded and 170 or 58
-	tween(self.Sidebar, 0.24, {Size = UDim2.fromOffset(width, 0)})
+	local width = expanded and 170 or 58
+	tween(self.Sidebar, 0.24, {Size = UDim2.new(0, width, 1, 0)})
 	tween(self.Content, 0.24, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
 	for _, item in ipairs(self.SidebarNavButtons) do
 		tween(item.Label, 0.18, {TextTransparency = expanded and 0 or 1})
@@ -461,6 +466,7 @@ function Library:Tab(config: {[string]: any})
 	button.BackgroundColor3 = self.Theme.Sidebar
 	button.BackgroundTransparency = 1
 	button.BorderSizePixel = 0
+	button.ZIndex = 3
 	button.Parent = self.Nav
 	corner(button, 9)
 	local navGradient = Instance.new("UIGradient")
@@ -474,16 +480,19 @@ function Library:Tab(config: {[string]: any})
 	indicator.BackgroundColor3 = self.Theme.AccentBright
 	indicator.BackgroundTransparency = 1
 	indicator.BorderSizePixel = 0
+	indicator.ZIndex = 4
 	indicator.Parent = button
 	corner(indicator, 3)
 	local glyph = icon(button, tab.Icon, 17, self.Theme.TextMuted)
 	glyph.Position = UDim2.fromOffset(10, 0)
 	glyph.Size = UDim2.fromOffset(42, 50)
+	glyph.ZIndex = 4
 	local label = text(button, config.Name, 12, self.Theme.TextMuted, Enum.Font.GothamMedium)
 	label.Position = UDim2.fromOffset(48, 0)
 	label.Size = UDim2.new(1, -58, 1, 0)
 	label.TextTransparency = 1
 	label.TextColor3 = self.Theme.Text
+	label.ZIndex = 4
 	self.SidebarNavButtons = self.SidebarNavButtons or {}
 	table.insert(self.SidebarNavButtons, {Button = button, Label = label})
 	if self.SidebarExpanded then label.TextTransparency = 0 end
