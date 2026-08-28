@@ -156,7 +156,7 @@ function Library.new(options: {[string]: any}?)
 	window.Visible = false
 	window.Parent = gui
 	corner(window, 20)
-	stroke(window, self.Theme.Stroke, 1)
+	stroke(window, self.Theme.Stroke, 0.24)
 	self.Window = window
 	local backgroundImage = Instance.new("ImageLabel")
 	backgroundImage.Name = "GlassBackdrop"
@@ -170,7 +170,6 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.Visible = false
 	backgroundImage.Parent = window
 	corner(backgroundImage, 20)
-	stroke(backgroundImage, self.Theme.Stroke, 0.18)
 	local glassWash = Instance.new("Frame")
 	glassWash.Name = "GlassWash"
 	glassWash.Position = UDim2.fromScale(0, 0)
@@ -300,14 +299,6 @@ function Library.new(options: {[string]: any}?)
 	sidebar.Parent = body
 	padding(sidebar, 8, 8, 14, 14)
 
-	local sideLine = Instance.new("Frame")
-	sideLine.AnchorPoint = Vector2.new(1, 0)
-	sideLine.Position = UDim2.new(1, 0, 0, 0)
-	sideLine.Size = UDim2.new(0, 1, 1, 0)
-	sideLine.BackgroundColor3 = self.Theme.StrokeSoft
-	sideLine.BackgroundTransparency = 1
-	sideLine.BorderSizePixel = 0
-	sideLine.Parent = sidebar
 	local sidebarGradient = Instance.new("UIGradient")
 	sidebarGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 27, 39)), ColorSequenceKeypoint.new(1, self.Theme.Sidebar)})
 	sidebarGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.04), NumberSequenceKeypoint.new(1, 0.42)})
@@ -430,7 +421,7 @@ end
 function Library:_setSidebarExpanded(expanded: boolean)
 	if self.SidebarExpanded == expanded then return end
 	self.SidebarExpanded = expanded
-		local width = expanded and 132 or 58
+		local width = expanded and 154 or 58
 	tween(self.Sidebar, 0.24, {Size = UDim2.fromOffset(width, 0)})
 	tween(self.Content, 0.24, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
 	for _, item in ipairs(self.SidebarNavButtons) do
@@ -451,7 +442,7 @@ function Library:Tab(config: {[string]: any})
 	button.Name = config.Name .. "Nav"
 	button.AutoButtonColor = false
 	button.Text = ""
-	button.Size = UDim2.new(1, 0, 0, 42)
+	button.Size = UDim2.new(1, 0, 0, 48)
 	button.BackgroundColor3 = self.Theme.Sidebar
 	button.BackgroundTransparency = 1
 	button.BorderSizePixel = 0
@@ -463,17 +454,17 @@ function Library:Tab(config: {[string]: any})
 	navGradient.Parent = button
 
 	local indicator = Instance.new("Frame")
-	indicator.Size = UDim2.fromOffset(3, 20)
-	indicator.Position = UDim2.fromOffset(0, 11)
+	indicator.Size = UDim2.fromOffset(3, 24)
+	indicator.Position = UDim2.fromOffset(0, 12)
 	indicator.BackgroundColor3 = self.Theme.AccentBright
 	indicator.BackgroundTransparency = 1
 	indicator.BorderSizePixel = 0
 	indicator.Parent = button
 	corner(indicator, 3)
-	local glyph = icon(button, tab.Icon, 15, self.Theme.TextMuted)
+	local glyph = icon(button, tab.Icon, 17, self.Theme.TextMuted)
 	glyph.Position = UDim2.fromOffset(10, 0)
-	glyph.Size = UDim2.fromOffset(42, 42)
-	local label = text(button, config.Name, 11, self.Theme.TextMuted, Enum.Font.GothamMedium)
+	glyph.Size = UDim2.fromOffset(42, 48)
+	local label = text(button, config.Name, 12, self.Theme.TextMuted, Enum.Font.GothamMedium)
 	label.Position = UDim2.fromOffset(48, 0)
 	label.Size = UDim2.new(1, -58, 1, 0)
 	label.TextTransparency = 1
