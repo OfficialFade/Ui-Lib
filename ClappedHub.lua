@@ -108,6 +108,20 @@ local function displayKey(value: Enum.KeyCode): string
 	return value.Name
 end
 
+local function colorToHex(value: Color3): string
+	return string.format("#%02X%02X%02X", math.floor(value.R * 255 + 0.5), math.floor(value.G * 255 + 0.5), math.floor(value.B * 255 + 0.5))
+end
+
+local function colorFromHex(value: string): Color3?
+	local hex = string.gsub(value or "", "#", "")
+	if not string.match(hex, "^%x%x%x%x%x%x$") then return nil end
+	local red = tonumber(string.sub(hex, 1, 2), 16)
+	local green = tonumber(string.sub(hex, 3, 4), 16)
+	local blue = tonumber(string.sub(hex, 5, 6), 16)
+	if not red or not green or not blue then return nil end
+	return Color3.fromRGB(red, green, blue)
+end
+
 local function hover(target: GuiObject, normal: Color3, over: Color3)
 	target.MouseEnter:Connect(function() tween(target, 0.18, {BackgroundColor3 = over}) end)
 	target.MouseLeave:Connect(function() tween(target, 0.22, {BackgroundColor3 = normal}) end)
@@ -137,6 +151,8 @@ function Library.new(options: {[string]: any}?)
 	self.ActiveKeybindPicker = nil
 	self.KeybindPanel = nil
 	self.KeybindPanelToggle = nil
+	self.ActiveDropdown = nil
+	self.ActiveColorPicker = nil
 	self.Minimized = false
 	self.CollapsibleSidebar = options.CollapsibleSidebar == true
 	self.EnableLoadingMusic = options.EnableLoadingMusic ~= false
@@ -1288,6 +1304,320 @@ function Library:Label(config: {[string]: any})
 	body.TextXAlignment = Enum.TextXAlignment.Right
 	body.TextWrapped = true
 	return row
+end
+
+function Library:TextBox(config: {[string]: any})
+	local row = self:_controlRow(self.Container, config.Name or "Text input", config.Description)
+	row.Size = UDim2.new(1, 0, 0, config.Description and 64 or 50)
+	local input = Instance.new("TextBox")
+	input.Name = "Input"
+	input.ClearTextOnFocus = false
+	input.Text = tostring(config.Default or "")
+	input.PlaceholderText = config.Placeholder or "Enter text..."
+	input.PlaceholderColor3 = self.Theme.TextMuted
+	input.TextColor3 = self.Theme.Text
+	input.TextSize = 10
+	input.Font = Enum.Font.Gotham
+	input.TextXAlignment = Enum.TextXAlignment.Left
+	input.BackgroundColor3 = self.Theme.StrokeSoft
+	input.BackgroundTransparency = 0.28
+	input.BorderSizePixel = 0
+	input.AnchorPoint = Vector2.new(1, 0.5)
+	input.Position = UDim2.new(1, -14, 0.5, 0)
+	input.Size = UDim2.fromOffset(142, 29)
+	input.Parent = row
+	corner(input, 8)
+	stroke(input, self.Theme.AccentDeep, 0.35)
+	local value = input.Text
+	local function set(nextValue: string, silent: boolean?)
+		value = tostring(nextValue or "")
+		input.Text = value
+		self.Flags[config.Flag or config.Name or "TextBox"] = value
+		if not silent and config.Callback then
+			local success, errorMessage = pcall(config.Callback, value)
+			if not success then warn("ClappedHub text callback failed:", errorMessage) end
+		end
+	end
+	input.FocusLost:Connect(function()
+		set(input.Text)
+	end)
+	if config.Live then
+		input:GetPropertyChangedSignal("Text"):Connect(function() set(input.Text) end)
+	end
+	set(value, true)
+	return {Row = row, Input = input, Set = set, Get = function() return value end}
+end
+
+function Library:Dropdown(config: {[string]: any})
+	local library = self.Library or self
+	local options = config.Options or {}
+	local row = self:_controlRow(self.Container, config.Name or "Dropdown", config.Description)
+	local value = tostring(config.Default or options[1] or "None")
+	local button = Instance.new("TextButton")
+	button.Name = "DropdownButton"
+	button.AutoButtonColor = false
+	button.Text = value .. "  ▾"
+	button.TextSize = 10
+	button.Font = Enum.Font.GothamMedium
+	button.TextColor3 = self.Theme.Text
+	button.BackgroundColor3 = self.Theme.StrokeSoft
+	button.BackgroundTransparency = 0.18
+	button.BorderSizePixel = 0
+	button.AnchorPoint = Vector2.new(1, 0.5)
+	button.Position = UDim2.new(1, -14, 0.5, 0)
+	button.Size = UDim2.fromOffset(126, 29)
+	button.Parent = row
+	corner(button, 8)
+	stroke(button, self.Theme.AccentDeep, 0.3)
+	hover(button, self.Theme.StrokeSoft, self.Theme.AccentDeep)
+	local menu = Instance.new("Frame")
+	menu.Name = "DropdownMenu"
+	menu.BackgroundColor3 = library.Theme.Window
+	menu.BackgroundTransparency = 0.08
+	menu.BorderSizePixel = 0
+	menu.Visible = false
+	menu.ZIndex = 50
+	menu.Parent = library.Gui
+	corner(menu, 10)
+	stroke(menu, library.Theme.Stroke, 0.22)
+	local menuList = Instance.new("UIListLayout")
+	menuList.Padding = UDim.new(0, 4)
+	menuList.Parent = menu
+	padding(menu, 7, 7, 7, 7)
+	local dropdown = {Row = row, Button = button, Menu = menu}
+	local function closeMenu()
+		menu.Visible = false
+		if library.ActiveDropdown == dropdown then library.ActiveDropdown = nil end
+	end
+	local function positionMenu()
+		local camera = workspace.CurrentCamera
+		local viewport = camera and camera.ViewportSize or Vector2.new(800, 600)
+		local width = 180
+		local height = math.min(190, 14 + (#options * 30))
+		local x = math.clamp(row.AbsolutePosition.X + row.AbsoluteSize.X - width, 8, math.max(8, viewport.X - width - 8))
+		local y = row.AbsolutePosition.Y + row.AbsoluteSize.Y + 6
+		if y + height > viewport.Y - 8 then y = math.max(8, row.AbsolutePosition.Y - height - 6) end
+		menu.Size = UDim2.fromOffset(width, height)
+		menu.Position = UDim2.fromOffset(x, y)
+	end
+	local function set(nextValue: string, silent: boolean?)
+		value = tostring(nextValue or "None")
+		button.Text = value .. "  ▾"
+		library.Flags[config.Flag or config.Name or "Dropdown"] = value
+		if not silent and config.Callback then
+			local success, errorMessage = pcall(config.Callback, value)
+			if not success then warn("ClappedHub dropdown callback failed:", errorMessage) end
+		end
+	end
+	for _, option in ipairs(options) do
+		local optionButton = Instance.new("TextButton")
+		optionButton.Name = tostring(option) .. "Option"
+		optionButton.AutoButtonColor = false
+		optionButton.Text = tostring(option)
+		optionButton.TextSize = 10
+		optionButton.Font = Enum.Font.GothamMedium
+		optionButton.TextColor3 = library.Theme.Text
+		optionButton.BackgroundColor3 = library.Theme.Surface
+		optionButton.BackgroundTransparency = 0.25
+		optionButton.BorderSizePixel = 0
+		optionButton.Size = UDim2.new(1, 0, 0, 26)
+		optionButton.Parent = menu
+		corner(optionButton, 7)
+		hover(optionButton, library.Theme.Surface, library.Theme.StrokeSoft)
+		optionButton.MouseButton1Click:Connect(function()
+			set(tostring(option))
+			closeMenu()
+		end)
+	end
+	button.MouseButton1Click:Connect(function()
+		if menu.Visible then closeMenu() return end
+		if library.ActiveDropdown and library.ActiveDropdown ~= dropdown then library.ActiveDropdown:Close() end
+		if library.ActiveColorPicker and library.ActiveColorPicker.Popup then library.ActiveColorPicker.Popup.Visible = false end
+		library.ActiveDropdown = dropdown
+		positionMenu()
+		menu.Visible = true
+	end)
+	dropdown.Close = closeMenu
+	dropdown.Set = set
+	dropdown.Get = function() return value end
+	set(value, true)
+	return dropdown
+end
+
+function Library:ColorPicker(config: {[string]: any})
+	local library = self.Library or self
+	local row = self:_controlRow(self.Container, config.Name or "Color", config.Description)
+	row.Size = UDim2.new(1, 0, 0, config.Description and 64 or 50)
+	local value = typeof(config.Default) == "Color3" and config.Default or library.Theme.Accent
+	local swatch = Instance.new("TextButton")
+	swatch.Name = "ColorSwatch"
+	swatch.AutoButtonColor = false
+	swatch.Text = ""
+	swatch.BackgroundColor3 = value
+	swatch.BackgroundTransparency = 0.04
+	swatch.BorderSizePixel = 0
+	swatch.AnchorPoint = Vector2.new(1, 0.5)
+	swatch.Position = UDim2.new(1, -14, 0.5, 0)
+	swatch.Size = UDim2.fromOffset(64, 29)
+	swatch.Parent = row
+	corner(swatch, 8)
+	stroke(swatch, library.Theme.Text, 0.2)
+	local popup = Instance.new("Frame")
+	popup.Name = "ColorPickerPopup"
+	popup.Size = UDim2.fromOffset(244, 190)
+	popup.BackgroundColor3 = library.Theme.Window
+	popup.BackgroundTransparency = 1
+	popup.BorderSizePixel = 0
+	popup.ClipsDescendants = true
+	popup.Visible = false
+	popup.ZIndex = 50
+	popup.Parent = library.Gui
+	corner(popup, 16)
+	stroke(popup, library.Theme.Stroke, 0.2)
+	local background = Instance.new("ImageLabel")
+	background.Size = UDim2.fromScale(1, 1)
+	background.BackgroundTransparency = 1
+	background.Image = library.BackgroundImage.Image
+	background.ImageTransparency = 0.12
+	background.ScaleType = Enum.ScaleType.Crop
+	background.ZIndex = 50
+	background.Parent = popup
+	corner(background, 16)
+	local wash = Instance.new("Frame")
+	wash.Size = UDim2.fromScale(1, 1)
+	wash.BackgroundColor3 = Color3.fromRGB(8, 16, 30)
+	wash.BackgroundTransparency = 0.24
+	wash.BorderSizePixel = 0
+	wash.ZIndex = 50
+	wash.Parent = popup
+	corner(wash, 16)
+	local popupHeader = Instance.new("Frame")
+	popupHeader.Size = UDim2.new(1, 0, 0, 36)
+	popupHeader.BackgroundColor3 = Color3.fromRGB(4, 8, 16)
+	popupHeader.BackgroundTransparency = 0.3
+	popupHeader.BorderSizePixel = 0
+	popupHeader.ZIndex = 51
+	popupHeader.ClipsDescendants = true
+	popupHeader.Parent = popup
+	corner(popupHeader, 16)
+	local popupTitle = text(popupHeader, "COLOR PICKER", 10, library.Theme.Text, Enum.Font.GothamBold)
+	popupTitle.Position = UDim2.fromOffset(12, 0)
+	popupTitle.Size = UDim2.new(1, -52, 1, 0)
+	popupTitle.ZIndex = 52
+	local popupClose = Instance.new("TextButton")
+	popupClose.Text = "×"
+	popupClose.TextSize = 16
+	popupClose.Font = Enum.Font.GothamMedium
+	popupClose.TextColor3 = library.Theme.Text
+	popupClose.BackgroundColor3 = library.Theme.StrokeSoft
+	popupClose.BackgroundTransparency = 0.12
+	popupClose.BorderSizePixel = 0
+	popupClose.AnchorPoint = Vector2.new(1, 0.5)
+	popupClose.Position = UDim2.new(1, -10, 0.5, 0)
+	popupClose.Size = UDim2.fromOffset(26, 24)
+	popupClose.ZIndex = 52
+	popupClose.Parent = popupHeader
+	corner(popupClose, 7)
+	hover(popupClose, library.Theme.StrokeSoft, library.Theme.AccentDeep)
+	local hexInput = Instance.new("TextBox")
+	hexInput.Name = "HexInput"
+	hexInput.ClearTextOnFocus = false
+	hexInput.Text = colorToHex(value)
+	hexInput.PlaceholderText = "#RRGGBB"
+	hexInput.TextColor3 = library.Theme.Text
+	hexInput.PlaceholderColor3 = library.Theme.TextMuted
+	hexInput.TextSize = 10
+	hexInput.Font = Enum.Font.Gotham
+	hexInput.BackgroundColor3 = library.Theme.Surface
+	hexInput.BackgroundTransparency = 0.2
+	hexInput.BorderSizePixel = 0
+	hexInput.Position = UDim2.fromOffset(12, 48)
+	hexInput.Size = UDim2.fromOffset(220, 28)
+	hexInput.ZIndex = 52
+	hexInput.Parent = popup
+	corner(hexInput, 8)
+	stroke(hexInput, library.Theme.StrokeSoft, 0.25)
+	local preview = Instance.new("Frame")
+	preview.Name = "Preview"
+	preview.BackgroundColor3 = value
+	preview.BorderSizePixel = 0
+	preview.Position = UDim2.fromOffset(12, 88)
+	preview.Size = UDim2.fromOffset(42, 74)
+	preview.ZIndex = 51
+	preview.Parent = popup
+	corner(preview, 9)
+	stroke(preview, library.Theme.Text, 0.25)
+	local channels = {}
+	for index, channel in ipairs({"R", "G", "B"}) do
+		local channelLabel = text(popup, channel, 10, library.Theme.AccentBright, Enum.Font.GothamBold)
+		channelLabel.Position = UDim2.fromOffset(68, 87 + ((index - 1) * 27))
+		channelLabel.Size = UDim2.fromOffset(18, 28)
+		channelLabel.ZIndex = 52
+		local channelInput = Instance.new("TextBox")
+		channelInput.Name = channel .. "Input"
+		channelInput.ClearTextOnFocus = false
+		channelInput.Text = "0"
+		channelInput.TextColor3 = library.Theme.Text
+		channelInput.TextSize = 10
+		channelInput.Font = Enum.Font.Gotham
+		channelInput.BackgroundColor3 = library.Theme.Surface
+		channelInput.BackgroundTransparency = 0.2
+		channelInput.BorderSizePixel = 0
+		channelInput.Position = UDim2.fromOffset(88, 87 + ((index - 1) * 27))
+		channelInput.Size = UDim2.fromOffset(54, 25)
+		channelInput.ZIndex = 52
+		channelInput.Parent = popup
+		corner(channelInput, 7)
+		stroke(channelInput, library.Theme.StrokeSoft, 0.25)
+		channels[channel] = channelInput
+	end
+	local picker = {Row = row, Button = swatch, Popup = popup}
+	local function refreshFields()
+		local red, green, blue = math.floor(value.R * 255 + 0.5), math.floor(value.G * 255 + 0.5), math.floor(value.B * 255 + 0.5)
+		hexInput.Text = colorToHex(value)
+		channels.R.Text, channels.G.Text, channels.B.Text = tostring(red), tostring(green), tostring(blue)
+		swatch.BackgroundColor3 = value
+		preview.BackgroundColor3 = value
+	end
+	local function set(nextValue: Color3, silent: boolean?)
+		value = nextValue
+		library.Flags[config.Flag or config.Name or "ColorPicker"] = value
+		refreshFields()
+		if not silent and config.Callback then
+			local success, errorMessage = pcall(config.Callback, value)
+			if not success then warn("ClappedHub color callback failed:", errorMessage) end
+		end
+	end
+	local function applyChannels()
+		local red = math.clamp(tonumber(channels.R.Text) or 0, 0, 255)
+		local green = math.clamp(tonumber(channels.G.Text) or 0, 0, 255)
+		local blue = math.clamp(tonumber(channels.B.Text) or 0, 0, 255)
+		set(Color3.fromRGB(red, green, blue))
+	end
+	hexInput.FocusLost:Connect(function() set(colorFromHex(hexInput.Text) or value) end)
+	for _, channelInput in pairs(channels) do channelInput.FocusLost:Connect(applyChannels) end
+	local function positionPopup()
+		local camera = workspace.CurrentCamera
+		local viewport = camera and camera.ViewportSize or Vector2.new(800, 600)
+		local width, height = 244, 190
+		local x = math.clamp(row.AbsolutePosition.X + row.AbsoluteSize.X - width, 8, math.max(8, viewport.X - width - 8))
+		local y = row.AbsolutePosition.Y + row.AbsoluteSize.Y + 6
+		if y + height > viewport.Y - 8 then y = math.max(8, row.AbsolutePosition.Y - height - 6) end
+		popup.Position = UDim2.fromOffset(x, y)
+	end
+	swatch.MouseButton1Click:Connect(function()
+		if popup.Visible then popup.Visible = false; library.ActiveColorPicker = nil; return end
+		if library.ActiveDropdown then library.ActiveDropdown:Close() end
+		if library.ActiveColorPicker and library.ActiveColorPicker.Popup then library.ActiveColorPicker.Popup.Visible = false end
+		library.ActiveColorPicker = picker
+		positionPopup()
+		popup.Visible = true
+	end)
+	popupClose.MouseButton1Click:Connect(function() popup.Visible = false; library.ActiveColorPicker = nil end)
+	picker.Set = set
+	picker.Get = function() return value end
+	set(value, true)
+	return picker
 end
 
 function Library:Button(config: {[string]: any})

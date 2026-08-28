@@ -92,6 +92,27 @@ visuals:Slider({
 	end,
 })
 
+visuals:Dropdown({
+	Name = "Theme style",
+	Description = "Choose an interface style.",
+	Flag = "ThemeStyle",
+	Options = {"Ocean", "Midnight", "Violet"},
+	Default = "Ocean",
+	Callback = function(value)
+		print("Theme style:", value)
+	end,
+})
+
+visuals:ColorPicker({
+	Name = "Accent color",
+	Description = "Edit the accent with hex or RGB values.",
+	Flag = "AccentColor",
+	Default = Color3.fromRGB(78, 160, 255),
+	Callback = function(value)
+		print("Accent color:", value)
+	end,
+})
+
 visuals:Keybind({
 	Name = "Toggle visuals",
 	Description = "Hold the selected key to enable this state.",
@@ -132,6 +153,17 @@ settings:Button({
 			Icon = "✦",
 			Duration = 3,
 		})
+	end,
+})
+
+settings:TextBox({
+	Name = "Profile name",
+	Description = "Example text input control.",
+	Flag = "ProfileName",
+	Placeholder = "Type a name...",
+	Default = "Clapped User",
+	Callback = function(value)
+		print("Profile name:", value)
 	end,
 })
 

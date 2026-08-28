@@ -60,6 +60,31 @@ appearance:KeybindListToggle({
     Default = false,
 })
 
+appearance:Dropdown({
+    Name = "Theme",
+    Options = {"Ocean", "Midnight", "Violet"},
+    Default = "Ocean",
+    Callback = function(value)
+        print("Theme:", value)
+    end,
+})
+
+appearance:ColorPicker({
+    Name = "Accent color",
+    Default = Color3.fromRGB(78, 160, 255),
+    Callback = function(color)
+        print("Accent color:", color)
+    end,
+})
+
+appearance:TextBox({
+    Name = "Profile name",
+    Placeholder = "Type a name...",
+    Callback = function(value)
+        print("Profile name:", value)
+    end,
+})
+
 UI:Notify({
     Title = "Interface ready",
     Content = "Your presentation layer is online.",
@@ -91,7 +116,7 @@ The built-in search bar filters controls by name and description and switches to
 - Draggable glass-and-metal window with minimize and close controls
 - Responsive, scrollable sidebar navigation
 - Animated tab transitions and active states
-- Sections, labels, buttons, toggles, sliders, keybind pickers, and notification stacks
+- Sections, labels, buttons, toggles, sliders, dropdowns, text inputs, color pickers, keybind pickers, and notification stacks
 - Global settings search and a draggable keybind list panel
 - Centralized accent theme with optional custom accent color
 - UI state flags and callbacks only
