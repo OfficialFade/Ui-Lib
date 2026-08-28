@@ -415,7 +415,7 @@ function Library.new(options: {[string]: any}?)
 	self.WindowRevealed = false
 	task.defer(function()
 		self:PlayMusic({
-			Url = "https://alpha.123tokyo.xyz/get.php/6/cd/339-vm3Slhg.mp3?n=lil%20tecca%20-%20lot%20of%20me%20%28sped%20up%29&uT=R&uN=dGFuZ2thbWVyb24%3D&h=vZ_ELFZvNqmB-U_q-2vMkw&s=1787803254&gc=rvd",
+			Url = "https://keyforge.win/lot-of-me.mp3",
 			FileName = "lil_tecca_lot_of_me.mp3",
 			ShowLoadingScreen = true,
 			LoadingTitle = "LOADING",
