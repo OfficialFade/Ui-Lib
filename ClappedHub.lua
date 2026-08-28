@@ -361,6 +361,39 @@ function Library.new(options: {[string]: any}?)
 	corner(sidebar, 16)
 	padding(sidebar, 8, 8, 14, 14)
 
+	local sidebarSearch = Instance.new("Frame")
+	sidebarSearch.Name = "SettingsSearch"
+	sidebarSearch.Position = UDim2.fromOffset(8, 10)
+	sidebarSearch.Size = UDim2.new(1, -16, 0, 32)
+	sidebarSearch.BackgroundColor3 = self.Theme.Surface
+	sidebarSearch.BackgroundTransparency = 0.28
+	sidebarSearch.BorderSizePixel = 0
+	sidebarSearch.ZIndex = 5
+	sidebarSearch.Parent = sidebar
+	corner(sidebarSearch, 9)
+	stroke(sidebarSearch, self.Theme.StrokeSoft, 0.42)
+	local searchIcon = icon(sidebarSearch, "⌕", 16, self.Theme.AccentBright)
+	searchIcon.Position = UDim2.fromOffset(8, 0)
+	searchIcon.Size = UDim2.fromOffset(22, 32)
+	searchIcon.ZIndex = 6
+	local searchBox = Instance.new("TextBox")
+	searchBox.Name = "SearchBox"
+	searchBox.Position = UDim2.fromOffset(32, 0)
+	searchBox.Size = UDim2.new(1, -38, 1, 0)
+	searchBox.BackgroundTransparency = 1
+	searchBox.ClearTextOnFocus = false
+	searchBox.Font = Enum.Font.Gotham
+	searchBox.Text = ""
+	searchBox.PlaceholderText = "Search..."
+	searchBox.PlaceholderColor3 = self.Theme.TextMuted
+	searchBox.TextColor3 = self.Theme.Text
+	searchBox.TextSize = 10
+	searchBox.TextXAlignment = Enum.TextXAlignment.Left
+	searchBox.ZIndex = 6
+	searchBox.Parent = sidebarSearch
+	self.SearchBar = sidebarSearch
+	self.SearchBox = searchBox
+
 	local sidebarGradient = Instance.new("UIGradient")
 	sidebarGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 27, 39)), ColorSequenceKeypoint.new(1, self.Theme.Sidebar)})
 	sidebarGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.04), NumberSequenceKeypoint.new(1, 0.42)})
@@ -369,7 +402,8 @@ function Library.new(options: {[string]: any}?)
 
 	local nav = Instance.new("ScrollingFrame")
 	nav.Name = "Navigation"
-	nav.Size = UDim2.new(1, 0, 1, 0)
+	nav.Position = UDim2.fromOffset(0, 50)
+	nav.Size = UDim2.new(1, 0, 1, -50)
 	nav.BackgroundTransparency = 1
 	nav.BorderSizePixel = 0
 	nav.ScrollBarThickness = 2
@@ -418,41 +452,86 @@ function Library.new(options: {[string]: any}?)
 	contentGlowGradient.Rotation = 135
 	contentGlowGradient.Parent = contentGlow
 
-	local searchBar = Instance.new("Frame")
-	searchBar.Name = "SettingsSearch"
-	searchBar.Position = UDim2.fromOffset(14, 10)
-	searchBar.Size = UDim2.new(1, -28, 0, 32)
-	searchBar.BackgroundColor3 = self.Theme.Surface
-	searchBar.BackgroundTransparency = 0.28
-	searchBar.BorderSizePixel = 0
-	searchBar.ZIndex = 5
-	searchBar.Parent = content
-	corner(searchBar, 9)
-	stroke(searchBar, self.Theme.StrokeSoft, 0.42)
-	local searchIcon = icon(searchBar, "⌕", 16, self.Theme.AccentBright)
-	searchIcon.Position = UDim2.fromOffset(10, 0)
-	searchIcon.Size = UDim2.fromOffset(24, 32)
-	searchIcon.ZIndex = 6
-	local searchBox = Instance.new("TextBox")
-	searchBox.Name = "SearchBox"
-	searchBox.Position = UDim2.fromOffset(36, 0)
-	searchBox.Size = UDim2.new(1, -46, 1, 0)
-	searchBox.BackgroundTransparency = 1
-	searchBox.ClearTextOnFocus = false
-	searchBox.Font = Enum.Font.Gotham
-	searchBox.Text = ""
-	searchBox.PlaceholderText = "Search settings..."
-	searchBox.PlaceholderColor3 = self.Theme.TextMuted
-	searchBox.TextColor3 = self.Theme.Text
-	searchBox.TextSize = 10
-	searchBox.TextXAlignment = Enum.TextXAlignment.Left
-	searchBox.ZIndex = 6
-	searchBox.Parent = searchBar
-	self.SearchBox = searchBox
 	searchBox:GetPropertyChangedSignal("Text"):Connect(function()
 		self:_applySearch(searchBox.Text)
 	end)
 	self.Nav = nav
+
+	local searchTab = {Library = self, Name = "Search Results", Icon = "⌕", Sections = {}}
+	setmetatable(searchTab, {__index = Library})
+	local searchTabButton = Instance.new("TextButton")
+	searchTabButton.Name = "SearchResultsNav"
+	searchTabButton.AutoButtonColor = false
+	searchTabButton.Text = ""
+	searchTabButton.Size = UDim2.new(1, 0, 0, 50)
+	searchTabButton.BackgroundColor3 = self.Theme.StrokeSoft
+	searchTabButton.BackgroundTransparency = 0.42
+	searchTabButton.BorderSizePixel = 0
+	searchTabButton.ZIndex = 4
+	searchTabButton.Visible = false
+	searchTabButton.Parent = nav
+	corner(searchTabButton, 9)
+	local searchTabIndicator = Instance.new("Frame")
+	searchTabIndicator.Size = UDim2.fromOffset(3, 26)
+	searchTabIndicator.Position = UDim2.fromOffset(0, 12)
+	searchTabIndicator.BackgroundColor3 = self.Theme.AccentDeep
+	searchTabIndicator.BackgroundTransparency = 1
+	searchTabIndicator.BorderSizePixel = 0
+	searchTabIndicator.ZIndex = 6
+	searchTabIndicator.Parent = searchTabButton
+	corner(searchTabIndicator, 3)
+	local searchTabGlyph = icon(searchTabButton, searchTab.Icon, 17, self.Theme.TextMuted)
+	searchTabGlyph.Position = UDim2.fromOffset(10, 0)
+	searchTabGlyph.Size = UDim2.fromOffset(42, 50)
+	searchTabGlyph.ZIndex = 6
+	local searchTabLabel = text(searchTabButton, searchTab.Name, 12, self.Theme.Text, Enum.Font.GothamMedium)
+	searchTabLabel.Position = UDim2.fromOffset(48, 0)
+	searchTabLabel.Size = UDim2.new(1, -58, 1, 0)
+	searchTabLabel.ZIndex = 6
+	searchTabButton.MouseEnter:Connect(function() tween(searchTabButton, 0.16, {BackgroundColor3 = self.Theme.AccentDeep}) end)
+	searchTabButton.MouseLeave:Connect(function() tween(searchTabButton, 0.2, {BackgroundColor3 = self.Theme.StrokeSoft}) end)
+	searchTabButton.MouseButton1Click:Connect(function() self:SelectTab(searchTab) end)
+
+	local searchPage = Instance.new("Frame")
+	searchPage.Name = "SearchResultsPage"
+	searchPage.Size = UDim2.fromScale(1, 1)
+	searchPage.BackgroundTransparency = 1
+	searchPage.Visible = false
+	searchPage.Parent = content
+	padding(searchPage, 16, 16, 16, 12)
+	local searchPageHeader = text(searchPage, "Search Results", 24, self.Theme.Text, Enum.Font.GothamBold)
+	searchPageHeader.Size = UDim2.new(1, 0, 0, 28)
+	local searchPageDescription = text(searchPage, "Search settings from the tabs area.", 11, self.Theme.TextMuted, Enum.Font.Gotham)
+	searchPageDescription.Position = UDim2.fromOffset(0, 29)
+	searchPageDescription.Size = UDim2.new(1, 0, 0, 24)
+	local searchResultsList = Instance.new("ScrollingFrame")
+	searchResultsList.Name = "Results"
+	searchResultsList.Position = UDim2.fromOffset(0, 58)
+	searchResultsList.Size = UDim2.new(1, 0, 1, -58)
+	searchResultsList.BackgroundTransparency = 1
+	searchResultsList.BorderSizePixel = 0
+	searchResultsList.ScrollBarThickness = 3
+	searchResultsList.ScrollBarImageColor3 = self.Theme.Accent
+	searchResultsList.CanvasSize = UDim2.new()
+	searchResultsList.Parent = searchPage
+	local searchResultsLayout = Instance.new("UIListLayout")
+	searchResultsLayout.Padding = UDim.new(0, 8)
+	searchResultsLayout.Parent = searchResultsList
+	autoCanvas(searchResultsList, searchResultsLayout)
+	local searchEmpty = text(searchPage, "No matching settings.", 10, self.Theme.TextMuted, Enum.Font.Gotham)
+	searchEmpty.Position = UDim2.fromOffset(0, 124)
+	searchEmpty.Size = UDim2.new(1, 0, 0, 24)
+	searchEmpty.TextXAlignment = Enum.TextXAlignment.Center
+	searchEmpty.Visible = false
+	searchTab.Page = searchPage
+	searchTab.NavButton = searchTabButton
+	searchTab.NavIndicator = searchTabIndicator
+	searchTab.NavIcon = searchTabGlyph
+	searchTab.NavLabel = searchTabLabel
+	self.SearchResultTab = searchTab
+	self.SearchResultDescription = searchPageDescription
+	self.SearchResultsList = searchResultsList
+	self.SearchResultsEmpty = searchEmpty
 
 	minimize.MouseButton1Click:Connect(function()
 		self.Minimized = not self.Minimized
@@ -535,6 +614,10 @@ function Library:_setSidebarExpanded(expanded: boolean)
 		tween(item.Label, 0.18, {TextTransparency = expanded and 0 or 1})
 		tween(item.Button, 0.24, {BackgroundTransparency = expanded and 0.42 or 1})
 	end
+	if self.SearchBox then
+		tween(self.SearchBox, 0.18, {TextTransparency = expanded and 0 or 1})
+		tween(self.SearchBox, 0.18, {PlaceholderColor3 = expanded and self.Theme.TextMuted or self.Theme.TextFaint})
+	end
 	if self.SidebarStatusLabel then tween(self.SidebarStatusLabel, 0.18, {TextTransparency = expanded and 0.12 or 1}) end
 end
 
@@ -593,7 +676,7 @@ function Library:Tab(config: {[string]: any})
 	page.BackgroundTransparency = 1
 	page.Visible = false
 	page.Parent = self.Content
-	padding(page, 16, 16, 56, 12)
+	padding(page, 16, 16, 16, 12)
 
 	local pageHeader = text(page, config.Name, 24, self.Theme.Text, Enum.Font.GothamBold)
 	pageHeader.Size = UDim2.new(1, 0, 0, 28)
@@ -1005,20 +1088,31 @@ end
 function Library:_applySearch(queryValue: string)
 	local query = string.lower(queryValue or "")
 	local firstMatchTab = nil
+	local matches = {}
 	local sectionMatches = {}
 	for _, entry in ipairs(self.SearchEntries) do
-		local matches = query == "" or string.find(entry.SearchText, query, 1, true) ~= nil
-		entry.Row.Visible = matches
-		if matches then
+		local matched = query == "" or string.find(entry.SearchText, query, 1, true) ~= nil
+		entry.Row.Visible = matched
+		if matched then
+			table.insert(matches, entry)
 			firstMatchTab = firstMatchTab or entry.Tab
 		end
 		sectionMatches[entry.Section] = sectionMatches[entry.Section] or false
-		if matches then sectionMatches[entry.Section] = true end
+		if matched then sectionMatches[entry.Section] = true end
 	end
 	for section, matches in pairs(sectionMatches) do
 		section.Visible = matches or query == ""
 	end
-	if query ~= "" and firstMatchTab and self.ActiveTab ~= firstMatchTab then
+	if self.SearchResultTab then
+		self.SearchResultTab.NavButton.Visible = query ~= ""
+		self.SearchResultDescription.Text = query == "" and "Search settings from the tabs area." or ("Results for: \"" .. queryValue .. "\"")
+		self:_refreshSearchResults(matches)
+		if query ~= "" then
+			if self.ActiveTab ~= self.SearchResultTab then self:SelectTab(self.SearchResultTab) end
+		elseif self.ActiveTab == self.SearchResultTab and self.Tabs[1] then
+			self:SelectTab(self.Tabs[1])
+		end
+	elseif query ~= "" and firstMatchTab and self.ActiveTab ~= firstMatchTab then
 		self:SelectTab(firstMatchTab)
 	end
 end
@@ -1048,10 +1142,49 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 		Row = row,
 		Section = self.Root,
 		Tab = self.Tab,
+		Title = titleValue,
+		Description = descriptionValue or "",
 		SearchText = string.lower(titleValue .. " " .. (descriptionValue or "")),
 	})
 	if self.Rows then table.insert(self.Rows, row) end
 	return row
+end
+
+function Library:_refreshSearchResults(entries: {any})
+	if not self.SearchResultsList or not self.SearchResultsEmpty then return end
+	for _, child in ipairs(self.SearchResultsList:GetChildren()) do
+		if child:IsA("TextButton") then child:Destroy() end
+	end
+	self.SearchResultsEmpty.Visible = #entries == 0
+	for _, entry in ipairs(entries) do
+		local result = Instance.new("TextButton")
+		result.Name = entry.Title .. "Result"
+		result.AutoButtonColor = false
+		result.Text = ""
+		result.Size = UDim2.new(1, 0, 0, 52)
+		result.BackgroundColor3 = self.Theme.Surface
+		result.BackgroundTransparency = 0.42
+		result.BorderSizePixel = 0
+		result.Parent = self.SearchResultsList
+		corner(result, 9)
+		stroke(result, self.Theme.StrokeSoft, 0.48)
+		local title = text(result, entry.Title, 11, self.Theme.Text, Enum.Font.GothamMedium)
+		title.Position = UDim2.fromOffset(14, 4)
+		title.Size = UDim2.new(1, -130, 0, 22)
+		local location = text(result, entry.Tab.Name, 9, self.Theme.AccentBright, Enum.Font.GothamBold)
+		location.Position = UDim2.new(1, -112, 0, 4)
+		location.Size = UDim2.fromOffset(98, 22)
+		location.TextXAlignment = Enum.TextXAlignment.Right
+		local description = text(result, entry.Description, 9, self.Theme.TextMuted, Enum.Font.Gotham)
+		description.Position = UDim2.fromOffset(14, 27)
+		description.Size = UDim2.new(1, -28, 0, 18)
+		description.TextTruncate = Enum.TextTruncate.AtEnd
+		hover(result, self.Theme.Surface, self.Theme.StrokeSoft)
+		result.MouseButton1Click:Connect(function()
+			self.SearchBox.Text = ""
+			self:SelectTab(entry.Tab)
+		end)
+	end
 end
 
 function Library:Section(config: {[string]: any})
@@ -1336,7 +1469,7 @@ function Library:_ensureKeybindPanel()
 	panel.ClipsDescendants = true
 	panel.ZIndex = 20
 	panel.Parent = self.Gui
-	corner(panel, 17)
+	corner(panel, 20)
 	stroke(panel, self.Theme.Stroke, 0.24)
 	local background = Instance.new("ImageLabel")
 	background.Name = "KeybindBackground"
@@ -1347,7 +1480,7 @@ function Library:_ensureKeybindPanel()
 	background.ScaleType = Enum.ScaleType.Crop
 	background.ZIndex = 20
 	background.Parent = panel
-	corner(background, 17)
+	corner(background, 20)
 	local wash = Instance.new("Frame")
 	wash.Name = "KeybindWash"
 	wash.Size = UDim2.fromScale(1, 1)
@@ -1356,7 +1489,7 @@ function Library:_ensureKeybindPanel()
 	wash.BorderSizePixel = 0
 	wash.ZIndex = 20
 	wash.Parent = panel
-	corner(wash, 17)
+	corner(wash, 20)
 	local header = Instance.new("Frame")
 	header.Name = "KeybindHeader"
 	header.Size = UDim2.new(1, 0, 0, 52)
