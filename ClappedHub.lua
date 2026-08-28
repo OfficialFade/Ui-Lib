@@ -1041,6 +1041,8 @@ function Library:Slider(config: {[string]: any})
 	corner(track, 3)
 	local fill = track:Clone()
 	fill.Name = "Fill"
+	fill.Position = UDim2.fromScale(0, 0)
+	fill.AnchorPoint = Vector2.new(0, 0)
 	fill.Size = UDim2.fromScale(0, 1)
 	fill.BackgroundColor3 = self.Theme.Accent
 	fill.Parent = track
