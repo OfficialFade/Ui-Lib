@@ -12,6 +12,7 @@ local Library = loadstring(game:HttpGet("YOUR_RAW_URL/ClappedHub.lua"))()
 local UI = Library.new({
     Name = "CLAPPED HUB",
     Subtitle = "PRIVATE INTERFACE SYSTEM",
+    ScriptType = "FREE", -- Use "PAID" for a paid-script badge.
 })
 
 local overview = UI:Tab({
@@ -111,6 +112,8 @@ runButton.SetText("DISABLED")
 
 The built-in search bar filters controls by name and description and switches to the first matching tab. Click a keybind value to choose a new key; press Escape to cancel. Keybinds are shown in a compact draggable panel and enabled entries are highlighted.
 
+The sidebar profile card automatically displays the local player’s avatar and username. Set `ScriptType = "FREE"` or `ScriptType = "PAID"` in `Library.new` to control the badge.
+
 ## Included primitives
 
 - Draggable glass-and-metal window with minimize and close controls
@@ -118,6 +121,7 @@ The built-in search bar filters controls by name and description and switches to
 - Animated tab transitions and active states
 - Sections, labels, buttons, toggles, sliders, dropdowns, text inputs, color pickers, keybind pickers, and notification stacks
 - Global settings search and a draggable keybind list panel
+- Sidebar profile card with avatar, username, and FREE/PAID script badge
 - Centralized accent theme with optional custom accent color
 - UI state flags and callbacks only
 - Built-in slim loading screen with timed client-side music transition

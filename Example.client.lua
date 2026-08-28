@@ -11,6 +11,7 @@ local UI = Library.new({
 	Name = "CLAPPED HUB",
 	Subtitle = "PRODUCTION UI EXAMPLE",
 	Accent = Color3.fromRGB(78, 160, 255),
+	ScriptType = "FREE", -- Change to "PAID" for a paid script badge.
 	EnableLoadingMusic = true,
 })
 

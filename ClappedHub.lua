@@ -140,6 +140,9 @@ function Library.new(options: {[string]: any}?)
 	local self = setmetatable({}, Library)
 	self.Name = options.Name or "CLAPPED HUB"
 	self.Subtitle = options.Subtitle or "PRIVATE INTERFACE SYSTEM"
+	self.ProfileUserName = options.ProfileUserName or LocalPlayer.Name
+	local scriptType = string.upper(tostring(options.ScriptType or "FREE"))
+	self.ScriptType = scriptType == "PAID" and "PAID" or "FREE"
 	self.Theme = table.clone(Library.Theme)
 	self.Flags = {}
 	self.Tabs = {}
@@ -421,7 +424,7 @@ function Library.new(options: {[string]: any}?)
 	local nav = Instance.new("ScrollingFrame")
 	nav.Name = "Navigation"
 	nav.Position = UDim2.fromOffset(0, 50)
-	nav.Size = UDim2.new(1, 0, 1, -50)
+	nav.Size = UDim2.new(1, 0, 1, -132)
 	nav.BackgroundTransparency = 1
 	nav.BorderSizePixel = 0
 	nav.ScrollBarThickness = 2
@@ -434,6 +437,53 @@ function Library.new(options: {[string]: any}?)
 	navLayout.Padding = UDim.new(0, 6)
 	navLayout.Parent = nav
 	autoCanvas(nav, navLayout)
+
+	local userCard = Instance.new("Frame")
+	userCard.Name = "UserCard"
+	userCard.Position = UDim2.new(0, 8, 1, -76)
+	userCard.Size = UDim2.new(1, -16, 0, 66)
+	userCard.BackgroundColor3 = self.Theme.Surface
+	userCard.BackgroundTransparency = 0.34
+	userCard.BorderSizePixel = 0
+	userCard.ClipsDescendants = true
+	userCard.ZIndex = 4
+	userCard.Parent = sidebar
+	corner(userCard, 11)
+	stroke(userCard, self.Theme.StrokeSoft, 0.34)
+	local avatar = Instance.new("ImageLabel")
+	avatar.Name = "ProfileIcon"
+	avatar.Position = UDim2.fromOffset(9, 9)
+	avatar.Size = UDim2.fromOffset(38, 38)
+	avatar.BackgroundColor3 = self.Theme.StrokeSoft
+	avatar.BackgroundTransparency = 0.18
+	avatar.BorderSizePixel = 0
+	avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(LocalPlayer.UserId) .. "&w=150&h=150"
+	avatar.ScaleType = Enum.ScaleType.Crop
+	avatar.ZIndex = 5
+	avatar.Parent = userCard
+	corner(avatar, 19)
+	stroke(avatar, self.Theme.AccentDeep, 0.12, 1.25)
+	local username = text(userCard, self.ProfileUserName, 10, self.Theme.Text, Enum.Font.GothamBold)
+	username.Position = UDim2.fromOffset(56, 7)
+	username.Size = UDim2.new(1, -64, 0, 20)
+	username.TextTruncate = Enum.TextTruncate.AtEnd
+	username.ZIndex = 5
+	local typeBadge = Instance.new("Frame")
+	typeBadge.Name = "ScriptTypeBadge"
+	typeBadge.Position = UDim2.fromOffset(56, 34)
+	typeBadge.Size = UDim2.fromOffset(66, 20)
+	typeBadge.BackgroundColor3 = self.ScriptType == "PAID" and self.Theme.AccentDeep or self.Theme.Success
+	typeBadge.BackgroundTransparency = 0.12
+	typeBadge.BorderSizePixel = 0
+	typeBadge.ZIndex = 5
+	typeBadge.Parent = userCard
+	corner(typeBadge, 6)
+	stroke(typeBadge, self.Theme.Text, 0.62)
+	local typeLabel = text(typeBadge, self.ScriptType, 8, self.Theme.Text, Enum.Font.GothamBold)
+	typeLabel.Size = UDim2.fromScale(1, 1)
+	typeLabel.TextXAlignment = Enum.TextXAlignment.Center
+	typeLabel.ZIndex = 6
+	self.UserCard = userCard
 
 	local content = Instance.new("Frame")
 	content.Name = "Content"
@@ -657,6 +707,7 @@ function Library:_setSidebarExpanded(expanded: boolean)
 		tween(self.SearchBox, 0.18, {TextTransparency = expanded and 0 or 1})
 		tween(self.SearchBox, 0.18, {PlaceholderColor3 = expanded and self.Theme.TextMuted or self.Theme.TextFaint})
 	end
+	if self.UserCard then self.UserCard.Visible = expanded end
 	if self.SidebarStatusLabel then tween(self.SidebarStatusLabel, 0.18, {TextTransparency = expanded and 0.12 or 1}) end
 end
 
