@@ -237,7 +237,7 @@ function Library.new(options: {[string]: any}?)
 	logo.ZIndex = 2
 	logo.Parent = brandMark
 	corner(logo, 10)
-	stroke(logo, self.Theme.AccentBright, 0.08, 1.5)
+	stroke(logo, self.Theme.AccentDeep, 0.08, 1.5)
 
 	local brand = Instance.new("Frame")
 	brand.BackgroundTransparency = 1
@@ -477,7 +477,7 @@ function Library:Tab(config: {[string]: any})
 	local indicator = Instance.new("Frame")
 	indicator.Size = UDim2.fromOffset(3, 26)
 	indicator.Position = UDim2.fromOffset(0, 12)
-	indicator.BackgroundColor3 = self.Theme.AccentBright
+	indicator.BackgroundColor3 = self.Theme.AccentDeep
 	indicator.BackgroundTransparency = 1
 	indicator.BorderSizePixel = 0
 	indicator.ZIndex = 4
@@ -495,7 +495,10 @@ function Library:Tab(config: {[string]: any})
 	label.ZIndex = 4
 	self.SidebarNavButtons = self.SidebarNavButtons or {}
 	table.insert(self.SidebarNavButtons, {Button = button, Label = label})
-	if self.SidebarExpanded then label.TextTransparency = 0 end
+	if self.SidebarExpanded then
+		label.TextTransparency = 0
+		button.BackgroundTransparency = 0.42
+	end
 
 	local page = Instance.new("Frame")
 	page.Name = config.Name .. "Page"
@@ -559,7 +562,7 @@ function Library:SelectTab(tab)
 	tab.Page.Visible = true
 	tab.Page.Position = UDim2.fromOffset(8, 0)
 	tween(tab.Page, 0.28, {Position = UDim2.fromOffset(0, 0)})
-	tween(tab.NavButton, 0.24, {BackgroundColor3 = self.Theme.SurfaceRaised})
+	tween(tab.NavButton, 0.24, {BackgroundColor3 = self.Theme.StrokeSoft})
 	tween(tab.NavIndicator, 0.24, {BackgroundTransparency = 0})
 	tab.NavLabel.TextColor3 = self.Theme.Text
 	tab.NavIcon.TextColor3 = self.Theme.AccentBright
