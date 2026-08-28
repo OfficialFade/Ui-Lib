@@ -214,7 +214,7 @@ function Library.new(options: {[string]: any}?)
 	header.BorderSizePixel = 0
 	header.ZIndex = 2
 	header.Parent = window
-	padding(header, 28, 22, 15, 12)
+	padding(header, 16, 22, 15, 12)
 
 	local brandMark = Instance.new("Frame")
 	brandMark.Size = UDim2.fromOffset(36, 36)
@@ -593,6 +593,25 @@ function Library:Notify(config: {[string]: any})
 	card.Parent = holder
 	corner(card, 11)
 	stroke(card, self.Theme.Stroke, 0.28)
+	local notificationBackground = Instance.new("ImageLabel")
+	notificationBackground.Name = "NotificationBackground"
+	notificationBackground.Size = UDim2.fromScale(1, 1)
+	notificationBackground.BackgroundTransparency = 1
+	notificationBackground.Image = "rbxassetid://78664802433772"
+	notificationBackground.ImageTransparency = 0.52
+	notificationBackground.ScaleType = Enum.ScaleType.Crop
+	notificationBackground.ZIndex = 0
+	notificationBackground.Parent = card
+	corner(notificationBackground, 11)
+	local notificationWash = Instance.new("Frame")
+	notificationWash.Name = "NotificationWash"
+	notificationWash.Size = UDim2.fromScale(1, 1)
+	notificationWash.BackgroundColor3 = self.Theme.SurfaceRaised
+	notificationWash.BackgroundTransparency = 0.58
+	notificationWash.BorderSizePixel = 0
+	notificationWash.ZIndex = 1
+	notificationWash.Parent = card
+	corner(notificationWash, 11)
 	local bar = Instance.new("Frame")
 	bar.Size = UDim2.fromOffset(3, 40)
 	bar.Position = UDim2.fromOffset(12, 15)
@@ -619,6 +638,8 @@ function Library:Notify(config: {[string]: any})
 		for _, descendant in ipairs(card:GetDescendants()) do
 			if descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
 				tween(descendant, duration, {TextTransparency = visible and 0 or 1}, Enum.EasingStyle.Quint, visible and Enum.EasingDirection.Out or Enum.EasingDirection.In)
+			elseif descendant:IsA("ImageLabel") then
+				tween(descendant, duration, {ImageTransparency = visible and descendant:GetAttribute("ClappedOriginalTransparency") or 1}, Enum.EasingStyle.Quint, visible and Enum.EasingDirection.Out or Enum.EasingDirection.In)
 			elseif descendant:IsA("Frame") then
 				tween(descendant, duration, {BackgroundTransparency = visible and descendant:GetAttribute("ClappedOriginalTransparency") or 1}, Enum.EasingStyle.Quint, visible and Enum.EasingDirection.Out or Enum.EasingDirection.In)
 			elseif descendant:IsA("UIStroke") then
@@ -627,7 +648,9 @@ function Library:Notify(config: {[string]: any})
 		end
 	end
 	for _, descendant in ipairs(card:GetDescendants()) do
-		if descendant:IsA("Frame") then
+		if descendant:IsA("ImageLabel") then
+			descendant:SetAttribute("ClappedOriginalTransparency", descendant.ImageTransparency)
+		elseif descendant:IsA("Frame") then
 			descendant:SetAttribute("ClappedOriginalTransparency", descendant.BackgroundTransparency)
 		elseif descendant:IsA("UIStroke") then
 			descendant:SetAttribute("ClappedOriginalTransparency", descendant.Transparency)
@@ -1035,6 +1058,7 @@ function Library:Slider(config: {[string]: any})
 	hit.Size = UDim2.new(1, 0, 0, 22)
 	hit.Position = UDim2.new(0, 0, 0.5, -11)
 	hit.Parent = track
+	local draggingSlider = false
 	local function set(nextValue: number, silent: boolean?)
 		value = math.clamp(nextValue, minimum, maximum)
 		local percent = (value - minimum) / (maximum - minimum)
@@ -1047,10 +1071,16 @@ function Library:Slider(config: {[string]: any})
 		local percent = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
 		set(minimum + ((maximum - minimum) * percent))
 	end
-	hit.MouseButton1Down:Connect(function() update({Position = UserInputService:GetMouseLocation()} :: any) end)
+	hit.MouseButton1Down:Connect(function()
+		draggingSlider = true
+		update({Position = UserInputService:GetMouseLocation()} :: any)
+	end)
 	hit.MouseButton1Click:Connect(function() update({Position = UserInputService:GetMouseLocation()} :: any) end)
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSlider = false end
+	end)
 	UserInputService.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then update(input) end
+		if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then update(input) end
 	end)
 	set(value, true)
 	return {Row = row, Set = set, Get = function() return value end}
