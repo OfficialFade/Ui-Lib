@@ -1,7 +1,7 @@
 -- Clapped Hub UI Lib - complete feature showcase
 -- This example only demonstrates UI callbacks and presentation state.
 
-local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/2d114c1/ClappedHub.lua")
+local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/9ee279e/ClappedHub.lua")
 local Library = assert(loadstring(source), "Could not compile ClappedHub.lua from GitHub")()
 
 local UI = Library.new({
