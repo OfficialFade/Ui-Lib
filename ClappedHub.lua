@@ -113,6 +113,7 @@ function Library.new(options: {[string]: any}?)
 	self.Tabs = {}
 	self.ActiveTab = nil
 	self.Destroyed = false
+	self.CollapsibleSidebar = options.CollapsibleSidebar == true
 
 	if options.Accent then self.Theme.Accent = options.Accent end
 
@@ -385,7 +386,9 @@ function Library.new(options: {[string]: any}?)
 		tween(window, 0.32, {Size = nextSize})
 	end)
 	sidebar.MouseEnter:Connect(function() self:_setSidebarExpanded(true) end)
-	sidebar.MouseLeave:Connect(function() self:_setSidebarExpanded(false) end)
+	sidebar.MouseLeave:Connect(function()
+		if self.CollapsibleSidebar then self:_setSidebarExpanded(false) end
+	end)
 
 	local dragging, dragStart, startPosition
 	header.InputBegan:Connect(function(input)
@@ -447,7 +450,7 @@ end
 function Library:_setSidebarExpanded(expanded: boolean)
 	if self.SidebarExpanded == expanded then return end
 	self.SidebarExpanded = expanded
-		local width = expanded and 174 or 58
+		local width = expanded and 132 or 58
 	tween(self.Sidebar, 0.24, {Size = UDim2.fromOffset(width, 0)})
 	tween(self.Content, 0.24, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
 	for _, item in ipairs(self.SidebarNavButtons) do
@@ -692,6 +695,8 @@ function Library:_revealMainWindow()
 	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.18})
 	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.3})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
+	-- Keep user-created tabs visible and easy to navigate after initialization.
+	self:_setSidebarExpanded(true)
 end
 
 -- Downloads and plays the built-in client-side audio segment during loading.
