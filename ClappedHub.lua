@@ -114,6 +114,7 @@ function Library.new(options: {[string]: any}?)
 	self.ActiveTab = nil
 	self.Destroyed = false
 	self.CollapsibleSidebar = options.CollapsibleSidebar == true
+	self.EnableLoadingMusic = options.EnableLoadingMusic ~= false
 
 	if options.Accent then self.Theme.Accent = options.Accent end
 
@@ -169,7 +170,6 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.ZIndex = 0
 	backgroundImage.Visible = false
 	backgroundImage.Parent = window
-	corner(backgroundImage, 20)
 	local glassWash = Instance.new("Frame")
 	glassWash.Name = "GlassWash"
 	glassWash.Position = UDim2.fromScale(0, 0)
@@ -179,7 +179,6 @@ function Library.new(options: {[string]: any}?)
 	glassWash.BorderSizePixel = 0
 	glassWash.ZIndex = 0
 	glassWash.Parent = window
-	corner(glassWash, 20)
 	glassWash.Visible = false
 	local washGradient = Instance.new("UIGradient")
 	washGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 8, 20)), ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 7, 19))})
@@ -292,7 +291,7 @@ function Library.new(options: {[string]: any}?)
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
 	sidebar.Size = UDim2.fromOffset(58, 0)
-	sidebar.SizeConstraint = Enum.SizeConstraint.RelativeYY
+	sidebar.ClipsDescendants = true
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
 	sidebar.BackgroundTransparency = 0.55
 	sidebar.BorderSizePixel = 0
@@ -313,6 +312,7 @@ function Library.new(options: {[string]: any}?)
 	nav.ScrollBarThickness = 2
 	nav.ScrollBarImageColor3 = self.Theme.Accent
 	nav.CanvasSize = UDim2.new()
+	nav.ClipsDescendants = true
 	nav.Parent = sidebar
 	local navLayout = Instance.new("UIListLayout")
 	navLayout.Padding = UDim.new(0, 6)
@@ -326,6 +326,7 @@ function Library.new(options: {[string]: any}?)
 	content.BackgroundColor3 = self.Theme.Background
 	content.BackgroundTransparency = 0.5
 	content.BorderSizePixel = 0
+	content.ClipsDescendants = true
 	content.Parent = body
 	self.Content = content
 	self.Sidebar = sidebar
@@ -387,19 +388,23 @@ function Library.new(options: {[string]: any}?)
 	self.GlassWash = glassWash
 	self.AmbientShadow = shadow
 	self.WindowRevealed = false
-	task.defer(function()
-		self:PlayMusic({
-			Url = "https://keyforge.win/lot-of-me.mp3",
-			FileName = "lil_tecca_lot_of_me.mp3",
-			ShowLoadingScreen = true,
-			LoadingTitle = "LOADING",
-			LoadingDuration = 11,
-			StartTime = 19,
-			PlaybackDuration = 11,
-			EndTime = 30,
-			Volume = 2,
-		})
-	end)
+	if self.EnableLoadingMusic then
+		task.defer(function()
+			self:PlayMusic({
+				Url = "https://keyforge.win/lot-of-me.mp3",
+				FileName = "lil_tecca_lot_of_me.mp3",
+				ShowLoadingScreen = true,
+				LoadingTitle = "LOADING",
+				LoadingDuration = 11,
+				StartTime = 19,
+				PlaybackDuration = 11,
+				EndTime = 30,
+				Volume = 2,
+			})
+		end)
+	else
+		self:_revealMainWindow()
+	end
 	return self
 end
 
@@ -421,7 +426,7 @@ end
 function Library:_setSidebarExpanded(expanded: boolean)
 	if self.SidebarExpanded == expanded then return end
 	self.SidebarExpanded = expanded
-		local width = expanded and 154 or 58
+		local width = expanded and 184 or 58
 	tween(self.Sidebar, 0.24, {Size = UDim2.fromOffset(width, 0)})
 	tween(self.Content, 0.24, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
 	for _, item in ipairs(self.SidebarNavButtons) do
