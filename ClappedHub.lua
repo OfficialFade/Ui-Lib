@@ -216,7 +216,9 @@ function Library.new(options: {[string]: any}?)
 	header.BackgroundTransparency = 0.45
 	header.BorderSizePixel = 0
 	header.ZIndex = 2
+	header.ClipsDescendants = true
 	header.Parent = window
+	corner(header, 20)
 	padding(header, 16, 22, 15, 12)
 
 	local brandMark = Instance.new("Frame")
@@ -290,16 +292,19 @@ function Library.new(options: {[string]: any}?)
 	body.Size = UDim2.new(1, 0, 1, -68)
 	body.BackgroundTransparency = 1
 	body.ZIndex = 2
+	body.ClipsDescendants = true
 	body.Parent = window
+	corner(body, 20)
 
 	local sidebar = Instance.new("Frame")
 	sidebar.Name = "Sidebar"
 	sidebar.Size = UDim2.fromOffset(58, 0)
-	sidebar.ClipsDescendants = true
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
 	sidebar.BackgroundTransparency = 0.55
 	sidebar.BorderSizePixel = 0
+	sidebar.ClipsDescendants = true
 	sidebar.Parent = body
+	corner(sidebar, 16)
 	padding(sidebar, 8, 8, 14, 14)
 
 	local sidebarGradient = Instance.new("UIGradient")
@@ -332,6 +337,7 @@ function Library.new(options: {[string]: any}?)
 	content.BorderSizePixel = 0
 	content.ClipsDescendants = true
 	content.Parent = body
+	corner(content, 16)
 	self.Content = content
 	self.Sidebar = sidebar
 	self.SidebarNavButtons = {}
@@ -451,7 +457,7 @@ function Library:Tab(config: {[string]: any})
 	button.Name = config.Name .. "Nav"
 	button.AutoButtonColor = false
 	button.Text = ""
-	button.Size = UDim2.new(1, 0, 0, 48)
+	button.Size = UDim2.new(1, 0, 0, 50)
 	button.BackgroundColor3 = self.Theme.Sidebar
 	button.BackgroundTransparency = 1
 	button.BorderSizePixel = 0
@@ -463,7 +469,7 @@ function Library:Tab(config: {[string]: any})
 	navGradient.Parent = button
 
 	local indicator = Instance.new("Frame")
-	indicator.Size = UDim2.fromOffset(3, 24)
+	indicator.Size = UDim2.fromOffset(3, 26)
 	indicator.Position = UDim2.fromOffset(0, 12)
 	indicator.BackgroundColor3 = self.Theme.AccentBright
 	indicator.BackgroundTransparency = 1
@@ -472,7 +478,7 @@ function Library:Tab(config: {[string]: any})
 	corner(indicator, 3)
 	local glyph = icon(button, tab.Icon, 17, self.Theme.TextMuted)
 	glyph.Position = UDim2.fromOffset(10, 0)
-	glyph.Size = UDim2.fromOffset(42, 48)
+	glyph.Size = UDim2.fromOffset(42, 50)
 	local label = text(button, config.Name, 12, self.Theme.TextMuted, Enum.Font.GothamMedium)
 	label.Position = UDim2.fromOffset(48, 0)
 	label.Size = UDim2.new(1, -58, 1, 0)
