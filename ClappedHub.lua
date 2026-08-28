@@ -210,7 +210,7 @@ function Library.new(options: {[string]: any}?)
 	header.Name = "Header"
 	header.Size = UDim2.new(1, 0, 0, 68)
 	header.BackgroundColor3 = Color3.fromRGB(4, 8, 16)
-	header.BackgroundTransparency = 0.1
+	header.BackgroundTransparency = 0.45
 	header.BorderSizePixel = 0
 	header.ZIndex = 2
 	header.Parent = window
@@ -294,7 +294,7 @@ function Library.new(options: {[string]: any}?)
 	sidebar.Size = UDim2.fromOffset(58, 0)
 	sidebar.SizeConstraint = Enum.SizeConstraint.RelativeYY
 	sidebar.BackgroundColor3 = self.Theme.Sidebar
-	sidebar.BackgroundTransparency = 0.12
+	sidebar.BackgroundTransparency = 0.55
 	sidebar.BorderSizePixel = 0
 	sidebar.Parent = body
 	padding(sidebar, 8, 8, 14, 14)
@@ -352,7 +352,7 @@ function Library.new(options: {[string]: any}?)
 	content.Position = UDim2.fromOffset(58, 0)
 	content.Size = UDim2.new(1, -58, 1, 0)
 	content.BackgroundColor3 = self.Theme.Background
-	content.BackgroundTransparency = 0.08
+	content.BackgroundTransparency = 0.58
 	content.BorderSizePixel = 0
 	content.Parent = body
 	self.Content = content
@@ -662,7 +662,7 @@ function Library:_revealMainWindow()
 	windowScale.Parent = self.Window
 	tween(windowScale, 0.62, {Scale = 1}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 	tween(self.BackgroundImage, 0.5, {ImageTransparency = 0.52})
-	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.08})
+	tween(self.GlassWash, 0.5, {BackgroundTransparency = 0.42})
 	tween(self.AmbientShadow, 0.5, {BackgroundTransparency = 0.52})
 end
 
@@ -872,7 +872,7 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	local row = Instance.new("Frame")
 	row.Size = UDim2.new(1, 0, 0, descriptionValue and 55 or 44)
 	row.BackgroundColor3 = self.Theme.Surface
-	row.BackgroundTransparency = 0.18
+	row.BackgroundTransparency = 0.62
 	row.BorderSizePixel = 0
 	row.Parent = parent
 	corner(row, 6)
@@ -901,7 +901,7 @@ function Library:Section(config: {[string]: any})
 	card.Size = UDim2.new(1, 0, 0, 0)
 	card.AutomaticSize = Enum.AutomaticSize.Y
 	card.BackgroundColor3 = self.Theme.Surface
-	card.BackgroundTransparency = 0.16
+	card.BackgroundTransparency = 0.6
 	card.BorderSizePixel = 0
 	card.Parent = config.Tab.Scroller
 	corner(card, 3)
@@ -950,6 +950,7 @@ function Library:Button(config: {[string]: any})
 	button.Font = Enum.Font.GothamBold
 	button.TextColor3 = self.Theme.Text
 	button.BackgroundColor3 = self.Theme.AccentDeep
+	button.BackgroundTransparency = 0.18
 	button.BorderSizePixel = 0
 	button.AnchorPoint = Vector2.new(1, 0.5)
 	button.Position = UDim2.new(1, -14, 0.5, 0)
@@ -971,6 +972,7 @@ function Library:Toggle(config: {[string]: any})
 	toggle.Position = UDim2.new(1, -16, 0.5, 0)
 	toggle.Size = UDim2.fromOffset(42, 23)
 	toggle.BackgroundColor3 = Color3.fromRGB(8, 13, 23)
+	toggle.BackgroundTransparency = 0.28
 	toggle.BorderSizePixel = 0
 	toggle.Parent = row
 	corner(toggle, 13)
@@ -985,7 +987,10 @@ function Library:Toggle(config: {[string]: any})
 	local function set(nextValue: boolean, silent: boolean?)
 		value = nextValue
 		self.Flags[config.Flag or config.Name or "Toggle"] = value
-		tween(toggle, 0.2, {BackgroundColor3 = value and self.Theme.AccentDeep or Color3.fromRGB(8, 13, 23)})
+		tween(toggle, 0.2, {
+			BackgroundColor3 = value and self.Theme.AccentDeep or Color3.fromRGB(8, 13, 23),
+			BackgroundTransparency = value and 0.12 or 0.28,
+		})
 		tween(knob, 0.24, {Position = value and UDim2.fromOffset(22, 3) or UDim2.fromOffset(3, 3), BackgroundColor3 = self.Theme.Text})
 		if not silent and config.Callback then config.Callback(value) end
 	end
@@ -1006,7 +1011,7 @@ function Library:Slider(config: {[string]: any})
 	valueLabel.TextXAlignment = Enum.TextXAlignment.Right
 	local track = Instance.new("Frame")
 	track.Position = UDim2.new(0, 16, 1, -24)
-	track.Size = UDim2.new(1, -32, 0, 5)
+	track.Size = UDim2.new(1, -48, 0, 5)
 	track.BackgroundColor3 = self.Theme.SurfaceRaised
 	track.BorderSizePixel = 0
 	track.Parent = row
