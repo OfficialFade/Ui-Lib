@@ -53,6 +53,23 @@ UI:Notify({
 })
 ```
 
+Callbacks can run any client-side code available to the host script:
+
+```lua
+local runButton = appearance:Button({
+    Name = "Run action",
+    Text = "RUN",
+    Callback = function()
+        print("Your script ran")
+    end,
+})
+
+runButton.SetEnabled(false)
+runButton.SetText("DISABLED")
+```
+
+`Toggle` and `Slider` return `Set` and `Get` methods, and every callback receives the current value.
+
 ## Included primitives
 
 - Draggable glass-and-metal window with minimize and close controls

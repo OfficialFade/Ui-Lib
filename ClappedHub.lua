@@ -991,8 +991,24 @@ function Library:Button(config: {[string]: any})
 	button.Parent = row
 	corner(button, 8)
 	hover(button, self.Theme.AccentDeep, self.Theme.Accent)
-	button.MouseButton1Click:Connect(function() if config.Callback then config.Callback() end end)
-	return row
+	local enabled = true
+	local function setEnabled(nextEnabled: boolean)
+		enabled = nextEnabled
+		button.Active = enabled
+		button.TextTransparency = enabled and 0 or 0.55
+		button.BackgroundTransparency = enabled and 0.18 or 0.62
+	end
+	button.MouseButton1Click:Connect(function()
+		if not enabled or not config.Callback then return end
+		local success, errorMessage = pcall(config.Callback)
+		if not success then warn("ClappedHub button callback failed:", errorMessage) end
+	end)
+	return {
+		Row = row,
+		Button = button,
+		SetEnabled = setEnabled,
+		SetText = function(value: string) button.Text = value end,
+	}
 end
 
 function Library:Toggle(config: {[string]: any})
@@ -1025,11 +1041,14 @@ function Library:Toggle(config: {[string]: any})
 			BackgroundTransparency = value and 0.12 or 0.28,
 		})
 		tween(knob, 0.24, {Position = value and UDim2.fromOffset(22, 3) or UDim2.fromOffset(3, 3), BackgroundColor3 = self.Theme.Text})
-		if not silent and config.Callback then config.Callback(value) end
+		if not silent and config.Callback then
+			local success, errorMessage = pcall(config.Callback, value)
+			if not success then warn("ClappedHub toggle callback failed:", errorMessage) end
+		end
 	end
 	toggle.MouseButton1Click:Connect(function() set(not value) end)
 	set(value, true)
-	return {Row = row, Set = set, Get = function() return value end}
+	return {Row = row, Toggle = toggle, Set = set, Get = function() return value end}
 end
 
 function Library:Slider(config: {[string]: any})
@@ -1077,7 +1096,10 @@ function Library:Slider(config: {[string]: any})
 		valueLabel.Text = string.format(config.Format or "%d", value)
 		self.Flags[config.Flag or config.Name or "Slider"] = value
 		tween(fill, 0.16, {Size = UDim2.fromScale(percent, 1)})
-		if not silent and config.Callback then config.Callback(value) end
+		if not silent and config.Callback then
+			local success, errorMessage = pcall(config.Callback, value)
+			if not success then warn("ClappedHub slider callback failed:", errorMessage) end
+		end
 	end
 	local function update(input: InputObject)
 		local percent = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
@@ -1095,7 +1117,7 @@ function Library:Slider(config: {[string]: any})
 		if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then update(input) end
 	end)
 	set(value, true)
-	return {Row = row, Set = set, Get = function() return value end}
+	return {Row = row, Track = track, Set = set, Get = function() return value end}
 end
 
 return Library
