@@ -114,6 +114,8 @@ The built-in search bar filters controls by name and description and switches to
 
 The sidebar profile card automatically displays the local player’s avatar and username. Set `ScriptType = "FREE"` or `ScriptType = "PAID"` in `Library.new` to control the badge.
 
+`ColorPicker` opens a palette with hue selection, a circular saturation/value field, a live preview, editable hex text, and RGB channels.
+
 ## Included primitives
 
 - Draggable glass-and-metal window with minimize and close controls

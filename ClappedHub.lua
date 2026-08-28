@@ -1537,7 +1537,7 @@ function Library:ColorPicker(config: {[string]: any})
 	stroke(swatch, library.Theme.Text, 0.2)
 	local popup = Instance.new("Frame")
 	popup.Name = "ColorPickerPopup"
-	popup.Size = UDim2.fromOffset(244, 190)
+	popup.Size = UDim2.fromOffset(300, 270)
 	popup.BackgroundColor3 = library.Theme.Window
 	popup.BackgroundTransparency = 1
 	popup.BorderSizePixel = 0
@@ -1564,6 +1564,97 @@ function Library:ColorPicker(config: {[string]: any})
 	wash.ZIndex = 50
 	wash.Parent = popup
 	corner(wash, 16)
+	local hue, saturation, brightness = value:ToHSV()
+	local palette = Instance.new("Frame")
+	palette.Name = "ColorPalette"
+	palette.Position = UDim2.fromOffset(12, 48)
+	palette.Size = UDim2.fromOffset(150, 150)
+	palette.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+	palette.BorderSizePixel = 0
+	palette.ZIndex = 51
+	palette.Parent = popup
+	corner(palette, 75)
+	local whiteShade = Instance.new("Frame")
+	whiteShade.Size = UDim2.fromScale(1, 1)
+	whiteShade.BackgroundColor3 = Color3.new(1, 1, 1)
+	whiteShade.BackgroundTransparency = 0
+	whiteShade.BorderSizePixel = 0
+	whiteShade.ZIndex = 52
+	whiteShade.Parent = palette
+	corner(whiteShade, 75)
+	local whiteGradient = Instance.new("UIGradient")
+	whiteGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1)})
+	whiteGradient.Parent = whiteShade
+	local blackShade = Instance.new("Frame")
+	blackShade.Size = UDim2.fromScale(1, 1)
+	blackShade.BackgroundColor3 = Color3.new(0, 0, 0)
+	blackShade.BackgroundTransparency = 0
+	blackShade.BorderSizePixel = 0
+	blackShade.ZIndex = 53
+	blackShade.Parent = palette
+	corner(blackShade, 75)
+	local blackGradient = Instance.new("UIGradient")
+	blackGradient.Rotation = 90
+	blackGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0)})
+	blackGradient.Parent = blackShade
+	local paletteHit = Instance.new("TextButton")
+	paletteHit.Name = "PaletteInput"
+	paletteHit.Text = ""
+	paletteHit.BackgroundTransparency = 1
+	paletteHit.BorderSizePixel = 0
+	paletteHit.Size = UDim2.fromScale(1, 1)
+	paletteHit.ZIndex = 54
+	paletteHit.Parent = palette
+	local paletteCursor = Instance.new("Frame")
+	paletteCursor.Name = "PaletteCursor"
+	paletteCursor.AnchorPoint = Vector2.new(0.5, 0.5)
+	paletteCursor.Size = UDim2.fromOffset(13, 13)
+	paletteCursor.BackgroundTransparency = 1
+	paletteCursor.BorderSizePixel = 0
+	paletteCursor.ZIndex = 55
+	paletteCursor.Parent = palette
+	corner(paletteCursor, 7)
+	stroke(paletteCursor, library.Theme.Text, 0.08, 1.5)
+	local hueBar = Instance.new("Frame")
+	hueBar.Name = "HueBar"
+	hueBar.Position = UDim2.fromOffset(174, 48)
+	hueBar.Size = UDim2.fromOffset(20, 150)
+	hueBar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+	hueBar.BorderSizePixel = 0
+	hueBar.ZIndex = 51
+	hueBar.Parent = popup
+	corner(hueBar, 8)
+	local hueGradient = Instance.new("UIGradient")
+	hueGradient.Rotation = 90
+	hueGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+		ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+		ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
+		ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)),
+	})
+	hueGradient.Parent = hueBar
+	local hueHit = Instance.new("TextButton")
+	hueHit.Name = "HueInput"
+	hueHit.Text = ""
+	hueHit.BackgroundTransparency = 1
+	hueHit.BorderSizePixel = 0
+	hueHit.Size = UDim2.fromScale(1, 1)
+	hueHit.ZIndex = 54
+	hueHit.Parent = hueBar
+	local hueCursor = Instance.new("Frame")
+	hueCursor.Name = "HueCursor"
+	hueCursor.AnchorPoint = Vector2.new(0.5, 0.5)
+	hueCursor.Position = UDim2.fromOffset(184, 48)
+	hueCursor.Size = UDim2.fromOffset(26, 5)
+	hueCursor.BackgroundTransparency = 1
+	hueCursor.BorderSizePixel = 0
+	hueCursor.ZIndex = 55
+	hueCursor.Parent = popup
+	corner(hueCursor, 3)
+	stroke(hueCursor, library.Theme.Text, 0.08, 1.5)
 	local popupHeader = Instance.new("Frame")
 	popupHeader.Size = UDim2.new(1, 0, 0, 36)
 	popupHeader.BackgroundColor3 = Color3.fromRGB(4, 8, 16)
@@ -1604,8 +1695,8 @@ function Library:ColorPicker(config: {[string]: any})
 	hexInput.BackgroundColor3 = library.Theme.Surface
 	hexInput.BackgroundTransparency = 0.2
 	hexInput.BorderSizePixel = 0
-	hexInput.Position = UDim2.fromOffset(12, 48)
-	hexInput.Size = UDim2.fromOffset(220, 28)
+	hexInput.Position = UDim2.fromOffset(12, 230)
+	hexInput.Size = UDim2.fromOffset(276, 28)
 	hexInput.ZIndex = 52
 	hexInput.Parent = popup
 	corner(hexInput, 8)
@@ -1614,8 +1705,8 @@ function Library:ColorPicker(config: {[string]: any})
 	preview.Name = "Preview"
 	preview.BackgroundColor3 = value
 	preview.BorderSizePixel = 0
-	preview.Position = UDim2.fromOffset(12, 88)
-	preview.Size = UDim2.fromOffset(42, 74)
+	preview.Position = UDim2.fromOffset(214, 48)
+	preview.Size = UDim2.fromOffset(72, 50)
 	preview.ZIndex = 51
 	preview.Parent = popup
 	corner(preview, 9)
@@ -1623,7 +1714,7 @@ function Library:ColorPicker(config: {[string]: any})
 	local channels = {}
 	for index, channel in ipairs({"R", "G", "B"}) do
 		local channelLabel = text(popup, channel, 10, library.Theme.AccentBright, Enum.Font.GothamBold)
-		channelLabel.Position = UDim2.fromOffset(68, 87 + ((index - 1) * 27))
+		channelLabel.Position = UDim2.fromOffset(214, 108 + ((index - 1) * 27))
 		channelLabel.Size = UDim2.fromOffset(18, 28)
 		channelLabel.ZIndex = 52
 		local channelInput = Instance.new("TextBox")
@@ -1636,7 +1727,7 @@ function Library:ColorPicker(config: {[string]: any})
 		channelInput.BackgroundColor3 = library.Theme.Surface
 		channelInput.BackgroundTransparency = 0.2
 		channelInput.BorderSizePixel = 0
-		channelInput.Position = UDim2.fromOffset(88, 87 + ((index - 1) * 27))
+		channelInput.Position = UDim2.fromOffset(232, 108 + ((index - 1) * 27))
 		channelInput.Size = UDim2.fromOffset(54, 25)
 		channelInput.ZIndex = 52
 		channelInput.Parent = popup
@@ -1647,10 +1738,14 @@ function Library:ColorPicker(config: {[string]: any})
 	local picker = {Row = row, Button = swatch, Popup = popup}
 	local function refreshFields()
 		local red, green, blue = math.floor(value.R * 255 + 0.5), math.floor(value.G * 255 + 0.5), math.floor(value.B * 255 + 0.5)
+		hue, saturation, brightness = value:ToHSV()
 		hexInput.Text = colorToHex(value)
 		channels.R.Text, channels.G.Text, channels.B.Text = tostring(red), tostring(green), tostring(blue)
 		swatch.BackgroundColor3 = value
 		preview.BackgroundColor3 = value
+		palette.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+		paletteCursor.Position = UDim2.fromScale(saturation, 1 - brightness)
+		hueCursor.Position = UDim2.fromOffset(184, 48 + (hue * 150))
 	end
 	local function set(nextValue: Color3, silent: boolean?)
 		value = nextValue
@@ -1669,10 +1764,41 @@ function Library:ColorPicker(config: {[string]: any})
 	end
 	hexInput.FocusLost:Connect(function() set(colorFromHex(hexInput.Text) or value) end)
 	for _, channelInput in pairs(channels) do channelInput.FocusLost:Connect(applyChannels) end
+	local paletteDragging = false
+	local hueDragging = false
+	local function updatePalette(input: any)
+		local percentX = math.clamp((input.Position.X - palette.AbsolutePosition.X) / palette.AbsoluteSize.X, 0, 1)
+		local percentY = math.clamp((input.Position.Y - palette.AbsolutePosition.Y) / palette.AbsoluteSize.Y, 0, 1)
+		set(Color3.fromHSV(hue, percentX, 1 - percentY))
+	end
+	local function updateHue(input: any)
+		local percentY = math.clamp((input.Position.Y - hueBar.AbsolutePosition.Y) / hueBar.AbsoluteSize.Y, 0, 1)
+		hue = percentY
+		set(Color3.fromHSV(hue, saturation, brightness))
+	end
+	paletteHit.MouseButton1Down:Connect(function()
+		paletteDragging = true
+		updatePalette({Position = UserInputService:GetMouseLocation()})
+	end)
+	hueHit.MouseButton1Down:Connect(function()
+		hueDragging = true
+		updateHue({Position = UserInputService:GetMouseLocation()})
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
+		if paletteDragging then updatePalette(input) end
+		if hueDragging then updateHue(input) end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			paletteDragging = false
+			hueDragging = false
+		end
+	end)
 	local function positionPopup()
 		local camera = workspace.CurrentCamera
 		local viewport = camera and camera.ViewportSize or Vector2.new(800, 600)
-		local width, height = 244, 190
+		local width, height = 300, 270
 		local x = math.clamp(row.AbsolutePosition.X + row.AbsoluteSize.X - width, 8, math.max(8, viewport.X - width - 8))
 		local y = row.AbsolutePosition.Y + row.AbsoluteSize.Y + 6
 		if y + height > viewport.Y - 8 then y = math.max(8, row.AbsolutePosition.Y - height - 6) end
