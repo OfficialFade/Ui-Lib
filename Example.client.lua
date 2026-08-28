@@ -1,7 +1,7 @@
 -- Clapped Hub UI Lib - search, tabs, keybind picker, and keybind panel example
 -- The commit URL keeps the executor from loading a stale cached library.
 local source = game:HttpGet(
-	"https://raw.githubusercontent.com/OfficialFade/Ui-Lib/6732f50/ClappedHub.lua"
+	"https://raw.githubusercontent.com/OfficialFade/Ui-Lib/e67d07c/ClappedHub.lua"
 )
 local loader = loadstring(source)
 assert(loader, "Could not compile ClappedHub.lua from GitHub")
