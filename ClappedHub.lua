@@ -169,7 +169,9 @@ function Library.new(options: {[string]: any}?)
 	backgroundImage.ScaleType = Enum.ScaleType.Crop
 	backgroundImage.ZIndex = 0
 	backgroundImage.Visible = false
+	backgroundImage.ClipsDescendants = true
 	backgroundImage.Parent = window
+	corner(backgroundImage, 20)
 	local glassWash = Instance.new("Frame")
 	glassWash.Name = "GlassWash"
 	glassWash.Position = UDim2.fromScale(0, 0)
@@ -179,6 +181,8 @@ function Library.new(options: {[string]: any}?)
 	glassWash.BorderSizePixel = 0
 	glassWash.ZIndex = 0
 	glassWash.Parent = window
+	glassWash.ClipsDescendants = true
+	corner(glassWash, 20)
 	glassWash.Visible = false
 	local washGradient = Instance.new("UIGradient")
 	washGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 8, 20)), ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 7, 19))})
@@ -426,7 +430,7 @@ end
 function Library:_setSidebarExpanded(expanded: boolean)
 	if self.SidebarExpanded == expanded then return end
 	self.SidebarExpanded = expanded
-		local width = expanded and 184 or 58
+		local width = expanded and 170 or 58
 	tween(self.Sidebar, 0.24, {Size = UDim2.fromOffset(width, 0)})
 	tween(self.Content, 0.24, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
 	for _, item in ipairs(self.SidebarNavButtons) do
