@@ -15,6 +15,14 @@ local UI = Library.new({
 	EnableLoadingMusic = true, -- Shows the built-in 11-second loading transition.
 })
 
+local Config = UI:ConfigManager({
+	Folder = "ClappedHubConfigs",
+	DefaultConfig = "Default",
+	OnStatus = function(success, message)
+		print(success and "[Config]" or "[Config error]", message)
+	end,
+})
+
 -- Combat tab: label, button, toggle, slider, and toggle keybind.
 local combatTab = UI:Tab({
 	Name = "Combat",
@@ -198,6 +206,53 @@ settings:HubToggleKeybind({
 	Key = Enum.KeyCode.RightShift,
 	Callback = function(visible)
 		print("Hub visible:", visible)
+	end,
+})
+
+local configName = settings:TextBox({
+	Name = "Config name",
+	Description = "Choose the file name used for save and load.",
+	Placeholder = "Default",
+	Default = "Default",
+})
+
+local function configNotice(title: string, success: boolean, message: string)
+	UI:Notify({
+		Title = title,
+		Content = message,
+		Icon = success and "✓" or "!",
+		Color = success and Color3.fromRGB(74, 205, 143) or Color3.fromRGB(235, 92, 112),
+		Duration = 3,
+	})
+end
+
+settings:Button({
+	Name = "Save config",
+	Text = "SAVE",
+	Description = "Save all current control values to disk.",
+	Callback = function()
+		local success, message = Config:Save(configName.Get())
+		configNotice("Config save", success, message)
+	end,
+})
+
+settings:Button({
+	Name = "Load config",
+	Text = "LOAD",
+	Description = "Restore saved controls, keys, and panel state.",
+	Callback = function()
+		local success, message = Config:Load(configName.Get())
+		configNotice("Config load", success, message)
+	end,
+})
+
+settings:Button({
+	Name = "Delete config",
+	Text = "DELETE",
+	Description = "Remove the selected config file.",
+	Callback = function()
+		local success, message = Config:Delete(configName.Get())
+		configNotice("Config delete", success, message)
 	end,
 })
 

@@ -7,6 +7,7 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -145,6 +146,7 @@ function Library.new(options: {[string]: any}?)
 	self.ScriptType = scriptType == "PAID" and "PAID" or "FREE"
 	self.Theme = table.clone(Library.Theme)
 	self.Flags = {}
+	self.FlagControls = {}
 	self.Tabs = {}
 	self.ActiveTab = nil
 	self.Destroyed = false
@@ -1342,6 +1344,11 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	return row
 end
 
+function Library:_registerFlagControl(flag: string, setter: (...any) -> ())
+	self.FlagControls = self.FlagControls or {}
+	self.FlagControls[flag] = setter
+end
+
 function Library:_refreshSearchResults(entries: {any})
 	if not self.SearchResultsList or not self.SearchResultsEmpty then return end
 	for _, child in ipairs(self.SearchResultsList:GetChildren()) do
@@ -1470,7 +1477,9 @@ function Library:TextBox(config: {[string]: any})
 		input:GetPropertyChangedSignal("Text"):Connect(function() set(input.Text) end)
 	end
 	set(value, true)
-	return {Row = row, Input = input, Set = set, Get = function() return value end}
+	local control = {Row = row, Input = input, Set = set, Get = function() return value end}
+	(self.Library or self):_registerFlagControl(config.Flag or config.Name or "TextBox", set)
+	return control
 end
 
 function Library:Dropdown(config: {[string]: any})
@@ -1566,6 +1575,7 @@ function Library:Dropdown(config: {[string]: any})
 	dropdown.Set = set
 	dropdown.Get = function() return value end
 	set(value, true)
+	library:_registerFlagControl(config.Flag or config.Name or "Dropdown", set)
 	return dropdown
 end
 
@@ -1868,6 +1878,7 @@ function Library:ColorPicker(config: {[string]: any})
 	picker.Set = set
 	picker.Get = function() return value end
 	set(value, true)
+	library:_registerFlagControl(config.Flag or config.Name or "ColorPicker", set)
 	return picker
 end
 
@@ -1945,7 +1956,9 @@ function Library:Toggle(config: {[string]: any})
 	end
 	toggle.MouseButton1Click:Connect(function() set(not value) end)
 	set(value, true)
-	return {Row = row, Toggle = toggle, Set = set, Get = function() return value end}
+	local control = {Row = row, Toggle = toggle, Set = set, Get = function() return value end}
+	(self.Library or self):_registerFlagControl(config.Flag or config.Name or "Toggle", set)
+	return control
 end
 
 function Library:Keybind(config: {[string]: any})
@@ -2028,6 +2041,9 @@ function Library:Keybind(config: {[string]: any})
 	library.Keybinds[identifier] = bind
 	table.insert(library.KeybindOrder, bind)
 	bind:SetEnabled(bind.Enabled, true)
+	library:_registerFlagControl(identifier, function(nextValue: any, silent: boolean?)
+		bind:SetEnabled(nextValue == true, silent)
+	end)
 	if library.KeybindPanel then library:_refreshKeybindPanel() end
 	return bind
 end
@@ -2054,6 +2070,175 @@ function Library:HubToggleKeybind(config: {[string]: any})
 end
 
 Library.ToggleHubKeybind = Library.HubToggleKeybind
+
+function Library:ConfigManager(options: {[string]: any}?)
+	options = options or {}
+	local library = self.Library or self
+	local function safeName(value: any, fallback: string): string
+		local result = string.gsub(tostring(value or fallback), "[^%w%._%-]", "_")
+		return result ~= "" and result or fallback
+	end
+	local folder = safeName(options.Folder, safeName(library.Name, "ClappedHub"))
+	local extension = tostring(options.Extension or ".json")
+	if string.sub(extension, 1, 1) ~= "." then extension = "." .. extension end
+	local manager = {
+		Library = library,
+		Folder = folder,
+		Extension = extension,
+		DefaultConfig = options.DefaultConfig or "Default",
+		OnStatus = options.OnStatus,
+		LastError = nil,
+	}
+
+	local function report(success: boolean, message: string)
+		manager.LastError = success and nil or message
+		if manager.OnStatus then
+			local callbackSuccess, callbackError = pcall(manager.OnStatus, success, message)
+			if not callbackSuccess then warn("ClappedHub config status callback failed:", callbackError) end
+		end
+		return success, message
+	end
+	local function available()
+		return type(writefile) == "function" and type(readfile) == "function" and type(makefolder) == "function"
+	end
+	local function ensureFolder()
+		if not available() then return report(false, "Config storage requires writefile, readfile, and makefolder.") end
+		local exists = false
+		if type(isfolder) == "function" then
+			local ok, result = pcall(isfolder, folder)
+			exists = ok and result == true
+		end
+		if not exists then
+			local ok = pcall(makefolder, folder)
+			if not ok and type(isfolder) == "function" then
+				local checkOk, checkResult = pcall(isfolder, folder)
+				if not checkOk or checkResult ~= true then return report(false, "Could not create config folder: " .. folder) end
+			end
+		end
+		return true, "Config folder ready."
+	end
+	local function path(name: any): string
+		return folder .. "/" .. safeName(name, manager.DefaultConfig) .. manager.Extension
+	end
+	local extensionPattern = string.gsub(manager.Extension, "([^%w])", "%%%1")
+	local function encodeValue(value: any, depth: number?): any
+		depth = depth or 0
+		if depth > 8 then return nil end
+		if typeof(value) == "Color3" then
+			return {__type = "Color3", R = value.R, G = value.G, B = value.B}
+		end
+		if type(value) == "string" or type(value) == "number" or type(value) == "boolean" then return value end
+		if type(value) == "table" then
+			local result = {}
+			for key, item in pairs(value) do
+				local encoded = encodeValue(item, depth + 1)
+				if encoded ~= nil and (type(key) == "string" or type(key) == "number") then result[key] = encoded end
+			end
+			return result
+		end
+		return nil
+	end
+	local function decodeValue(value: any): any
+		if type(value) ~= "table" then return value end
+		if value.__type == "Color3" then
+			return Color3.new(math.clamp(tonumber(value.R) or 0, 0, 1), math.clamp(tonumber(value.G) or 0, 0, 1), math.clamp(tonumber(value.B) or 0, 0, 1))
+		end
+		local result = {}
+		for key, item in pairs(value) do result[key] = decodeValue(item) end
+		return result
+	end
+
+	function manager:GetPath(name: any): string
+		return path(name)
+	end
+	function manager:Exists(name: any): boolean
+		if type(isfile) ~= "function" then return false end
+		local ok, result = pcall(isfile, path(name))
+		return ok and result == true
+	end
+	function manager:Save(name: any)
+		local folderReady = ensureFolder()
+		if not folderReady then return false, manager.LastError end
+		local data = {
+			Version = 1,
+			Flags = {},
+			Keybinds = {},
+			HubVisible = library.HubVisible,
+			KeybindPanelVisible = library.KeybindPanel and library.KeybindPanel.Visible or false,
+		}
+		for flag, value in pairs(library.Flags) do data.Flags[flag] = encodeValue(value) end
+		for identifier, bind in pairs(library.Keybinds) do
+			data.Keybinds[identifier] = {
+				Key = bind.Key and bind.Key.Name or "Unknown",
+				Mode = bind.Mode,
+				Enabled = bind.Enabled == true,
+			}
+		end
+		local success, encoded = pcall(function() return HttpService:JSONEncode(data) end)
+		if not success then return report(false, "Could not encode config: " .. tostring(encoded)) end
+		local writeSuccess, writeError = pcall(writefile, path(name), encoded)
+		if not writeSuccess then return report(false, "Could not save config: " .. tostring(writeError)) end
+		return report(true, "Saved config: " .. safeName(name, manager.DefaultConfig))
+	end
+	function manager:Load(name: any)
+		if type(readfile) ~= "function" then return report(false, "Config storage requires readfile.") end
+		local filePath = path(name)
+		if type(isfile) == "function" then
+			local existsOk, existsResult = pcall(isfile, filePath)
+			if not existsOk or existsResult ~= true then return report(false, "Config does not exist: " .. safeName(name, manager.DefaultConfig)) end
+		end
+		local readSuccess, contents = pcall(readfile, filePath)
+		if not readSuccess then return report(false, "Could not read config: " .. tostring(contents)) end
+		local decodeSuccess, data = pcall(function() return HttpService:JSONDecode(contents) end)
+		if not decodeSuccess or type(data) ~= "table" then return report(false, "Config contains invalid JSON.") end
+		for flag, value in pairs(data.Flags or {}) do
+			local decoded = decodeValue(value)
+			local setter = library.FlagControls and library.FlagControls[flag]
+			if setter then
+				local setSuccess, setError = pcall(setter, decoded, true)
+				if not setSuccess then warn("ClappedHub config control restore failed:", flag, setError) end
+			else
+				library.Flags[flag] = decoded
+			end
+		end
+		for identifier, state in pairs(data.Keybinds or {}) do
+			local bind = library.Keybinds[identifier]
+			if bind and type(state) == "table" then
+				if state.Key then bind:SetKey(state.Key) end
+				if state.Mode == "Hold" or state.Mode == "Toggle" then bind.Mode = state.Mode end
+				bind:SetEnabled(state.Enabled == true, true)
+			end
+		end
+		if data.HubVisible ~= nil then library:SetHubVisible(data.HubVisible == true) end
+		if data.KeybindPanelVisible ~= nil then library:SetKeybindPanelVisible(data.KeybindPanelVisible == true) end
+		if library.KeybindPanel then library:_refreshKeybindPanel() end
+		return report(true, "Loaded config: " .. safeName(name, manager.DefaultConfig))
+	end
+	function manager:Delete(name: any)
+		if type(delfile) ~= "function" then return report(false, "Config storage requires delfile.") end
+		if type(isfile) == "function" and not self:Exists(name) then return report(false, "Config does not exist: " .. safeName(name, manager.DefaultConfig)) end
+		local success, deleteError = pcall(delfile, path(name))
+		if not success then return report(false, "Could not delete config: " .. tostring(deleteError)) end
+		return report(true, "Deleted config: " .. safeName(name, manager.DefaultConfig))
+	end
+	function manager:List(): {string}
+		local result = {}
+		if type(listfiles) ~= "function" then return result end
+		local success, files = pcall(listfiles, folder)
+		if not success or type(files) ~= "table" then return result end
+		for _, file in ipairs(files) do
+			local configName = string.match(tostring(file), "([^/\\]+)" .. extensionPattern .. "$")
+			if configName then table.insert(result, configName) end
+		end
+		table.sort(result)
+		return result
+	end
+	manager.SaveConfig = manager.Save
+	manager.LoadConfig = manager.Load
+	manager.DeleteConfig = manager.Delete
+	library.ConfigManagerObject = manager
+	return manager
+end
 
 function Library:KeybindListToggle(config: {[string]: any})
 	config = config or {}
@@ -2309,7 +2494,9 @@ function Library:Slider(config: {[string]: any})
 		if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then update(input) end
 	end)
 	set(value, true)
-	return {Row = row, Track = track, Set = set, Get = function() return value end}
+	local control = {Row = row, Track = track, Set = set, Get = function() return value end}
+	(self.Library or self):_registerFlagControl(config.Flag or config.Name or "Slider", set)
+	return control
 end
 
 return Library

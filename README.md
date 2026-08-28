@@ -122,6 +122,18 @@ The built-in search bar filters controls by name and description and switches to
 
 `HubToggleKeybind` adds a key picker that smoothly shows or hides the entire hub. `ToggleHubKeybind` is available as an equivalent alias, and `UI:ToggleHub()` can be used from code.
 
+`ConfigManager` stores control flags, colors, keybind keys/modes, enabled states, hub visibility, and keybind-panel visibility as JSON files through the host's `writefile`, `readfile`, `makefolder`, and `delfile` functions:
+
+```lua
+local configs = UI:ConfigManager({Folder = "MyScriptConfigs"})
+configs:Save("Default")
+configs:Load("Default")
+configs:Delete("Default")
+local names = configs:List()
+```
+
+The manager also exposes `SaveConfig`, `LoadConfig`, and `DeleteConfig` aliases. If the host does not provide file functions, operations return `false` with an explanatory message.
+
 The sidebar profile card automatically displays the local player’s avatar and username. Set `ScriptType = "FREE"` or `ScriptType = "PAID"` in `Library.new` to control the badge.
 
 `ColorPicker` opens a palette with hue selection, a circular saturation/value field, a live preview, editable hex text, and RGB channels.
@@ -133,6 +145,7 @@ The sidebar profile card automatically displays the local player’s avatar and 
 - Animated tab transitions and active states
 - Sections, labels, buttons, toggles, sliders, dropdowns, text inputs, color pickers, keybind pickers, and notification stacks
 - Global settings search and a draggable keybind list panel
+- JSON config manager with save, load, delete, list, and control-state restoration
 - Sidebar profile card with avatar, username, and FREE/PAID script badge
 - Centralized accent theme with optional custom accent color
 - UI state flags and callbacks only
