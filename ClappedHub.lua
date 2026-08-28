@@ -304,7 +304,7 @@ function Library.new(options: {[string]: any}?)
 	sideLine.Position = UDim2.new(1, 0, 0, 0)
 	sideLine.Size = UDim2.new(0, 1, 1, 0)
 	sideLine.BackgroundColor3 = self.Theme.StrokeSoft
-	sideLine.BackgroundTransparency = 0.38
+	sideLine.BackgroundTransparency = 1
 	sideLine.BorderSizePixel = 0
 	sideLine.Parent = sidebar
 	local sidebarGradient = Instance.new("UIGradient")
@@ -590,6 +590,7 @@ function Library:Notify(config: {[string]: any})
 	card.BackgroundColor3 = self.Theme.SurfaceRaised
 	card.BorderSizePixel = 0
 	card.BackgroundTransparency = 1
+	card.ClipsDescendants = true
 	card.Parent = holder
 	corner(card, 11)
 	stroke(card, self.Theme.Stroke, 0.28)
@@ -617,18 +618,22 @@ function Library:Notify(config: {[string]: any})
 	bar.Position = UDim2.fromOffset(12, 15)
 	bar.BackgroundColor3 = config.Color or self.Theme.Accent
 	bar.BorderSizePixel = 0
+	bar.ZIndex = 2
 	bar.Parent = card
 	corner(bar, 2)
 	local glyph = icon(card, config.Icon or "✦", 16, config.Color or self.Theme.AccentBright)
 	glyph.Position = UDim2.fromOffset(27, 14)
 	glyph.Size = UDim2.fromOffset(28, 24)
+	glyph.ZIndex = 3
 	local title = text(card, config.Title or "Notification", 11, self.Theme.Text, Enum.Font.GothamBold)
 	title.Position = UDim2.fromOffset(61, 10)
 	title.Size = UDim2.new(1, -75, 20, 0)
-	local message = text(card, config.Content or "", 10, self.Theme.TextMuted, Enum.Font.Gotham)
+	title.ZIndex = 3
+	local message = text(card, config.Content or config.Text or "Notification", 10, self.Theme.TextMuted, Enum.Font.Gotham)
 	message.Position = UDim2.fromOffset(61, 30)
 	message.Size = UDim2.new(1, -75, 30, 0)
 	message.TextWrapped = true
+	message.ZIndex = 3
 	local function animateNotification(visible: boolean)
 		local duration = visible and 0.42 or 0.3
 		tween(card, duration, {
