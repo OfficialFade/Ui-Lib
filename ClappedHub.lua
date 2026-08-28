@@ -90,6 +90,24 @@ local function icon(parent: Instance, glyph: string, size: number, color: Color3
 	return item
 end
 
+local function normalizeKey(value: any): Enum.KeyCode
+	if typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
+		return value
+	end
+	if type(value) == "string" then
+		local success, key = pcall(function() return Enum.KeyCode[value] end)
+		if success and key then return key end
+		local upperSuccess, upperKey = pcall(function() return Enum.KeyCode[string.upper(value)] end)
+		if upperSuccess and upperKey then return upperKey end
+	end
+	return Enum.KeyCode.Unknown
+end
+
+local function displayKey(value: Enum.KeyCode): string
+	if value == Enum.KeyCode.Unknown then return "NONE" end
+	return value.Name
+end
+
 local function hover(target: GuiObject, normal: Color3, over: Color3)
 	target.MouseEnter:Connect(function() tween(target, 0.18, {BackgroundColor3 = over}) end)
 	target.MouseLeave:Connect(function() tween(target, 0.22, {BackgroundColor3 = normal}) end)
@@ -113,6 +131,12 @@ function Library.new(options: {[string]: any}?)
 	self.Tabs = {}
 	self.ActiveTab = nil
 	self.Destroyed = false
+	self.SearchEntries = {}
+	self.KeybindOrder = {}
+	self.Keybinds = {}
+	self.ActiveKeybindPicker = nil
+	self.KeybindPanel = nil
+	self.KeybindPanelToggle = nil
 	self.CollapsibleSidebar = options.CollapsibleSidebar == true
 	self.EnableLoadingMusic = options.EnableLoadingMusic ~= false
 
@@ -126,6 +150,34 @@ function Library.new(options: {[string]: any}?)
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 	self.Gui = gui
+	self.KeybindInputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if self.Destroyed then return end
+		local picking = self.ActiveKeybindPicker
+		if picking then
+			if input.KeyCode == Enum.KeyCode.Escape then
+				if picking.Picker then picking.Picker.Text = picking.DisplayKey end
+				self.ActiveKeybindPicker = nil
+			elseif input.KeyCode ~= Enum.KeyCode.Unknown then
+				picking:SetKey(input.KeyCode)
+				self.ActiveKeybindPicker = nil
+			end
+			return
+		end
+		if gameProcessed or input.KeyCode == Enum.KeyCode.Unknown then return end
+		for _, bind in ipairs(self.KeybindOrder) do
+			if bind.Key == input.KeyCode then
+				bind:Press()
+			end
+		end
+	end)
+	self.KeybindInputEndedConnection = UserInputService.InputEnded:Connect(function(input)
+		if self.Destroyed or input.KeyCode == Enum.KeyCode.Unknown then return end
+		for _, bind in ipairs(self.KeybindOrder) do
+			if bind.Mode == "Hold" and bind.Key == input.KeyCode then
+				bind:SetEnabled(false)
+			end
+		end
+	end)
 
 	local shadow = Instance.new("Frame")
 	shadow.Name = "AmbientShadow"
@@ -365,6 +417,41 @@ function Library.new(options: {[string]: any}?)
 	contentGlowGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1)})
 	contentGlowGradient.Rotation = 135
 	contentGlowGradient.Parent = contentGlow
+
+	local searchBar = Instance.new("Frame")
+	searchBar.Name = "SettingsSearch"
+	searchBar.Position = UDim2.fromOffset(14, 10)
+	searchBar.Size = UDim2.new(1, -28, 0, 32)
+	searchBar.BackgroundColor3 = self.Theme.Surface
+	searchBar.BackgroundTransparency = 0.28
+	searchBar.BorderSizePixel = 0
+	searchBar.ZIndex = 5
+	searchBar.Parent = content
+	corner(searchBar, 9)
+	stroke(searchBar, self.Theme.StrokeSoft, 0.42)
+	local searchIcon = icon(searchBar, "⌕", 16, self.Theme.AccentBright)
+	searchIcon.Position = UDim2.fromOffset(10, 0)
+	searchIcon.Size = UDim2.fromOffset(24, 32)
+	searchIcon.ZIndex = 6
+	local searchBox = Instance.new("TextBox")
+	searchBox.Name = "SearchBox"
+	searchBox.Position = UDim2.fromOffset(36, 0)
+	searchBox.Size = UDim2.new(1, -46, 1, 0)
+	searchBox.BackgroundTransparency = 1
+	searchBox.ClearTextOnFocus = false
+	searchBox.Font = Enum.Font.Gotham
+	searchBox.Text = ""
+	searchBox.PlaceholderText = "Search settings..."
+	searchBox.PlaceholderColor3 = self.Theme.TextMuted
+	searchBox.TextColor3 = self.Theme.Text
+	searchBox.TextSize = 10
+	searchBox.TextXAlignment = Enum.TextXAlignment.Left
+	searchBox.ZIndex = 6
+	searchBox.Parent = searchBar
+	self.SearchBox = searchBox
+	searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+		self:_applySearch(searchBox.Text)
+	end)
 	self.Nav = nav
 
 	minimize.MouseButton1Click:Connect(function()
@@ -506,7 +593,7 @@ function Library:Tab(config: {[string]: any})
 	page.BackgroundTransparency = 1
 	page.Visible = false
 	page.Parent = self.Content
-	padding(page, 16, 16, 14, 12)
+	padding(page, 16, 16, 56, 12)
 
 	local pageHeader = text(page, config.Name, 24, self.Theme.Text, Enum.Font.GothamBold)
 	pageHeader.Size = UDim2.new(1, 0, 0, 28)
@@ -887,6 +974,22 @@ function Library:Destroy()
 	if self.Destroyed then return end
 	self.Destroyed = true
 	self.MusicGeneration = (self.MusicGeneration or 0) + 1
+	if self.KeybindInputConnection then
+		self.KeybindInputConnection:Disconnect()
+		self.KeybindInputConnection = nil
+	end
+	if self.KeybindInputEndedConnection then
+		self.KeybindInputEndedConnection:Disconnect()
+		self.KeybindInputEndedConnection = nil
+	end
+	if self.KeybindPanelDragConnection then
+		self.KeybindPanelDragConnection:Disconnect()
+		self.KeybindPanelDragConnection = nil
+	end
+	if self.KeybindPanelInputEndedConnection then
+		self.KeybindPanelInputEndedConnection:Disconnect()
+		self.KeybindPanelInputEndedConnection = nil
+	end
 	if self.MusicSound then
 		self.MusicSound:Stop()
 		self.MusicSound:Destroy()
@@ -899,7 +1002,29 @@ function Library:Destroy()
 	if self.Gui then self.Gui:Destroy() end
 end
 
+function Library:_applySearch(queryValue: string)
+	local query = string.lower(queryValue or "")
+	local firstMatchTab = nil
+	local sectionMatches = {}
+	for _, entry in ipairs(self.SearchEntries) do
+		local matches = query == "" or string.find(entry.SearchText, query, 1, true) ~= nil
+		entry.Row.Visible = matches
+		if matches then
+			firstMatchTab = firstMatchTab or entry.Tab
+		end
+		sectionMatches[entry.Section] = sectionMatches[entry.Section] or false
+		if matches then sectionMatches[entry.Section] = true end
+	end
+	for section, matches in pairs(sectionMatches) do
+		section.Visible = matches or query == ""
+	end
+	if query ~= "" and firstMatchTab and self.ActiveTab ~= firstMatchTab then
+		self:SelectTab(firstMatchTab)
+	end
+end
+
 function Library:_controlRow(parent: Instance, titleValue: string, descriptionValue: string?)
+	local library = self.Library or self
 	local row = Instance.new("Frame")
 	row.Size = UDim2.new(1, 0, 0, descriptionValue and 55 or 44)
 	row.BackgroundColor3 = self.Theme.Surface
@@ -918,12 +1043,20 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 		descriptionLabel.Size = UDim2.new(0.58, 0, 0, 18)
 		descriptionLabel.TextTransparency = 0.08
 	end
+	library.SearchEntries = library.SearchEntries or {}
+	table.insert(library.SearchEntries, {
+		Row = row,
+		Section = self.Root,
+		Tab = self.Tab,
+		SearchText = string.lower(titleValue .. " " .. (descriptionValue or "")),
+	})
+	if self.Rows then table.insert(self.Rows, row) end
 	return row
 end
 
 function Library:Section(config: {[string]: any})
 	assert(config and config.Tab and config.Name, "Section requires Tab and Name")
-	local section = {Library = self, Tab = config.Tab, Name = config.Name}
+	local section = {Library = self, Tab = config.Tab, Name = config.Name, Rows = {}}
 	section.Theme = self.Theme
 	section.Flags = self.Flags
 	setmetatable(section, {__index = Library})
@@ -938,6 +1071,7 @@ function Library:Section(config: {[string]: any})
 	corner(card, 3)
 	stroke(card, self.Theme.Stroke, 0.78)
 	padding(card, 14, 14, 14, 14)
+	section.Root = card
 	local cardGradient = Instance.new("UIGradient")
 	cardGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, self.Theme.SurfaceRaised), ColorSequenceKeypoint.new(1, self.Theme.Surface)})
 	cardGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.18), NumberSequenceKeypoint.new(1, 0.52)})
@@ -1047,6 +1181,273 @@ function Library:Toggle(config: {[string]: any})
 	toggle.MouseButton1Click:Connect(function() set(not value) end)
 	set(value, true)
 	return {Row = row, Toggle = toggle, Set = set, Get = function() return value end}
+end
+
+function Library:Keybind(config: {[string]: any})
+	assert(config and config.Name, "Keybind requires a Name")
+	local library = self.Library or self
+	local row = self:_controlRow(self.Container, config.Name, config.Description)
+	local key = normalizeKey(config.Key or config.DefaultKey)
+	local identifier = config.Flag or config.Name
+	local bind = {
+		Library = library,
+		Name = config.Name,
+		Key = key,
+		DisplayKey = displayKey(key),
+		Mode = config.Mode == "Hold" and "Hold" or "Toggle",
+		Enabled = config.DefaultEnabled == true,
+		Flag = identifier,
+		Callback = config.Callback,
+	}
+
+	local picker = Instance.new("TextButton")
+	picker.Name = "KeyPicker"
+	picker.AutoButtonColor = false
+	picker.Text = bind.DisplayKey
+	picker.TextSize = 10
+	picker.Font = Enum.Font.GothamBold
+	picker.TextColor3 = library.Theme.Text
+	picker.BackgroundColor3 = library.Theme.StrokeSoft
+	picker.BackgroundTransparency = 0.12
+	picker.BorderSizePixel = 0
+	picker.AnchorPoint = Vector2.new(1, 0.5)
+	picker.Position = UDim2.new(1, -14, 0.5, 0)
+	picker.Size = UDim2.fromOffset(78, 29)
+	picker.Parent = row
+	corner(picker, 8)
+	stroke(picker, library.Theme.AccentDeep, 0.25)
+	hover(picker, library.Theme.StrokeSoft, library.Theme.AccentDeep)
+	bind.Picker = picker
+
+	function bind:SetKey(nextKey: any)
+		self.Key = normalizeKey(nextKey)
+		self.DisplayKey = displayKey(self.Key)
+		self.Picker.Text = self.DisplayKey
+		if self.PanelKeyLabel then self.PanelKeyLabel.Text = self.DisplayKey end
+	end
+
+	function bind:SetEnabled(nextEnabled: boolean, silent: boolean?)
+		self.Enabled = nextEnabled == true
+		self.Library.Flags[self.Flag] = self.Enabled
+		if self.PanelRow then
+			tween(self.PanelRow, 0.2, {
+				BackgroundColor3 = self.Enabled and self.Library.Theme.AccentDeep or self.Library.Theme.Surface,
+				BackgroundTransparency = self.Enabled and 0.16 or 0.48,
+			})
+		end
+		if self.PanelKeyLabel then
+			self.PanelKeyLabel.TextColor3 = self.Enabled and self.Library.Theme.Text or self.Library.Theme.AccentBright
+		end
+		if not silent and self.Callback then
+			local success, errorMessage = pcall(self.Callback, self.Enabled)
+			if not success then warn("ClappedHub keybind callback failed:", errorMessage) end
+		end
+	end
+
+	function bind:Press()
+		if self.Mode == "Hold" then
+			self:SetEnabled(true)
+		else
+			self:SetEnabled(not self.Enabled)
+		end
+	end
+
+	picker.MouseButton1Click:Connect(function()
+		if library.ActiveKeybindPicker and library.ActiveKeybindPicker.Picker then
+			library.ActiveKeybindPicker.Picker.Text = library.ActiveKeybindPicker.DisplayKey
+		end
+		library.ActiveKeybindPicker = bind
+		picker.Text = "PRESS KEY"
+	end)
+
+	library.Keybinds[identifier] = bind
+	table.insert(library.KeybindOrder, bind)
+	bind:SetEnabled(bind.Enabled, true)
+	if library.KeybindPanel then library:_refreshKeybindPanel() end
+	return bind
+end
+
+function Library:KeybindListToggle(config: {[string]: any})
+	config = config or {}
+	local library = self.Library or self
+	local callback = config.Callback
+	local toggleConfig = table.clone(config)
+	toggleConfig.Name = config.Name or "Show keybinds"
+	toggleConfig.Description = config.Description or "Open the active keybind list."
+	toggleConfig.Default = config.Default == true
+	toggleConfig.Callback = function(enabled: boolean)
+		library:SetKeybindPanelVisible(enabled)
+		if callback then
+			local success, errorMessage = pcall(callback, enabled)
+			if not success then warn("ClappedHub keybind panel callback failed:", errorMessage) end
+		end
+	end
+	local control = self:Toggle(toggleConfig)
+	library.KeybindPanelToggle = control
+	if toggleConfig.Default then library:SetKeybindPanelVisible(true) end
+	return control
+end
+
+function Library:_refreshKeybindPanel()
+	if not self.KeybindPanel or not self.KeybindList then return end
+	for _, bind in ipairs(self.KeybindOrder) do
+		bind.PanelRow = nil
+		bind.PanelKeyLabel = nil
+	end
+	for _, child in ipairs(self.KeybindList:GetChildren()) do
+		if child:IsA("Frame") then child:Destroy() end
+	end
+	local hasKeybinds = #self.KeybindOrder > 0
+	if self.KeybindEmpty then self.KeybindEmpty.Visible = not hasKeybinds end
+	for _, bind in ipairs(self.KeybindOrder) do
+		local row = Instance.new("Frame")
+		row.Name = bind.Name .. "Keybind"
+		row.Size = UDim2.new(1, 0, 0, 38)
+		row.BackgroundColor3 = bind.Enabled and self.Theme.AccentDeep or self.Theme.Surface
+		row.BackgroundTransparency = bind.Enabled and 0.16 or 0.48
+		row.BorderSizePixel = 0
+		row.Parent = self.KeybindList
+		corner(row, 8)
+		stroke(row, bind.Enabled and self.Theme.Accent or self.Theme.StrokeSoft, bind.Enabled and 0.22 or 0.5)
+		local title = text(row, bind.Name, 10, self.Theme.Text, Enum.Font.GothamMedium)
+		title.Position = UDim2.fromOffset(12, 0)
+		title.Size = UDim2.new(1, -92, 1, 0)
+		title.ZIndex = 23
+		local keyLabel = text(row, bind.DisplayKey, 10, bind.Enabled and self.Theme.Text or self.Theme.AccentBright, Enum.Font.GothamBold)
+		keyLabel.Position = UDim2.new(1, -80, 0, 0)
+		keyLabel.Size = UDim2.fromOffset(68, 38)
+		keyLabel.TextXAlignment = Enum.TextXAlignment.Right
+		keyLabel.ZIndex = 23
+		bind.PanelRow = row
+		bind.PanelKeyLabel = keyLabel
+	end
+end
+
+function Library:_ensureKeybindPanel()
+	if self.KeybindPanel then return end
+	local panel = Instance.new("Frame")
+	panel.Name = "KeybindPanel"
+	panel.AnchorPoint = Vector2.new(1, 1)
+	panel.Position = UDim2.new(1, -24, 1, -24)
+	panel.Size = UDim2.fromOffset(286, 260)
+	panel.BackgroundColor3 = self.Theme.Window
+	panel.BackgroundTransparency = 1
+	panel.BorderSizePixel = 0
+	panel.ClipsDescendants = true
+	panel.ZIndex = 20
+	panel.Parent = self.Gui
+	corner(panel, 17)
+	stroke(panel, self.Theme.Stroke, 0.24)
+	local background = Instance.new("ImageLabel")
+	background.Name = "KeybindBackground"
+	background.Size = UDim2.fromScale(1, 1)
+	background.BackgroundTransparency = 1
+	background.Image = self.BackgroundImage.Image
+	background.ImageTransparency = 0.18
+	background.ScaleType = Enum.ScaleType.Crop
+	background.ZIndex = 20
+	background.Parent = panel
+	corner(background, 17)
+	local wash = Instance.new("Frame")
+	wash.Name = "KeybindWash"
+	wash.Size = UDim2.fromScale(1, 1)
+	wash.BackgroundColor3 = Color3.fromRGB(8, 16, 30)
+	wash.BackgroundTransparency = 0.3
+	wash.BorderSizePixel = 0
+	wash.ZIndex = 20
+	wash.Parent = panel
+	corner(wash, 17)
+	local header = Instance.new("Frame")
+	header.Name = "KeybindHeader"
+	header.Size = UDim2.new(1, 0, 0, 52)
+	header.BackgroundColor3 = Color3.fromRGB(4, 8, 16)
+	header.BackgroundTransparency = 0.34
+	header.BorderSizePixel = 0
+	header.ZIndex = 21
+	header.Parent = panel
+	local title = text(header, "KEYBINDS", 13, self.Theme.Text, Enum.Font.GothamBold)
+	title.Position = UDim2.fromOffset(16, 4)
+	title.Size = UDim2.new(1, -62, 0, 23)
+	title.ZIndex = 22
+	local subtitle = text(header, "ACTIVE CONTROLS", 8, self.Theme.TextMuted, Enum.Font.GothamBold)
+	subtitle.Position = UDim2.fromOffset(16, 27)
+	subtitle.Size = UDim2.new(1, -62, 0, 16)
+	subtitle.ZIndex = 22
+	local close = Instance.new("TextButton")
+	close.Name = "CloseKeybinds"
+	close.AutoButtonColor = false
+	close.Text = "×"
+	close.TextSize = 17
+	close.Font = Enum.Font.GothamMedium
+	close.TextColor3 = self.Theme.Text
+	close.BackgroundColor3 = self.Theme.StrokeSoft
+	close.BackgroundTransparency = 0.16
+	close.BorderSizePixel = 0
+	close.AnchorPoint = Vector2.new(1, 0.5)
+	close.Position = UDim2.new(1, -14, 0.5, 0)
+	close.Size = UDim2.fromOffset(30, 27)
+	close.ZIndex = 22
+	close.Parent = header
+	corner(close, 8)
+	hover(close, self.Theme.StrokeSoft, self.Theme.AccentDeep)
+	local list = Instance.new("ScrollingFrame")
+	list.Name = "KeybindList"
+	list.Position = UDim2.fromOffset(12, 64)
+	list.Size = UDim2.new(1, -24, 1, -76)
+	list.BackgroundTransparency = 1
+	list.BorderSizePixel = 0
+	list.ScrollBarThickness = 2
+	list.ScrollBarImageColor3 = self.Theme.Accent
+	list.CanvasSize = UDim2.new()
+	list.ZIndex = 21
+	list.Parent = panel
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, 6)
+	layout.Parent = list
+	autoCanvas(list, layout)
+	local empty = text(panel, "No keybinds added.", 10, self.Theme.TextMuted, Enum.Font.Gotham)
+	empty.Position = UDim2.fromOffset(20, 124)
+	empty.Size = UDim2.new(1, -40, 0, 24)
+	empty.TextXAlignment = Enum.TextXAlignment.Center
+	empty.ZIndex = 22
+	self.KeybindPanel = panel
+	self.KeybindList = list
+	self.KeybindEmpty = empty
+	self:_refreshKeybindPanel()
+
+	local dragging = false
+	local dragStart
+	local startPosition
+	local dragInput
+	header.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPosition = panel.Position
+		end
+	end)
+	header.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+	end)
+	self.KeybindPanelDragConnection = UserInputService.InputChanged:Connect(function(input)
+		if dragging and input == dragInput then
+			local delta = input.Position - dragStart
+			panel.Position = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
+		end
+	end)
+	self.KeybindPanelInputEndedConnection = UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+	end)
+	close.MouseButton1Click:Connect(function()
+		self:SetKeybindPanelVisible(false)
+		if self.KeybindPanelToggle then self.KeybindPanelToggle.Set(false, true) end
+	end)
+end
+
+function Library:SetKeybindPanelVisible(visible: boolean)
+	self:_ensureKeybindPanel()
+	self.KeybindPanel.Visible = visible == true
+	if visible then self:_refreshKeybindPanel() end
 end
 
 function Library:Slider(config: {[string]: any})

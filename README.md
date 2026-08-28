@@ -46,6 +46,20 @@ appearance:Slider({
     end,
 })
 
+appearance:Keybind({
+    Name = "Toggle overlay",
+    Key = Enum.KeyCode.V,
+    Mode = "Toggle", -- Use "Hold" for press-and-hold behavior.
+    Callback = function(enabled)
+        print("Overlay enabled:", enabled)
+    end,
+})
+
+appearance:KeybindListToggle({
+    Name = "Show keybinds",
+    Default = false,
+})
+
 UI:Notify({
     Title = "Interface ready",
     Content = "Your presentation layer is online.",
@@ -70,12 +84,15 @@ runButton.SetText("DISABLED")
 
 `Toggle` and `Slider` return `Set` and `Get` methods, and every callback receives the current value.
 
+The built-in search bar filters controls by name and description and switches to the first matching tab. Click a keybind value to choose a new key; press Escape to cancel. Keybinds are shown in a compact draggable panel and enabled entries are highlighted.
+
 ## Included primitives
 
 - Draggable glass-and-metal window with minimize and close controls
 - Responsive, scrollable sidebar navigation
 - Animated tab transitions and active states
-- Sections, labels, buttons, toggles, sliders, and notification stacks
+- Sections, labels, buttons, toggles, sliders, keybind pickers, and notification stacks
+- Global settings search and a draggable keybind list panel
 - Centralized accent theme with optional custom accent color
 - UI state flags and callbacks only
 - Built-in slim loading screen with timed client-side music transition
