@@ -269,13 +269,13 @@ function Library.new(options: {[string]: any}?)
 	minimize.Text = "—"
 	minimize.TextSize = 18
 	minimize.Font = Enum.Font.GothamMedium
-	minimize.TextColor3 = self.Theme.TextMuted
-	minimize.BackgroundColor3 = self.Theme.Surface
+	minimize.TextColor3 = self.Theme.Text
+	minimize.BackgroundColor3 = self.Theme.StrokeSoft
 	minimize.BorderSizePixel = 0
 	minimize.Size = UDim2.fromOffset(34, 30)
 	minimize.Parent = controls
-	corner(minimize, 8)
-	hover(minimize, self.Theme.Surface, self.Theme.SurfaceHover)
+	corner(minimize, 9)
+	hover(minimize, self.Theme.StrokeSoft, self.Theme.AccentDeep)
 
 	local close = minimize:Clone()
 	-- Avoid the generic "Close" name: some gamepad binding systems reserve it
@@ -285,7 +285,7 @@ function Library.new(options: {[string]: any}?)
 	close.TextSize = 20
 	close.Parent = controls
 	close.MouseButton1Click:Connect(function() self:Destroy() end)
-	hover(close, self.Theme.Surface, Color3.fromRGB(22, 48, 78))
+	hover(close, self.Theme.StrokeSoft, self.Theme.AccentDeep)
 
 	local body = Instance.new("Frame")
 	body.Name = "Body"
@@ -1061,17 +1061,20 @@ function Library:Slider(config: {[string]: any})
 	valueLabel.TextXAlignment = Enum.TextXAlignment.Right
 	local track = Instance.new("Frame")
 	track.Position = UDim2.new(0, 16, 1, -24)
-	track.Size = UDim2.new(1, -48, 0, 5)
-	track.BackgroundColor3 = self.Theme.SurfaceRaised
+	track.Size = UDim2.new(1, -48, 0, 6)
+	track.BackgroundColor3 = self.Theme.StrokeSoft
+	track.BackgroundTransparency = 0.18
 	track.BorderSizePixel = 0
 	track.Parent = row
-	corner(track, 3)
+	corner(track, 5)
+	stroke(track, self.Theme.AccentDeep, 0.35, 1)
 	local fill = track:Clone()
 	fill.Name = "Fill"
 	fill.Position = UDim2.fromScale(0, 0)
 	fill.AnchorPoint = Vector2.new(0, 0)
 	fill.Size = UDim2.fromScale(0, 1)
 	fill.BackgroundColor3 = self.Theme.Accent
+	fill.BackgroundTransparency = 0.02
 	fill.Parent = track
 	local dot = Instance.new("Frame")
 	dot.AnchorPoint = Vector2.new(0.5, 0.5)
