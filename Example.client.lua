@@ -257,6 +257,17 @@ settings:Button({
 })
 
 settings:Button({
+	Name = "List configs",
+	Text = "LIST",
+	Description = "List saved configs from the config folder.",
+	Callback = function()
+		local names = Config:List()
+		local message = #names == 0 and "No saved configs found." or table.concat(names, ", ")
+		configNotice("Saved configs", true, message)
+	end,
+})
+
+settings:Button({
 	Name = "Notification test",
 	Text = "SHOW",
 	Description = "Shows a custom notification with the shared backdrop.",
