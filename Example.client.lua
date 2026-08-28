@@ -1,8 +1,7 @@
--- Clapped Hub UI Lib - test example
--- Always fetch the immutable commit so an old local ModuleScript or executor
--- cache cannot silently load a previous version.
+-- Clapped Hub UI Lib - search, tabs, keybind picker, and keybind panel example
+-- The commit URL keeps the executor from loading a stale cached library.
 local source = game:HttpGet(
-	"https://raw.githubusercontent.com/OfficialFade/Ui-Lib/c538487/ClappedHub.lua"
+	"https://raw.githubusercontent.com/OfficialFade/Ui-Lib/63b152e/ClappedHub.lua"
 )
 local loader = loadstring(source)
 assert(loader, "Could not compile ClappedHub.lua from GitHub")
@@ -10,39 +9,70 @@ local Library = loader()
 
 local UI = Library.new({
 	Name = "CLAPPED HUB",
-	Subtitle = "UI LIBRARY SHOWCASE",
+	Subtitle = "PRODUCTION UI EXAMPLE",
 	Accent = Color3.fromRGB(78, 160, 255),
+	EnableLoadingMusic = true,
 })
 
-local dashboard = UI:Tab({
-	Name = "Dashboard",
-	Icon = "⌂",
-	Description = "A polished showcase of the interface system.",
+local combatTab = UI:Tab({
+	Name = "Combat",
+	Icon = "⚔",
+	Description = "Combat-related controls.",
 })
 
-local controls = UI:Section({
-	Tab = dashboard,
-	Name = "Interactive Controls",
-	Description = "These controls demonstrate the interface system.",
+local combat = UI:Section({
+	Tab = combatTab,
+	Name = "Combat Controls",
+	Description = "Search these controls or use their keybinds.",
 })
 
-controls:Button({
-	Name = "Notification test",
-	Text = "SHOW",
-	Description = "Test the animated notification stack.",
+combat:Button({
+	Name = "Attack test",
+	Text = "RUN",
+	Description = "Runs a safe UI-only callback.",
 	Callback = function()
 		UI:Notify({
-			Title = "Button clicked",
-			Content = "The notification system is working.",
-			Icon = "✦",
+			Title = "Attack test",
+			Content = "The button callback fired successfully.",
+			Icon = "✓",
 			Duration = 3,
 		})
 	end,
 })
 
-controls:Toggle({
+combat:Toggle({
+	Name = "Auto mode",
+	Default = false,
+	Callback = function(enabled)
+		print("Auto mode:", enabled)
+	end,
+})
+
+combat:Keybind({
+	Name = "Infinite Jump",
+	Description = "Press the selected key to toggle this state.",
+	Flag = "InfiniteJump",
+	Key = Enum.KeyCode.V,
+	Mode = "Toggle",
+	Callback = function(enabled)
+		print("Infinite Jump:", enabled)
+	end,
+})
+
+local visualsTab = UI:Tab({
+	Name = "Visuals",
+	Icon = "◉",
+	Description = "Visual interface settings.",
+})
+
+local visuals = UI:Section({
+	Tab = visualsTab,
+	Name = "Visual Controls",
+	Description = "Controls are searchable from the bar above.",
+})
+
+visuals:Toggle({
 	Name = "Ambient glow",
-	Description = "Demonstrates toggle state changes.",
 	Flag = "AmbientGlow",
 	Default = true,
 	Callback = function(enabled)
@@ -50,9 +80,8 @@ controls:Toggle({
 	end,
 })
 
-controls:Slider({
+visuals:Slider({
 	Name = "Interface intensity",
-	Description = "Demonstrates slider interaction.",
 	Flag = "InterfaceIntensity",
 	Min = 0,
 	Max = 100,
@@ -63,31 +92,52 @@ controls:Slider({
 	end,
 })
 
-local aboutTab = UI:Tab({
-	Name = "About",
-	Icon = "ⓘ",
-	Description = "Information about this visual test build.",
+visuals:Keybind({
+	Name = "Toggle visuals",
+	Description = "Hold the selected key to enable this state.",
+	Flag = "ToggleVisuals",
+	Key = Enum.KeyCode.B,
+	Mode = "Hold",
+	Callback = function(enabled)
+		print("Toggle visuals:", enabled)
+	end,
 })
 
-local about = UI:Section({
-	Tab = aboutTab,
-	Name = "Clapped Hub UI Lib",
-	Description = "A premium Roblox presentation layer.",
+local settingsTab = UI:Tab({
+	Name = "Settings",
+	Icon = "⚙",
+	Description = "Library settings and keybind options.",
 })
 
-about:Label({
-	Title = "Build",
-	Text = "SHOWCASE 01",
+local settings = UI:Section({
+	Tab = settingsTab,
+	Name = "Library Settings",
+	Description = "Open the draggable keybind list here.",
 })
 
-about:Label({
-	Title = "Scope",
-	Text = "UI ONLY",
+settings:KeybindListToggle({
+	Name = "Show keybinds",
+	Description = "Open the compact keybind panel.",
+	Default = false,
+})
+
+settings:Button({
+	Name = "Test notification",
+	Text = "SHOW",
+	Description = "Shows a notification with the shared backdrop.",
+	Callback = function()
+		UI:Notify({
+			Title = "Settings",
+			Content = "Search, keybinds, and notifications are working.",
+			Icon = "✦",
+			Duration = 3,
+		})
+	end,
 })
 
 UI:Notify({
 	Title = "Interface ready",
-	Content = "Clapped Hub UI Lib loaded successfully.",
+	Content = "Try the search bar or open Show keybinds.",
 	Icon = "✓",
 	Duration = 4,
 })
