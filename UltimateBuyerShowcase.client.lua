@@ -1,8 +1,8 @@
 -- Clapped Hub UI Lib - ultimate buyer showcase
 -- Loads the published library and demonstrates the complete public API.
 
--- Pin this to a commit after publishing so buyers never receive a stale CDN copy.
-local LIBRARY_URL = "https://raw.githubusercontent.com/OfficialFade/Ui-Lib/main/ClappedHub.lua?v=latest"
+-- Pin this to a commit so buyers never receive a stale CDN copy.
+local LIBRARY_URL = "https://raw.githubusercontent.com/OfficialFade/Ui-Lib/3099787/ClappedHub.lua"
 local source = game:HttpGet(LIBRARY_URL)
 local Library = assert(loadstring(source), "Could not load the published UI library")()
 
