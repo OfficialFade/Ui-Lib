@@ -2068,7 +2068,9 @@ function Library:ColorPicker(config: {[string]: any})
 		local offsetX = percentX - 0.5
 		local offsetY = percentY - 0.5
 		local distance = math.sqrt((offsetX * offsetX) + (offsetY * offsetY))
-		local radius = 0.5
+		local paletteDiameter = palette.AbsoluteSize.X > 0 and palette.AbsoluteSize.X or 150
+		local cursorDiameter = paletteCursor.AbsoluteSize.X > 0 and paletteCursor.AbsoluteSize.X or 13
+		local radius = math.max(0, 0.5 - ((cursorDiameter / paletteDiameter) / 2))
 		if distance > radius and distance > 0 then
 			local scale = radius / distance
 			offsetX *= scale
