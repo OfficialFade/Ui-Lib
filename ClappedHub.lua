@@ -1700,7 +1700,7 @@ function Library:Dropdown(config: {[string]: any})
 	button.Name = "DropdownButton"
 	button.AutoButtonColor = false
 	button.Text = value
-	button.TextSize = 11
+	button.TextSize = 12
 	button.Font = Enum.Font.GothamBold
 	button.TextXAlignment = Enum.TextXAlignment.Center
 	button.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1708,7 +1708,7 @@ function Library:Dropdown(config: {[string]: any})
 	button.TextColor3 = Color3.fromRGB(255, 255, 255)
 	button.TextTransparency = 0
 	button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-	button.TextStrokeTransparency = 0.42
+	button.TextStrokeTransparency = 0
 	button.BackgroundColor3 = self.Theme.StrokeSoft
 	button.BackgroundTransparency = 0.08
 	button.BorderSizePixel = 0
@@ -1773,11 +1773,11 @@ function Library:Dropdown(config: {[string]: any})
 		optionButton.Name = tostring(option) .. "Option"
 		optionButton.AutoButtonColor = false
 		optionButton.Text = tostring(option)
-		optionButton.TextSize = 11
-		optionButton.Font = Enum.Font.GothamSemibold
+		optionButton.TextSize = 12
+		optionButton.Font = Enum.Font.GothamBold
 		optionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 		optionButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-		optionButton.TextStrokeTransparency = 0.72
+		optionButton.TextStrokeTransparency = 0.25
 		optionButton.BackgroundColor3 = library.Theme.Surface
 		optionButton.BackgroundTransparency = 0.25
 		optionButton.BorderSizePixel = 0
@@ -2064,6 +2064,18 @@ function Library:ColorPicker(config: {[string]: any})
 		channels[channel] = channelInput
 	end
 	local picker = {Row = row, Button = swatch, Popup = popup}
+	local function clampPalettePoint(percentX: number, percentY: number)
+		local offsetX = percentX - 0.5
+		local offsetY = percentY - 0.5
+		local distance = math.sqrt((offsetX * offsetX) + (offsetY * offsetY))
+		local radius = 0.5
+		if distance > radius and distance > 0 then
+			local scale = radius / distance
+			offsetX *= scale
+			offsetY *= scale
+		end
+		return math.clamp(offsetX + 0.5, 0, 1), math.clamp(offsetY + 0.5, 0, 1)
+	end
 	local function refreshFields()
 		local red, green, blue = math.floor(value.R * 255 + 0.5), math.floor(value.G * 255 + 0.5), math.floor(value.B * 255 + 0.5)
 		hue, saturation, brightness = value:ToHSV()
@@ -2072,7 +2084,8 @@ function Library:ColorPicker(config: {[string]: any})
 		swatch.BackgroundColor3 = value
 		preview.BackgroundColor3 = value
 		palette.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-		paletteCursor.Position = UDim2.fromScale(saturation, 1 - brightness)
+		local cursorX, cursorY = clampPalettePoint(saturation, 1 - brightness)
+		paletteCursor.Position = UDim2.fromScale(cursorX, cursorY)
 		hueCursor.Position = UDim2.fromOffset(184, 48 + (hue * 150))
 	end
 	local function set(nextValue: Color3, silent: boolean?)
@@ -2097,6 +2110,7 @@ function Library:ColorPicker(config: {[string]: any})
 	local function updatePalette(input: any)
 		local percentX = math.clamp((input.Position.X - palette.AbsolutePosition.X) / palette.AbsoluteSize.X, 0, 1)
 		local percentY = math.clamp((input.Position.Y - palette.AbsolutePosition.Y) / palette.AbsoluteSize.Y, 0, 1)
+		percentX, percentY = clampPalettePoint(percentX, percentY)
 		set(Color3.fromHSV(hue, percentX, 1 - percentY))
 	end
 	local function updateHue(input: any)
