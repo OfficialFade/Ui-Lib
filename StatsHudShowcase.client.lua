@@ -5,6 +5,7 @@ local Library = assert(loadstring(source), "Could not load Ocean UI Lib")()
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
+local UserInputService = game:GetService("UserInputService")
 
 local UI = Library.new({
 	Name = "OCEAN UI LIB",
@@ -42,9 +43,9 @@ hudGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 local hud = Instance.new("Frame")
 hud.Name = "StatsPanel"
 hud.Position = UDim2.fromOffset(18, 18)
-hud.Size = UDim2.fromOffset(170, 84)
-hud.BackgroundColor3 = Color3.fromRGB(10, 18, 30)
-hud.BackgroundTransparency = 0.08
+hud.Size = UDim2.fromOffset(190, 104)
+hud.BackgroundColor3 = Color3.fromRGB(13, 17, 28)
+hud.BackgroundTransparency = 0.12
 hud.BorderSizePixel = 0
 hud.Visible = false
 hud.Parent = hudGui
@@ -55,20 +56,50 @@ local hudStroke = Instance.new("UIStroke")
 hudStroke.Color = Color3.fromRGB(80, 175, 255)
 hudStroke.Transparency = 0.25
 hudStroke.Parent = hud
+local hudGradient = Instance.new("UIGradient")
+hudGradient.Color = ColorSequence.new(Color3.fromRGB(24, 34, 52), Color3.fromRGB(8, 12, 21))
+hudGradient.Rotation = 135
+hudGradient.Parent = hud
+local hudHeader = Instance.new("Frame")
+hudHeader.Name = "DragHeader"
+hudHeader.BackgroundTransparency = 1
+hudHeader.Size = UDim2.new(1, -42, 0, 30)
+hudHeader.Parent = hud
 local hudTitle = Instance.new("TextLabel")
 hudTitle.BackgroundTransparency = 1
 hudTitle.Position = UDim2.fromOffset(12, 8)
-hudTitle.Size = UDim2.new(1, -24, 0, 18)
+hudTitle.Size = UDim2.new(1, -12, 0, 18)
 hudTitle.Font = Enum.Font.GothamBold
 hudTitle.Text = "LIVE STATS"
 hudTitle.TextColor3 = Color3.fromRGB(235, 245, 255)
 hudTitle.TextSize = 11
 hudTitle.TextXAlignment = Enum.TextXAlignment.Left
-hudTitle.Parent = hud
+hudTitle.Active = false
+hudTitle.Parent = hudHeader
+local hudClose = Instance.new("TextButton")
+hudClose.Name = "Close"
+hudClose.AnchorPoint = Vector2.new(1, 0.5)
+hudClose.Position = UDim2.new(1, -8, 0, 15)
+hudClose.Size = UDim2.fromOffset(22, 22)
+hudClose.BackgroundColor3 = Color3.fromRGB(235, 92, 112)
+hudClose.BackgroundTransparency = 0.08
+hudClose.BorderSizePixel = 0
+hudClose.AutoButtonColor = false
+hudClose.Font = Enum.Font.GothamBold
+hudClose.Text = "×"
+hudClose.TextColor3 = Color3.fromRGB(255, 255, 255)
+hudClose.TextSize = 14
+hudClose.ZIndex = 3
+hudClose.Parent = hud
+local hudCloseCorner = Instance.new("UICorner")
+hudCloseCorner.CornerRadius = UDim.new(0, 7)
+hudCloseCorner.Parent = hudClose
+hudClose.MouseEnter:Connect(function() hudClose.BackgroundColor3 = Color3.fromRGB(255, 120, 140) end)
+hudClose.MouseLeave:Connect(function() hudClose.BackgroundColor3 = Color3.fromRGB(235, 92, 112) end)
 local hudValues = Instance.new("TextLabel")
 hudValues.BackgroundTransparency = 1
 hudValues.Position = UDim2.fromOffset(12, 30)
-hudValues.Size = UDim2.new(1, -24, 0, 42)
+hudValues.Size = UDim2.new(1, -24, 0, 56)
 hudValues.Font = Enum.Font.GothamSemibold
 hudValues.TextColor3 = Color3.fromRGB(170, 205, 235)
 hudValues.TextSize = 11
@@ -76,6 +107,23 @@ hudValues.TextXAlignment = Enum.TextXAlignment.Left
 hudValues.TextYAlignment = Enum.TextYAlignment.Top
 hudValues.Text = "FPS: --\nPING: -- ms"
 hudValues.Parent = hud
+local dragging, dragStart, startPosition = false, nil, nil
+hudHeader.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPosition = hud.Position
+	end
+end)
+hudHeader.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if not dragging or (input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch) then return end
+	local delta = input.Position - dragStart
+	hud.Position = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
+end)
+hudClose.MouseButton1Click:Connect(function() hud.Visible = false end)
 local frames, elapsed, fps = 0, 0, 0
 local statsConnection = RunService.RenderStepped:Connect(function(delta)
 	frames += 1
