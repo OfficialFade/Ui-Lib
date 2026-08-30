@@ -161,9 +161,36 @@ function Library.new(options: {[string]: any}?)
 	self.Minimized = false
 	self.HubVisible = true
 	self.HubToggleBind = nil
+	self.ColorPickerDragConnections = {}
 	self.CollapsibleSidebar = options.CollapsibleSidebar == true
+	self.AutoCollapseSidebar = options.AutoCollapseSidebar == true or self.CollapsibleSidebar
+	self.SidebarExpandedWidth = options.SidebarExpandedWidth or 170
+	self.SidebarCollapsedWidth = options.SidebarCollapsedWidth or 58
+	self.SidebarCollapseDelay = options.SidebarCollapseDelay or 0
+	self.SidebarCollapseToken = 0
 	self.EnableLoadingMusic = options.EnableLoadingMusic ~= false
+	self.EnableDragging = options.EnableDragging ~= false
+	self.EnableMinimize = options.EnableMinimize ~= false
+	self.ShowSearch = options.ShowSearch ~= false
+	self.ShowProfile = options.ShowProfile ~= false
+	self.ShowBackground = options.ShowBackground ~= false
+	self.LogoImage = options.IconImage or options.Icon or options.LogoImage or "rbxassetid://101595980825854"
+	self.UseAspectRatio = options.WindowSize == nil and options.AspectRatio ~= false
+	self.WindowMinSize = options.WindowMinSize or Vector2.new(330, 400)
+	self.WindowMaxSize = options.WindowMaxSize or Vector2.new(520, 620)
+	self.WindowAspectRatio = options.AspectRatio or 1.04
+	self.WindowPosition = options.WindowPosition or UDim2.fromScale(0.5, 0.5)
+	local configuredSize = options.WindowSize
+	if typeof(configuredSize) == "Vector2" then
+		configuredSize = UDim2.fromOffset(configuredSize.X, configuredSize.Y)
+	end
+	self.WindowSize = configuredSize or UDim2.new(0.36, 0, 0.6, 0)
 
+	if type(options.Theme) == "table" then
+		for key, value in pairs(options.Theme) do
+			if self.Theme[key] ~= nil then self.Theme[key] = value end
+		end
+	end
 	if options.Accent then self.Theme.Accent = options.Accent end
 
 	local gui = Instance.new("ScreenGui")
@@ -206,8 +233,8 @@ function Library.new(options: {[string]: any}?)
 	local shadow = Instance.new("Frame")
 	shadow.Name = "AmbientShadow"
 	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-	shadow.Position = UDim2.fromScale(0.5, 0.5)
-	shadow.Size = UDim2.new(0.36, 0, 0.6, 0)
+	shadow.Position = self.WindowPosition
+	shadow.Size = self.WindowSize
 	shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	shadow.BackgroundTransparency = 0.52
 	shadow.BorderSizePixel = 0
@@ -232,8 +259,8 @@ function Library.new(options: {[string]: any}?)
 	local window = Instance.new("Frame")
 	window.Name = "Window"
 	window.AnchorPoint = Vector2.new(0.5, 0.5)
-	window.Position = UDim2.fromScale(0.5, 0.5)
-	window.Size = UDim2.new(0.36, 0, 0.6, 0)
+	window.Position = self.WindowPosition
+	window.Size = self.WindowSize
 	window.BackgroundColor3 = self.Theme.Window
 	window.BackgroundTransparency = 1
 	window.BorderSizePixel = 0
@@ -317,7 +344,7 @@ function Library.new(options: {[string]: any}?)
 	logo.AnchorPoint = Vector2.new(0.5, 0.5)
 	logo.Position = UDim2.fromScale(0.5, 0.5)
 	logo.BackgroundTransparency = 1
-	logo.Image = "rbxassetid://101595980825854"
+	logo.Image = self.LogoImage
 	logo.ScaleType = Enum.ScaleType.Fit
 	logo.ZIndex = 2
 	logo.Parent = brandMark
@@ -339,38 +366,42 @@ function Library.new(options: {[string]: any}?)
 	local controls = Instance.new("Frame")
 	controls.BackgroundTransparency = 1
 	controls.AnchorPoint = Vector2.new(1, 0.5)
-	controls.Position = UDim2.new(1, -22, 0.5, 0)
-	controls.Size = UDim2.fromOffset(92, 30)
+	controls.Position = UDim2.new(1, -16, 0.5, 0)
+	controls.Size = UDim2.fromOffset(78, 32)
 	controls.Parent = header
 	local controlLayout = Instance.new("UIListLayout")
 	controlLayout.FillDirection = Enum.FillDirection.Horizontal
 	controlLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 	controlLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	controlLayout.Padding = UDim.new(0, 8)
+	controlLayout.Padding = UDim.new(0, 6)
 	controlLayout.Parent = controls
 
 	local minimize = Instance.new("TextButton")
 	minimize.AutoButtonColor = false
 	minimize.Text = "—"
-	minimize.TextSize = 18
+	minimize.TextSize = 17
 	minimize.Font = Enum.Font.GothamMedium
 	minimize.TextColor3 = self.Theme.Text
 	minimize.BackgroundColor3 = self.Theme.StrokeSoft
 	minimize.BorderSizePixel = 0
-	minimize.Size = UDim2.fromOffset(34, 30)
+	minimize.Size = UDim2.fromOffset(36, 32)
 	minimize.Parent = controls
+	minimize.Visible = self.EnableMinimize
 	corner(minimize, 9)
-	hover(minimize, self.Theme.StrokeSoft, self.Theme.AccentDeep)
+	minimize.BackgroundColor3 = self.Theme.AccentDeep
+	hover(minimize, self.Theme.AccentDeep, self.Theme.Accent)
 
 	local close = minimize:Clone()
 	-- Avoid the generic "Close" name: some gamepad binding systems reserve it
 	-- for an ImageLabel and will error when they find a TextButton instead.
 	close.Name = "DismissControl"
 	close.Text = "×"
-	close.TextSize = 20
+	close.TextSize = 18
 	close.Parent = controls
 	close.MouseButton1Click:Connect(function() self:Destroy() end)
-	hover(close, self.Theme.StrokeSoft, self.Theme.AccentDeep)
+	close.BackgroundColor3 = self.Theme.Danger
+	close.BackgroundTransparency = 0.18
+	hover(close, self.Theme.Danger, Color3.fromRGB(255, 120, 135))
 
 	local body = Instance.new("Frame")
 	body.Name = "Body"
@@ -449,6 +480,7 @@ function Library.new(options: {[string]: any}?)
 	searchBox.Parent = sidebarSearch
 	self.SearchBar = sidebarSearch
 	self.SearchBox = searchBox
+	self.SearchIcon = searchIcon
 
 	local sidebarGradient = Instance.new("UIGradient")
 	sidebarGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 27, 39)), ColorSequenceKeypoint.new(1, self.Theme.Sidebar)})
@@ -533,6 +565,9 @@ function Library.new(options: {[string]: any}?)
 	corner(content, 16)
 	self.Content = content
 	self.Sidebar = sidebar
+	self.SearchBar.Visible = self.ShowSearch
+	self.SearchBox.Visible = self.ShowSearch
+	self.UserCard.Visible = self.ShowProfile
 	self.SidebarNavButtons = {}
 	self.SidebarExpanded = true
 	local contentGradient = Instance.new("UIGradient")
@@ -639,6 +674,7 @@ function Library.new(options: {[string]: any}?)
 	self.HeaderControls = controls
 	self.BrandTitle = title
 	self.BrandSubtitle = subtitle
+	self.BrandLogo = logo
 	self.TopGlow = topGlow
 	local minimizedHitbox = Instance.new("TextButton")
 	minimizedHitbox.Name = "RestoreWindow"
@@ -660,31 +696,45 @@ function Library.new(options: {[string]: any}?)
 			self:_setMinimized(false)
 		end
 	end)
-	sidebar.MouseEnter:Connect(function() self:_setSidebarExpanded(true) end)
+	sidebar.MouseEnter:Connect(function()
+		self.SidebarCollapseToken += 1
+		if self.AutoCollapseSidebar then self:_setSidebarExpanded(true) end
+	end)
 	sidebar.MouseLeave:Connect(function()
-		if self.CollapsibleSidebar then self:_setSidebarExpanded(false) end
+		if not self.AutoCollapseSidebar then return end
+		self.SidebarCollapseToken += 1
+		local token = self.SidebarCollapseToken
+		if self.SidebarCollapseDelay > 0 then
+			task.delay(self.SidebarCollapseDelay, function()
+				if not self.Destroyed and token == self.SidebarCollapseToken then self:_setSidebarExpanded(false) end
+			end)
+		else
+			self:_setSidebarExpanded(false)
+		end
 	end)
 
-	local dragging, dragStart, startPosition
-	header.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			if self.Minimized then return end
-			dragging = true
-			dragStart = input.Position
-			startPosition = window.Position
-		end
-	end)
-	header.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-	end)
-	UserInputService.InputChanged:Connect(function(input)
-		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-			local delta = input.Position - dragStart
-			local nextPosition = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
-			window.Position = nextPosition
-			shadow.Position = nextPosition
-		end
-	end)
+	if self.EnableDragging then
+		local dragging, dragStart, startPosition
+		header.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				if self.Minimized then return end
+				dragging = true
+				dragStart = input.Position
+				startPosition = window.Position
+			end
+		end)
+		header.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+		end)
+		self.WindowDragConnection = UserInputService.InputChanged:Connect(function(input)
+			if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+				local delta = input.Position - dragStart
+				local nextPosition = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
+				window.Position = nextPosition
+				shadow.Position = nextPosition
+			end
+		end)
+	end
 
 	self:_addResponsiveConstraints(window, content, sidebar)
 	self.Window = window
@@ -714,35 +764,52 @@ end
 
 function Library:_addResponsiveConstraints(window: Frame, content: Frame, sidebar: Frame)
 	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(330, 400)
-	sizeConstraint.MaxSize = Vector2.new(520, 620)
+	sizeConstraint.MinSize = self.WindowMinSize
+	sizeConstraint.MaxSize = self.WindowMaxSize
 	sizeConstraint.Parent = window
+	self.WindowSizeConstraint = sizeConstraint
 	local sidebarConstraint = Instance.new("UISizeConstraint")
 	sidebarConstraint.MinSize = Vector2.new(58, 0)
 	sidebarConstraint.MaxSize = Vector2.new(184, math.huge)
 	sidebarConstraint.Parent = sidebar
 	local aspect = Instance.new("UIAspectRatioConstraint")
-	aspect.AspectRatio = 1.04
+	aspect.AspectRatio = self.WindowAspectRatio
 	aspect.DominantAxis = Enum.DominantAxis.Width
-	aspect.Parent = window
+	if self.UseAspectRatio then aspect.Parent = window end
 	self.WindowAspectConstraint = aspect
 end
 
 function Library:_setSidebarExpanded(expanded: boolean)
 	if self.SidebarExpanded == expanded then return end
 	self.SidebarExpanded = expanded
-	local width = expanded and 170 or 58
-	tween(self.Sidebar, 0.24, {Size = UDim2.new(0, width, 1, 0)})
-	tween(self.Content, 0.24, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
+	local width = expanded and self.SidebarExpandedWidth or self.SidebarCollapsedWidth
+	tween(self.Sidebar, 0.34, {Size = UDim2.new(0, width, 1, 0)})
+	tween(self.Content, 0.34, {Position = UDim2.fromOffset(width, 0), Size = UDim2.new(1, -width, 1, 0)})
 	for _, item in ipairs(self.SidebarNavButtons) do
-		tween(item.Label, 0.18, {TextTransparency = expanded and 0 or 1})
-		tween(item.Button, 0.24, {BackgroundTransparency = expanded and 0.42 or 1})
+		tween(item.Label, 0.28, {TextTransparency = expanded and 0 or 1})
+		tween(item.Button, 0.34, {BackgroundTransparency = expanded and 0.42 or 1})
 	end
 	if self.SearchBox then
-		tween(self.SearchBox, 0.18, {TextTransparency = expanded and 0 or 1})
-		tween(self.SearchBox, 0.18, {PlaceholderColor3 = expanded and self.Theme.TextMuted or self.Theme.TextFaint})
+		self.SearchBox.Visible = expanded and self.ShowSearch
+		tween(self.SearchBox, 0.28, {TextTransparency = expanded and 0 or 1})
+		tween(self.SearchBox, 0.28, {PlaceholderColor3 = expanded and self.Theme.TextMuted or self.Theme.TextFaint})
 	end
-	if self.UserCard then self.UserCard.Visible = expanded end
+	if self.SearchBar then
+		tween(self.SearchBar, 0.34, {
+			Position = expanded and UDim2.fromOffset(8, 10) or UDim2.fromOffset(math.floor((self.SidebarCollapsedWidth - 32) / 2), 10),
+			Size = expanded and UDim2.new(1, -16, 0, 32) or UDim2.fromOffset(32, 32),
+		})
+	end
+	if self.SearchIcon then
+		if expanded then
+			self.SearchIcon.AnchorPoint = Vector2.new(0, 0)
+			tween(self.SearchIcon, 0.34, {Position = UDim2.fromOffset(10, 8)})
+		else
+			self.SearchIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+			tween(self.SearchIcon, 0.34, {Position = UDim2.fromScale(0.5, 0.5)})
+		end
+	end
+	if self.UserCard then self.UserCard.Visible = expanded and self.ShowProfile end
 	if self.SidebarStatusLabel then tween(self.SidebarStatusLabel, 0.18, {TextTransparency = expanded and 0.12 or 1}) end
 end
 
@@ -765,13 +832,93 @@ function Library:_setMinimized(minimized: boolean)
 		self.MinimizedHitbox.Visible = false
 		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 68)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		tween(self.BrandSubtitle, 0.18, {TextTransparency = 0.08})
-		tween(self.Window, 0.42, {Size = UDim2.new(0.36, 0, 0.6, 0)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		tween(self.Window, 0.42, {Size = self.WindowSize}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		task.delay(0.44, function()
-			if not self.Destroyed and not self.Minimized and self.WindowAspectConstraint then
+			if not self.Destroyed and not self.Minimized and self.UseAspectRatio and self.WindowAspectConstraint then
 				self.WindowAspectConstraint.Parent = self.Window
 			end
 		end)
 	end
+end
+
+function Library:SetWindowSize(size: UDim2 | Vector2)
+	if self.Destroyed or not self.Window then return end
+	if typeof(size) == "Vector2" then size = UDim2.fromOffset(size.X, size.Y) end
+	assert(typeof(size) == "UDim2", "SetWindowSize requires UDim2 or Vector2")
+	self.WindowSize = size
+	self.UseAspectRatio = false
+	if self.WindowAspectConstraint then self.WindowAspectConstraint.Parent = nil end
+	tween(self.Window, 0.25, {Size = size})
+	if self.AmbientShadow then tween(self.AmbientShadow, 0.25, {Size = size}) end
+end
+
+function Library:SetWindowPosition(position: UDim2)
+	if self.Destroyed or not self.Window then return end
+	assert(typeof(position) == "UDim2", "SetWindowPosition requires UDim2")
+	self.WindowPosition = position
+	tween(self.Window, 0.25, {Position = position})
+	if self.AmbientShadow then tween(self.AmbientShadow, 0.25, {Position = position}) end
+end
+
+function Library:SetSearchVisible(visible: boolean)
+	self.ShowSearch = visible == true
+	if self.SearchBar then self.SearchBar.Visible = self.ShowSearch end
+	if self.SearchBox then self.SearchBox.Visible = self.ShowSearch end
+end
+
+function Library:SetProfileVisible(visible: boolean)
+	self.ShowProfile = visible == true
+	if self.UserCard then self.UserCard.Visible = self.ShowProfile and self.SidebarExpanded end
+end
+
+function Library:SetSidebarAutoCollapse(enabled: boolean)
+	self.AutoCollapseSidebar = enabled == true
+	if not self.AutoCollapseSidebar then self:_setSidebarExpanded(true) end
+end
+
+function Library:SetTheme(theme: {[string]: any})
+	assert(type(theme) == "table", "SetTheme requires a table")
+	for key, value in pairs(theme) do
+		if self.Theme[key] ~= nil then self.Theme[key] = value end
+	end
+	if self.Window then self.Window.BackgroundColor3 = self.Theme.Window end
+	if self.Sidebar then self.Sidebar.BackgroundColor3 = self.Theme.Sidebar end
+	if self.Content then self.Content.BackgroundColor3 = self.Theme.Background end
+	if self.TopGlow then self.TopGlow.BackgroundColor3 = self.Theme.AccentBright end
+	if self.Nav then self.Nav.ScrollBarImageColor3 = self.Theme.Accent end
+	return self.Theme
+end
+
+function Library:SetAccent(color: Color3)
+	assert(typeof(color) == "Color3", "SetAccent requires Color3")
+	return self:SetTheme({Accent = color})
+end
+
+function Library:SetBackgroundVisible(visible: boolean)
+	self.ShowBackground = visible == true
+	if self.BackgroundImage then self.BackgroundImage.Visible = self.ShowBackground and self.WindowRevealed end
+	if self.GlassWash then self.GlassWash.Visible = self.ShowBackground and self.WindowRevealed end
+end
+
+function Library:SetBackgroundImage(image: string, transparency: number?)
+	assert(type(image) == "string", "SetBackgroundImage requires an asset id string")
+	if self.BackgroundImage then
+		self.BackgroundImage.Image = image
+		if transparency ~= nil then
+			self.BackgroundImage.ImageTransparency = math.clamp(transparency, 0, 1)
+		end
+	end
+	self.BackgroundImageAsset = image
+end
+
+function Library:SetLogo(image: string)
+	assert(type(image) == "string", "SetLogo requires an asset id string")
+	self.LogoImage = image
+	if self.BrandLogo then self.BrandLogo.Image = image end
+end
+
+function Library:SetIcon(image: string)
+	return self:SetLogo(image)
 end
 
 function Library:SetHubVisible(visible: boolean)
@@ -844,7 +991,7 @@ function Library:Tab(config: {[string]: any})
 	glyph.Position = UDim2.fromOffset(10, 0)
 	glyph.Size = UDim2.fromOffset(42, 50)
 	glyph.ZIndex = 4
-	local label = text(button, config.Name, 12, self.Theme.TextMuted, Enum.Font.GothamMedium)
+	local label = text(button, config.Name, 12, self.Theme.TextMuted, Enum.Font.GothamBold)
 	label.Position = UDim2.fromOffset(48, 0)
 	label.Size = UDim2.new(1, -58, 1, 0)
 	label.TextTransparency = 1
@@ -1036,8 +1183,8 @@ function Library:_revealMainWindow()
 	self.Window.Visible = true
 	self.WindowGroup.Visible = true
 	self.WindowGroup.GroupTransparency = 1
-	self.BackgroundImage.Visible = true
-	self.GlassWash.Visible = true
+	self.BackgroundImage.Visible = self.ShowBackground
+	self.GlassWash.Visible = self.ShowBackground
 	-- The shadow uses a different aspect ratio than the responsive window and
 	-- can spill below it. Keep the panel edge clean at every size.
 	self.AmbientShadow.Visible = false
@@ -1259,6 +1406,16 @@ function Library:Destroy()
 		self.KeybindInputEndedConnection:Disconnect()
 		self.KeybindInputEndedConnection = nil
 	end
+	if self.WindowDragConnection then
+		self.WindowDragConnection:Disconnect()
+		self.WindowDragConnection = nil
+	end
+	if self.ColorPickerDragConnections then
+		for _, connection in ipairs(self.ColorPickerDragConnections) do
+			connection:Disconnect()
+		end
+		table.clear(self.ColorPickerDragConnections)
+	end
 	if self.KeybindPanelDragConnection then
 		self.KeybindPanelDragConnection:Disconnect()
 		self.KeybindPanelDragConnection = nil
@@ -1314,7 +1471,7 @@ end
 function Library:_controlRow(parent: Instance, titleValue: string, descriptionValue: string?)
 	local library = self.Library or self
 	local row = Instance.new("Frame")
-	row.Size = UDim2.new(1, 0, 0, descriptionValue and 55 or 44)
+	row.Size = UDim2.new(1, 0, 0, descriptionValue and 60 or 44)
 	row.BackgroundColor3 = self.Theme.Surface
 	row.BackgroundTransparency = 0.62
 	row.BorderSizePixel = 0
@@ -1324,13 +1481,26 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	hover(row, self.Theme.Surface, self.Theme.SurfaceHover)
 	local titleLabel = text(row, titleValue, 11, self.Theme.Text, Enum.Font.GothamMedium)
 	titleLabel.Position = UDim2.fromOffset(16, descriptionValue and 11 or 0)
-	titleLabel.Size = UDim2.new(0.55, 0, 0, 20)
+	titleLabel.Size = UDim2.fromOffset(0, 20)
+	titleLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	if descriptionValue then
 		local descriptionLabel = text(row, descriptionValue, 9, self.Theme.TextMuted, Enum.Font.Gotham)
 		descriptionLabel.Position = UDim2.fromOffset(16, 31)
-		descriptionLabel.Size = UDim2.new(0.58, 0, 0, 18)
+		descriptionLabel.Size = UDim2.fromOffset(0, 18)
 		descriptionLabel.TextTransparency = 0.08
+		descriptionLabel.TextWrapped = false
+		descriptionLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	end
+	local function updateLabelWidths()
+		local available = math.max(0, row.AbsoluteSize.X - 160)
+		titleLabel.Size = UDim2.fromOffset(available, 20)
+		if descriptionValue then
+			local descriptionLabel = row:FindFirstChildWhichIsA("TextLabel")
+			if descriptionLabel and descriptionLabel ~= titleLabel then descriptionLabel.Size = UDim2.fromOffset(available, 18) end
+		end
+	end
+	row:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateLabelWidths)
+	updateLabelWidths()
 	library.SearchEntries = library.SearchEntries or {}
 	table.insert(library.SearchEntries, {
 		Row = row,
@@ -1451,15 +1621,26 @@ function Library:TextBox(config: {[string]: any})
 	input.TextSize = 10
 	input.Font = Enum.Font.Gotham
 	input.TextXAlignment = Enum.TextXAlignment.Left
+	input.TextWrapped = false
+	input.TextTruncate = Enum.TextTruncate.AtEnd
 	input.BackgroundColor3 = self.Theme.StrokeSoft
 	input.BackgroundTransparency = 0.28
 	input.BorderSizePixel = 0
 	input.AnchorPoint = Vector2.new(1, 0.5)
 	input.Position = UDim2.new(1, -14, 0.5, 0)
-	input.Size = UDim2.fromOffset(142, 29)
+	input.Size = UDim2.fromOffset(config.Width or 142, 29)
 	input.Parent = row
 	corner(input, 8)
-	stroke(input, self.Theme.AccentDeep, 0.35)
+	local inputStroke = stroke(input, self.Theme.AccentDeep, 0.35)
+	padding(input, 10, 10, 0, 0)
+	input.Focused:Connect(function()
+		tween(input, 0.16, {BackgroundTransparency = 0.12})
+		tween(inputStroke, 0.16, {Transparency = 0.05, Color = self.Theme.Accent})
+	end)
+	input.FocusLost:Connect(function()
+		tween(input, 0.16, {BackgroundTransparency = 0.28})
+		tween(inputStroke, 0.16, {Transparency = 0.35, Color = self.Theme.AccentDeep})
+	end)
 	local value = input.Text
 	local function set(nextValue: string, silent: boolean?)
 		value = tostring(nextValue or "")
@@ -1490,19 +1671,32 @@ function Library:Dropdown(config: {[string]: any})
 	local button = Instance.new("TextButton")
 	button.Name = "DropdownButton"
 	button.AutoButtonColor = false
-	button.Text = value .. "  ▾"
+	button.Text = value
 	button.TextSize = 10
-	button.Font = Enum.Font.GothamMedium
+	button.Font = Enum.Font.GothamBold
+	button.TextXAlignment = Enum.TextXAlignment.Center
+	button.TextTruncate = Enum.TextTruncate.AtEnd
+	button.TextWrapped = false
 	button.TextColor3 = self.Theme.Text
 	button.BackgroundColor3 = self.Theme.StrokeSoft
-	button.BackgroundTransparency = 0.18
+	button.BackgroundTransparency = 0.08
 	button.BorderSizePixel = 0
 	button.AnchorPoint = Vector2.new(1, 0.5)
 	button.Position = UDim2.new(1, -14, 0.5, 0)
-	button.Size = UDim2.fromOffset(126, 29)
+	button.Size = UDim2.fromOffset(config.Width or 136, 30)
 	button.Parent = row
 	corner(button, 8)
-	stroke(button, self.Theme.AccentDeep, 0.3)
+	local dropdownStroke = stroke(button, self.Theme.AccentDeep, 0.24, 1.15)
+	local dropdownGradient = Instance.new("UIGradient")
+	dropdownGradient.Color = ColorSequence.new({self.Theme.SurfaceRaised, self.Theme.StrokeSoft})
+	dropdownGradient.Rotation = 90
+	dropdownGradient.Parent = button
+	button.MouseEnter:Connect(function()
+		tween(dropdownStroke, 0.16, {Transparency = 0.04, Color = self.Theme.Accent})
+	end)
+	button.MouseLeave:Connect(function()
+		tween(dropdownStroke, 0.2, {Transparency = 0.24, Color = self.Theme.AccentDeep})
+	end)
 	hover(button, self.Theme.StrokeSoft, self.Theme.AccentDeep)
 	local menu = Instance.new("Frame")
 	menu.Name = "DropdownMenu"
@@ -1536,7 +1730,7 @@ function Library:Dropdown(config: {[string]: any})
 	end
 	local function set(nextValue: string, silent: boolean?)
 		value = tostring(nextValue or "None")
-		button.Text = value .. "  ▾"
+		button.Text = value
 		library.Flags[config.Flag or config.Name or "Dropdown"] = value
 		if not silent and config.Callback then
 			local success, errorMessage = pcall(config.Callback, value)
@@ -1604,6 +1798,7 @@ function Library:ColorPicker(config: {[string]: any})
 	popup.BackgroundTransparency = 1
 	popup.BorderSizePixel = 0
 	popup.ClipsDescendants = true
+	popup.Active = true
 	popup.Visible = false
 	popup.ZIndex = 50
 	popup.Parent = library.Gui
@@ -1724,12 +1919,18 @@ function Library:ColorPicker(config: {[string]: any})
 	popupHeader.BorderSizePixel = 0
 	popupHeader.ZIndex = 51
 	popupHeader.ClipsDescendants = true
+	popupHeader.Active = true
 	popupHeader.Parent = popup
 	corner(popupHeader, 16)
 	local popupTitle = text(popupHeader, "COLOR PICKER", 10, library.Theme.Text, Enum.Font.GothamBold)
 	popupTitle.Position = UDim2.fromOffset(12, 0)
-	popupTitle.Size = UDim2.new(1, -52, 1, 0)
+	popupTitle.Size = UDim2.new(1, -100, 1, 0)
 	popupTitle.ZIndex = 52
+	local dragHint = text(popupHeader, "DRAG", 8, library.Theme.TextMuted, Enum.Font.GothamBold)
+	dragHint.Position = UDim2.new(1, -70, 0, 0)
+	dragHint.Size = UDim2.fromOffset(38, 36)
+	dragHint.TextXAlignment = Enum.TextXAlignment.Right
+	dragHint.ZIndex = 52
 	local popupClose = Instance.new("TextButton")
 	popupClose.Text = "×"
 	popupClose.TextSize = 16
@@ -1745,6 +1946,38 @@ function Library:ColorPicker(config: {[string]: any})
 	popupClose.Parent = popupHeader
 	corner(popupClose, 7)
 	hover(popupClose, library.Theme.StrokeSoft, library.Theme.AccentDeep)
+	local pickerDragging = false
+	local pickerDragStart
+	local pickerStartPosition
+	local pickerDragInput
+	popupHeader.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			pickerDragging = true
+			pickerDragStart = input.Position
+			pickerStartPosition = popup.Position
+		end
+	end)
+	popupHeader.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			pickerDragInput = input
+		end
+	end)
+	table.insert(library.ColorPickerDragConnections, UserInputService.InputChanged:Connect(function(input)
+		if not pickerDragging or (input ~= pickerDragInput and input.UserInputType ~= Enum.UserInputType.MouseMovement) then return end
+		local delta = input.Position - pickerDragStart
+		popup.Position = UDim2.new(
+			pickerStartPosition.X.Scale,
+			pickerStartPosition.X.Offset + delta.X,
+			pickerStartPosition.Y.Scale,
+			pickerStartPosition.Y.Offset + delta.Y
+		)
+	end))
+	table.insert(library.ColorPickerDragConnections, UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			pickerDragging = false
+			pickerDragInput = nil
+		end
+	end))
 	local hexInput = Instance.new("TextBox")
 	hexInput.Name = "HexInput"
 	hexInput.ClearTextOnFocus = false
@@ -1888,16 +2121,29 @@ function Library:Button(config: {[string]: any})
 	button.AutoButtonColor = false
 	button.Text = config.Text or "EXECUTE"
 	button.TextSize = 10
-	button.Font = Enum.Font.GothamBold
+	button.Font = Enum.Font.GothamSemibold
+	button.TextTruncate = Enum.TextTruncate.AtEnd
+	button.TextWrapped = false
 	button.TextColor3 = self.Theme.Text
 	button.BackgroundColor3 = self.Theme.AccentDeep
-	button.BackgroundTransparency = 0.18
+	button.BackgroundTransparency = 0.08
 	button.BorderSizePixel = 0
 	button.AnchorPoint = Vector2.new(1, 0.5)
 	button.Position = UDim2.new(1, -14, 0.5, 0)
-	button.Size = UDim2.fromOffset(112, 31)
+	button.Size = UDim2.fromOffset(config.Width or 112, 32)
 	button.Parent = row
-	corner(button, 8)
+	corner(button, 9)
+	local buttonStroke = stroke(button, self.Theme.AccentBright, 0.68, 1)
+	local buttonGradient = Instance.new("UIGradient")
+	buttonGradient.Color = ColorSequence.new({self.Theme.Accent, self.Theme.AccentDeep})
+	buttonGradient.Rotation = 90
+	buttonGradient.Parent = button
+	button.MouseEnter:Connect(function()
+		tween(buttonStroke, 0.16, {Transparency = 0.28})
+	end)
+	button.MouseLeave:Connect(function()
+		tween(buttonStroke, 0.2, {Transparency = 0.68})
+	end)
 	hover(button, self.Theme.AccentDeep, self.Theme.Accent)
 	local enabled = true
 	local function setEnabled(nextEnabled: boolean)

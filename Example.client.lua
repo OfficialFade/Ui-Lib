@@ -5,7 +5,7 @@ local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-L
 local Library = assert(loadstring(source), "Could not compile ClappedHub.lua from GitHub")()
 
 local UI = Library.new({
-	Name = "CLAPPED HUB",
+	Name = "EXAMPLE HUB",
 	Subtitle = "COMPLETE UI SHOWCASE",
 	Accent = Color3.fromRGB(78, 160, 255),
 	ScriptType = "FREE", -- Change to "PAID" for the paid-script badge.
@@ -16,7 +16,7 @@ local UI = Library.new({
 })
 
 local Config = UI:ConfigManager({
-	Folder = "ClappedHubConfigs",
+	Folder = "ExampleHubConfigs",
 	DefaultConfig = "Default",
 	OnStatus = function(success, message)
 		print(success and "[Config]" or "[Config error]", message)
@@ -162,7 +162,7 @@ visuals:TextBox({
 	Description = "Test text input and the live callback.",
 	Flag = "DisplayName",
 	Placeholder = "Type a display name...",
-	Default = "Clapped User",
+	Default = "Example User",
 	Live = true,
 	Callback = function(value)
 		print("Display name:", value)
@@ -306,7 +306,7 @@ local aboutTab = UI:Tab({
 
 local about = UI:Section({
 	Tab = aboutTab,
-	Name = "Clapped Hub UI Lib",
+	Name = "Example UI Library",
 	Description = "A complete production-style interface showcase.",
 })
 
@@ -322,7 +322,7 @@ about:Button({
 	Callback = function()
 		UI:Notify({
 			Title = "Library status",
-			Content = "Clapped Hub UI Lib is running successfully.",
+			Content = "Example UI Library is running successfully.",
 			Icon = "✓",
 			Duration = 3,
 		})
