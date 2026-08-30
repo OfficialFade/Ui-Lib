@@ -1,7 +1,7 @@
 -- Ocean UI Lib by Fade - complete product showcase
 -- Generic examples for presenting the full public UI library.
 
-local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/ffb72dd/ClappedHub.lua?complete_product_showcase=" .. os.clock())
+local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/26a76e7/ClappedHub.lua?complete_product_showcase=" .. os.clock())
 local Library = assert(loadstring(source), "Could not load Ocean UI Lib")()
 
 local UI = Library.new({
