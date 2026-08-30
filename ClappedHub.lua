@@ -2169,7 +2169,8 @@ function Library:Button(config: {[string]: any})
 	button.TextTruncate = Enum.TextTruncate.AtEnd
 	button.TextWrapped = false
 	button.TextColor3 = self.Theme.Text
-	button.BackgroundColor3 = self.Theme.AccentDeep
+	local buttonColor = self.Theme.AccentDeep:Lerp(self.Theme.Accent, 0.22)
+	button.BackgroundColor3 = buttonColor
 	button.BackgroundTransparency = 0.08
 	button.BorderSizePixel = 0
 	button.AnchorPoint = Vector2.new(1, 0.5)
@@ -2179,7 +2180,7 @@ function Library:Button(config: {[string]: any})
 	corner(button, 9)
 	local buttonStroke = stroke(button, self.Theme.AccentBright, 0.68, 1)
 	local buttonGradient = Instance.new("UIGradient")
-	buttonGradient.Color = ColorSequence.new(self.Theme.Accent, self.Theme.AccentDeep)
+	buttonGradient.Color = ColorSequence.new(buttonColor, self.Theme.AccentDeep)
 	buttonGradient.Rotation = 90
 	buttonGradient.Parent = button
 	button.MouseEnter:Connect(function()
@@ -2188,7 +2189,7 @@ function Library:Button(config: {[string]: any})
 	button.MouseLeave:Connect(function()
 		tween(buttonStroke, 0.2, {Transparency = 0.68})
 	end)
-	hover(button, self.Theme.AccentDeep, self.Theme.Accent)
+	hover(button, buttonColor, self.Theme.Accent)
 	local enabled = true
 	local function setEnabled(nextEnabled: boolean)
 		enabled = nextEnabled

@@ -49,11 +49,6 @@ end})
 buttons:Keybind({Name = "Keybind", Description = "Toggle or hold actions with a configurable key.", Flag = "DemoKeybind", Key = Enum.KeyCode.RightShift, Mode = "Toggle", Callback = function(value)
 	notify("Keybind fired", value and "Activated" or "Deactivated")
 end})
-buttons:Button({Name = "Change icon", Text = "ICON", Width = 135, Callback = function()
-	UI:SetIcon("rbxassetid://101595980825854")
-	notify("Icon updated", "Custom branding is supported.")
-end})
-
 -- Configuration, visibility, and layout mechanics live under this tab.
 local settingsTab = UI:Tab({Name = "Settings", Icon = "⚙", Description = "Config saving, keybind utilities, and interface settings."})
 local settings = UI:Section({Tab = settingsTab, Name = "Configuration manager", Description = "Save, load, and list user preferences with a small public API."})
