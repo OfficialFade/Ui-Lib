@@ -1,148 +1,204 @@
-# Clapped Hub UI Lib
+# Ocean UI Lib by Fade
 
-Clapped Hub UI Lib is a presentation-focused Roblox interface library for polished script panels, settings menus, dashboards, and showcases. It includes a glass-style window, responsive navigation, searchable controls, keybind management, notifications, configuration storage, theming, and an optional loading transition.
+Ocean UI Lib is a polished, customizable Luau interface library for Roblox panels, script hubs, dashboards, settings menus, and product showcases.
 
-The library owns UI state and callbacks. Your game or script owns the actual behavior inside those callbacks.
+It gives you a complete visual foundation—window chrome, navigation, controls, notifications, keybinds, themes, and configuration storage—while leaving your actual game or product logic inside your callbacks.
 
-## Installation
+> **Important:** Ocean UI Lib is UI-only. It does not include gameplay automation, remote-event calls, or game-specific behavior.
 
-Load the library from your hosted raw URL, then create one library instance. Replace the example URL with your own stable, versioned release URL before shipping.
+## Why use Ocean UI Lib?
+
+Building a professional interface from scratch takes time. Ocean UI Lib handles the repetitive UI work so you can focus on your product:
+
+- Consistent spacing, typography, borders, and colors.
+- Smooth window, sidebar, notification, and hover animations.
+- A simple tab → section → control construction pattern.
+- Built-in search, keybind management, and configuration persistence.
+- Runtime customization for branding, colors, backgrounds, and visibility.
+- Sensible defaults with optional overrides when you need more control.
+
+## Requirements
+
+- Roblox client-side Luau environment.
+- A loader capable of fetching and compiling the hosted source.
+- A client context for input-driven features such as dragging and keybinds.
+- File APIs are recommended for configuration saving, but the library safely reports when they are unavailable.
+
+## Quick start
+
+Use a stable raw URL for your release. During development, add a cache-busting query or pin to a commit.
 
 ```lua
 local source = game:HttpGet("YOUR_RAW_URL/ClappedHub.lua")
-local Library = assert(loadstring(source), "Could not load the UI library")()
+local Library = assert(loadstring(source), "Could not load Ocean UI Lib")()
 
 local UI = Library.new({
-    Name = "MY HUB",
-    Subtitle = "CONTROL PANEL",
+    Name = "MY PRODUCT",
+    Subtitle = "POWERED BY OCEAN UI",
     EnableLoadingMusic = false,
 })
-```
 
-Ready-to-run references included in this package:
-
-- `ExampleShowcase.client.lua` — presentation script with Example 1–4 tabs.
-- `Example.client.lua` — broad feature reference.
-- `FullExample.client.lua` — customization-focused reference.
-- `AutoCollect.client.lua` — game-specific example; keep gameplay logic separate from the UI library.
-
-## First panel
-
-The normal construction flow is tab, section, then controls:
-
-```lua
 local tab = UI:Tab({
-    Name = "Settings",
-    Icon = "⚙",
-    Description = "Configure your preferences.",
+    Name = "Home",
+    Icon = "⌂",
+    Description = "Your main product page.",
 })
 
 local section = UI:Section({
     Tab = tab,
-    Name = "General",
-    Description = "Common interface settings.",
+    Name = "Welcome",
+    Description = "A short introduction for your users.",
 })
 
-section:Toggle({
-    Name = "Notifications",
-    Description = "Show feedback messages.",
-    Flag = "Notifications",
-    Default = true,
-    Callback = function(enabled)
-        print("Notifications:", enabled)
+section:Button({
+    Name = "Test notification",
+    Text = "TEST",
+    Callback = function()
+        UI:Notify({
+            Title = "It works",
+            Content = "Your callback ran successfully.",
+            Icon = "✓",
+            Duration = 3,
+        })
     end,
-})
-
-UI:Notify({
-    Title = "Ready",
-    Content = "The interface loaded successfully.",
-    Icon = "✓",
-    Duration = 4,
 })
 ```
 
-Create tabs before sections. Names and descriptions are indexed by the built-in search bar, so use concise, searchable wording.
+## Recommended construction pattern
+
+Create the library first, then create tabs, sections, and controls in that order.
+
+```text
+Library.new(options)
+└── UI:Tab(options)
+    └── UI:Section({Tab = tab, ...})
+        ├── section:Label(options)
+        ├── section:Button(options)
+        ├── section:Toggle(options)
+        └── section:Slider(options)
+```
+
+Create all tabs before adding controls when possible. The built-in search indexes control names and descriptions, so use useful words such as `notifications`, `movement`, `appearance`, or `configuration`.
 
 ## Constructor options
 
-All options are optional and have sensible defaults.
+All constructor options are optional.
 
-| Option | Type | Purpose |
+| Option | Type | Description |
 | --- | --- | --- |
 | `Name` | string | Main window title. |
-| `Subtitle` | string | Small title below the main title. |
-| `ProfileUserName` | string | Profile-card text; defaults to the local player name. |
-| `ScriptType` | `"FREE"` or `"PAID"` | Controls the profile badge. |
-| `Accent` | Color3 | Primary highlight color. |
-| `Theme` | table | Overrides named theme colors; unknown keys are ignored. |
+| `Subtitle` | string | Smaller text below the title. |
+| `ProfileUserName` | string | Profile-card username; defaults to the local player. |
+| `ScriptType` | `"FREE"` or `"PAID"` | Text shown in the profile badge. |
+| `Accent` | Color3 | Primary highlight and action color. |
+| `Theme` | table | Overrides named theme colors. |
 | `IconImage` | string | Main logo asset ID. `Icon` and `LogoImage` are aliases. |
-| `BackgroundImage` | string | Glass background asset ID. |
+| `BackgroundImage` | string | Background image asset ID. |
 | `BackgroundImageTransparency` | number | Background transparency from `0` to `1`. |
 | `ShowBackground` | boolean | Shows or hides the glass background. |
 | `WindowSize` | Vector2 or UDim2 | Initial window size. |
 | `WindowPosition` | UDim2 | Initial window position. |
-| `WindowMinSize` | Vector2 | Minimum window size. |
-| `WindowMaxSize` | Vector2 | Maximum window size. |
-| `AspectRatio` | number | Responsive window aspect ratio. |
+| `WindowMinSize` | Vector2 | Minimum resizable size. |
+| `WindowMaxSize` | Vector2 | Maximum resizable size. |
+| `AspectRatio` | number | Optional responsive aspect ratio. |
 | `EnableDragging` | boolean | Allows dragging from the header. |
-| `EnableMinimize` | boolean | Shows the minimize control. |
-| `CollapsibleSidebar` | boolean | Enables sidebar collapsing. |
+| `EnableMinimize` | boolean | Shows the minimize/restore control. |
+| `CollapsibleSidebar` | boolean | Enables manual sidebar collapsing. |
 | `AutoCollapseSidebar` | boolean | Collapses the sidebar when the pointer leaves it. |
 | `SidebarExpandedWidth` | number | Expanded sidebar width in pixels. |
 | `SidebarCollapsedWidth` | number | Collapsed sidebar width in pixels. |
 | `SidebarCollapseDelay` | number | Auto-collapse delay in seconds. |
-| `ShowSearch` | boolean | Shows the sidebar search control. |
+| `ShowSearch` | boolean | Shows the search bar. |
 | `ShowProfile` | boolean | Shows the profile card. |
-| `EnableLoadingMusic` | boolean | Enables the optional loading transition and music. |
+| `EnableLoadingMusic` | boolean | Enables the optional loading transition/music. |
 
-Example production-style setup:
+### Production setup
 
 ```lua
 local UI = Library.new({
-    Name = "EXAMPLE HUB",
-    Subtitle = "PRODUCTION PANEL",
+    Name = "OCEAN UI LIB",
+    Subtitle = "SHOWCASE BY FADE",
     IconImage = "rbxassetid://1234567890",
-    Accent = Color3.fromRGB(110, 190, 255),
-    Theme = {
-        Background = Color3.fromRGB(7, 10, 18),
-        Window = Color3.fromRGB(14, 17, 28),
-        Surface = Color3.fromRGB(24, 30, 45),
-        SurfaceRaised = Color3.fromRGB(35, 44, 65),
-        SurfaceHover = Color3.fromRGB(48, 64, 92),
-        Text = Color3.fromRGB(242, 247, 255),
-        TextMuted = Color3.fromRGB(163, 180, 208),
-    },
-    WindowSize = Vector2.new(720, 620),
-    WindowPosition = UDim2.fromScale(0.5, 0.5),
-    CollapsibleSidebar = false,
-    AutoCollapseSidebar = false,
+    Accent = Color3.fromRGB(80, 175, 255),
+    WindowSize = Vector2.new(820, 650),
+    WindowMinSize = Vector2.new(500, 440),
+    WindowMaxSize = Vector2.new(1000, 820),
+    ShowSearch = true,
+    ShowProfile = true,
+    ShowBackground = true,
+    EnableDragging = true,
+    EnableMinimize = true,
     EnableLoadingMusic = false,
 })
 ```
 
-Supported theme keys are `Background`, `Window`, `Sidebar`, `Surface`, `SurfaceRaised`, `SurfaceHover`, `Stroke`, `StrokeSoft`, `Text`, `TextMuted`, `TextFaint`, `Accent`, `AccentBright`, `AccentDeep`, `Success`, `Warning`, and `Danger`.
+For a permanently expanded sidebar, use:
+
+```lua
+CollapsibleSidebar = false,
+AutoCollapseSidebar = false,
+```
+
+## Theme customization
+
+Supported theme keys:
+
+`Background`, `Window`, `Sidebar`, `Surface`, `SurfaceRaised`, `SurfaceHover`, `Stroke`, `StrokeSoft`, `Text`, `TextMuted`, `TextFaint`, `Accent`, `AccentBright`, `AccentDeep`, `Success`, `Warning`, `Danger`.
+
+```lua
+local UI = Library.new({
+    Accent = Color3.fromRGB(90, 190, 255),
+    Theme = {
+        Background = Color3.fromRGB(7, 10, 18),
+        Window = Color3.fromRGB(13, 17, 28),
+        Sidebar = Color3.fromRGB(10, 14, 24),
+        Surface = Color3.fromRGB(22, 29, 44),
+        SurfaceRaised = Color3.fromRGB(35, 46, 68),
+        SurfaceHover = Color3.fromRGB(49, 66, 95),
+        Text = Color3.fromRGB(244, 248, 255),
+        TextMuted = Color3.fromRGB(163, 180, 208),
+    },
+})
+```
+
+You can also change the presentation after creation:
+
+```lua
+UI:SetTheme({
+    Surface = Color3.fromRGB(24, 30, 45),
+    TextMuted = Color3.fromRGB(170, 190, 215),
+})
+
+UI:SetAccent(Color3.fromRGB(255, 120, 180))
+UI:SetIcon("rbxassetid://1234567890")
+UI:SetLogo("rbxassetid://1234567890")
+UI:SetBackgroundImage("rbxassetid://78664802433772", 0.2)
+UI:SetBackgroundVisible(true)
+```
 
 ## Tabs and sections
 
 ```lua
 local tab = UI:Tab({
     Name = "Appearance",
-    Icon = "◉",
+    Icon = "✦",
     Description = "Visual preferences and display options.",
 })
 
 local section = UI:Section({
     Tab = tab,
-    Name = "Theme",
-    Description = "Adjust the look of the panel.",
+    Name = "Theme settings",
+    Description = "Controls for your visual preferences.",
 })
 ```
 
-Tab labels are bold for readability. For a permanently expanded sidebar, leave both sidebar-collapse options disabled.
+Tabs are searchable and navigation labels use bold typography for readability. Icons can be text glyphs or other supported icon values used by your environment.
 
 ## Controls
 
 ### Label
+
+Use labels for read-only status or information.
 
 ```lua
 section:Label({
@@ -153,112 +209,129 @@ section:Label({
 
 ### Button
 
+Buttons run a callback when clicked. `Width` and `Height` are optional for longer labels or special layouts.
+
 ```lua
 local button = section:Button({
     Name = "Run action",
     Text = "RUN",
-    Description = "Executes a one-time callback.",
+    Description = "Executes a one-time action.",
+    Width = 136,
+    Height = 32,
     Callback = function()
         print("Action ran")
     end,
 })
 
+button.SetText("READY")
 button.SetEnabled(false)
-button.SetText("DISABLED")
 ```
 
 ### Toggle
 
+Toggles return `Set` and `Get` methods.
+
 ```lua
 local toggle = section:Toggle({
-    Name = "Enabled",
-    Flag = "Enabled",
-    Default = false,
-    Callback = function(value)
-        print("Enabled:", value)
+    Name = "Notifications",
+    Flag = "Notifications",
+    Default = true,
+    Callback = function(enabled)
+        print("Notifications:", enabled)
     end,
 })
 
-toggle.Set(true)       -- second argument true suppresses the callback
+toggle.Set(false)
 print(toggle.Get())
 ```
 
 ### Slider
 
+Slider values are clamped between `Min` and `Max`. `Format` controls the displayed value text.
+
 ```lua
-section:Slider({
-    Name = "Opacity",
-    Flag = "Opacity",
+local slider = section:Slider({
+    Name = "Example slider",
+    Flag = "ExampleSlider",
     Min = 0,
     Max = 100,
     Default = 75,
     Format = "%d%%",
     Callback = function(value)
-        print("Opacity:", value)
+        print("Slider value:", value)
     end,
 })
-```
 
-Slider values are clamped between `Min` and `Max`. The returned control supports `Set` and `Get`.
+slider.Set(50)
+print(slider.Get())
+```
 
 ### Dropdown
 
+Dropdowns support centered, bold option text and a configurable width.
+
 ```lua
 section:Dropdown({
-    Name = "Mode",
-    Flag = "Mode",
-    Width = 150,
-    Options = {"Balanced", "Fast", "Quiet"},
-    Default = "Balanced",
+    Name = "Example dropdown",
+    Flag = "ExampleDropdown",
+    Width = 160,
+    Options = {"First option", "Second option", "Third option"},
+    Default = "First option",
     Callback = function(value)
-        print("Mode:", value)
+        print("Selected:", value)
     end,
 })
 ```
-
-Use `Width` for longer option names. Dropdown values are displayed with a font-safe arrow and clean truncation. Buttons also accept an optional `Width` value when the action text needs more room.
 
 ### TextBox
 
+By default, the callback runs when focus is lost. Set `Live = true` to run it as the text changes.
+
 ```lua
-local nameBox = section:TextBox({
-    Name = "Display name",
-    Description = "Text is padded and truncated cleanly.",
+local box = section:TextBox({
+    Name = "Example text box",
+    Description = "A clean padded input field.",
+    Flag = "ExampleText",
     Width = 160,
-    Flag = "DisplayName",
-    Placeholder = "Enter a name...",
-    Default = "Player",
+    Placeholder = "Enter text...",
+    Default = "Example",
     Live = false,
     Callback = function(value)
-        print("Name:", value)
+        print("Text:", value)
     end,
 })
-```
 
-With `Live = true`, the callback runs as text changes. Otherwise it runs when focus is lost. The returned control supports `Set`, `Get`, and `Input`.
+box.Set("Updated value")
+print(box.Get())
+```
 
 ### ColorPicker
 
+The color picker includes a circular saturation/value palette, hue slider, RGB fields, hex input, preview, and a draggable panel.
+
 ```lua
-section:ColorPicker({
-    Name = "Accent color",
-    Flag = "AccentColor",
-    Default = Color3.fromRGB(110, 190, 255),
+local picker = section:ColorPicker({
+    Name = "Example color picker",
+    Flag = "ExampleColor",
+    Default = Color3.fromRGB(80, 175, 255),
     Callback = function(color)
         print("Color:", color)
     end,
 })
-```
 
-The picker supports hue, saturation/value, hex input, RGB channels, preview, and programmatic `Set`/`Get` methods.
+picker.Set(Color3.fromRGB(255, 120, 180))
+print(picker.Get())
+```
 
 ### Keybind
 
+Use `Toggle` for press-to-switch behavior or `Hold` for behavior active only while held.
+
 ```lua
 section:Keybind({
-    Name = "Toggle panel",
-    Flag = "TogglePanel",
-    Key = Enum.KeyCode.B,
+    Name = "Example keybind",
+    Flag = "ExampleKeybind",
+    Key = Enum.KeyCode.RightShift,
     Mode = "Toggle", -- or "Hold"
     Callback = function(enabled)
         print("Keybind state:", enabled)
@@ -266,41 +339,38 @@ section:Keybind({
 })
 ```
 
-Click a key value to choose a new key. Press Escape to cancel. `Hold` keybinds remain active only while the key is held.
-
-## Runtime customization
-
-```lua
-UI:SetWindowSize(Vector2.new(800, 680))
-UI:SetWindowPosition(UDim2.fromScale(0.5, 0.46))
-UI:SetTheme({Accent = Color3.fromRGB(255, 110, 175)})
-UI:SetAccent(Color3.fromRGB(110, 220, 170))
-UI:SetIcon("rbxassetid://1234567890")
-UI:SetLogo("rbxassetid://1234567890")
-UI:SetBackgroundImage("rbxassetid://78664802433772", 0.25)
-UI:SetBackgroundVisible(true)
-UI:SetSearchVisible(false)
-UI:SetProfileVisible(true)
-UI:SetSidebarAutoCollapse(false)
-```
-
-`SetTheme` updates the main surfaces and navigation accent at runtime. For a complete visual preset, pass the full `Theme` table during construction, then use `SetAccent` and `SetBackgroundImage` for live user choices.
+Users can click the displayed key to rebind it. Escape cancels rebinding.
 
 ## Notifications
 
+Notifications support a title, body text, icon, color, and duration.
+
 ```lua
 UI:Notify({
-    Title = "Saved",
-    Content = "Your settings were saved.",
+    Title = "Configuration saved",
+    Content = "Your preferences were saved successfully.",
     Icon = "✓",
     Color = Color3.fromRGB(74, 205, 143),
     Duration = 3,
 })
 ```
 
-`Content` and `Text` are both accepted. Notifications stack in the lower-right corner and animate automatically.
+Notifications stack automatically and animate in the lower-right area of the interface.
 
-## Hub and keybind panel
+## Runtime window and visibility controls
+
+```lua
+UI:SetWindowSize(Vector2.new(800, 680))
+UI:SetWindowPosition(UDim2.fromScale(0.5, 0.46))
+UI:SetSearchVisible(false)
+UI:SetProfileVisible(true)
+UI:SetBackgroundVisible(true)
+UI:SetSidebarAutoCollapse(false)
+```
+
+`EnableDragging` and `EnableMinimize` are constructor options because they affect the window’s input behavior.
+
+## Keybind panel and hub visibility
 
 ```lua
 UI:SetKeybindPanelVisible(true)
@@ -309,16 +379,26 @@ UI:SetHubVisible(true)
 UI:ToggleHub()
 ```
 
+Add built-in controls to a section:
+
 ```lua
-section:KeybindListToggle({Name = "Show keybinds", Default = false})
-section:HubToggleKeybind({Name = "Toggle hub", Key = Enum.KeyCode.RightShift})
+section:KeybindListToggle({
+    Name = "Show keybind panel",
+    Default = false,
+})
+
+section:HubToggleKeybind({
+    Name = "Toggle hub",
+    Key = Enum.KeyCode.RightShift,
+    Mode = "Toggle",
+})
 ```
 
-`ToggleHubKeybind` is an alias for `HubToggleKeybind`.
+`ToggleHubKeybind` is also accepted as an alias for `HubToggleKeybind`.
 
 ## Configuration manager
 
-The configuration manager stores flags, colors, text values, dropdown values, slider values, keybinds, hub visibility, and keybind-panel state.
+Flags identify values that should be persisted. Give every persistent control a unique flag.
 
 ```lua
 local configs = UI:ConfigManager({
@@ -335,11 +415,13 @@ local deleted, deleteMessage = configs:Delete("OldConfig")
 local names = configs:List()
 ```
 
-The manager also provides `SaveConfig`, `LoadConfig`, and `DeleteConfig` aliases. If file APIs are unavailable, operations return `false` with an explanatory message. Show that message to users instead of silently failing.
+Available aliases include `SaveConfig`, `LoadConfig`, and `DeleteConfig`. If file APIs are unavailable, operations return `false` and an explanation. Always display that message to the user instead of silently assuming the operation succeeded.
+
+The manager can persist flagged toggles, sliders, dropdowns, text boxes, colors, keybinds, hub visibility, and keybind-panel state.
 
 ## Loading transition
 
-The loading transition is optional:
+Loading music is optional and disabled by default in most product examples.
 
 ```lua
 local UI = Library.new({
@@ -347,26 +429,62 @@ local UI = Library.new({
 })
 ```
 
-Set `EnableLoadingMusic = false` for instant startup. You can call `UI:PlayMusic({...})` for a custom loading/audio presentation. Keep loading short and always offer an instant-start option.
+Use `false` for instant startup. If you enable loading, keep the transition short and provide an obvious way to continue or disable it for users who do not want audio.
+
+## Cleanup
+
+Destroy the interface when your script is finished or being reloaded.
+
+```lua
+UI:Destroy()
+```
+
+Cleanup removes the interface and library-managed input connections. If you create additional ScreenGuis or connections in your own showcase, clean those up separately.
+
+## Building a showcase
+
+A strong buyer demo should be easy to understand within a minute:
+
+1. Start with a welcome tab showing the design and a notification button.
+2. Use a Controls tab to demonstrate every input type.
+3. Add a Settings tab for configuration save/load/list behavior.
+4. Keep example names generic: `Example button`, `Example slider`, and `Example dropdown`.
+5. Use a stable hosted source or a cache-free loader for testing.
+6. Include screenshots and a short feature list in your product post.
+
+The repository includes ready-to-run references:
+
+- `ProductShowcase.client.lua` — complete buyer-facing control and configuration demo.
+- `CacheFreeProductShowcase.client.lua` — cache-free launcher for the product showcase.
+- `CompleteShowcase.client.lua` — broad API tour with appearance examples.
+- `ButtonsSettingsShowcase.client.lua` — focused buttons/settings demo.
+- `StatsHudShowcase.client.lua` — optional draggable stats HUD example.
+- `AutoCollect.client.lua` — game-specific UI wiring example; keep gameplay logic separate from the library.
 
 ## Production checklist
 
-1. Replace the development raw URL and placeholder asset IDs with stable production versions.
-2. Give every persistent control a unique `Flag`.
-3. Keep names and descriptions short enough for the minimum window size.
-4. Test search, keyboard input, mouse input, touch input, and narrow viewports as applicable.
-5. Test config operations when file APIs are unavailable.
-6. Decide whether loading music belongs in your product; disable it with `EnableLoadingMusic = false` if not.
-7. Call `UI:Destroy()` during cleanup so the ScreenGui and input handlers are removed.
-8. Keep gameplay or remote-event logic in the owning script, not inside this reusable UI module.
+- Replace placeholder raw URLs and asset IDs.
+- Pin public loaders to a commit for reproducible releases.
+- Use unique flags for every persisted control.
+- Test at the minimum window size.
+- Test mouse, keyboard, touch, and search behavior where relevant.
+- Test with and without file APIs.
+- Keep descriptions short enough to avoid truncation.
+- Decide whether loading audio belongs in your product.
+- Clean up custom connections and UI objects on shutdown.
+- Keep game behavior in your own script callbacks.
 
-## Included features
+## License and buyer terms
 
-- Custom title, subtitle, logo, theme, accent, background, size, position, and layout.
-- Optional loading transition and music.
-- Bold searchable sidebar navigation with optional auto-collapse.
-- Tabs, sections, labels, buttons, toggles, sliders, dropdowns, text boxes, color pickers, and keybinds.
-- Toggle and hold keybind modes with a draggable keybind panel.
-- Animated notifications and hub visibility controls.
-- JSON configuration manager with save, load, delete, and list operations.
-- UI-only callbacks with no built-in gameplay or remote-event behavior.
+The commercial offer for the current package is **$15 one time** and may include the source code, documentation, showcase examples, updates, and support according to the seller’s stated terms.
+
+Before selling, clearly define whether buyers receive:
+
+- Commercial use in their own projects.
+- Permission to modify the source.
+- Permission to ship the library inside their products.
+- Updates and support.
+- Redistribution restrictions.
+- Resale or sublicensing restrictions.
+
+Do not describe a license as a transfer of copyright unless that is actually what you intend to provide.
