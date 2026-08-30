@@ -1959,11 +1959,6 @@ function Library:ColorPicker(config: {[string]: any})
 	popupTitle.Position = UDim2.fromOffset(12, 0)
 	popupTitle.Size = UDim2.new(1, -100, 1, 0)
 	popupTitle.ZIndex = 52
-	local dragHint = text(popupHeader, "DRAG", 8, library.Theme.TextMuted, Enum.Font.GothamBold)
-	dragHint.Position = UDim2.new(1, -70, 0, 0)
-	dragHint.Size = UDim2.fromOffset(38, 36)
-	dragHint.TextXAlignment = Enum.TextXAlignment.Right
-	dragHint.ZIndex = 52
 	local popupClose = Instance.new("TextButton")
 	popupClose.Text = "×"
 	popupClose.TextSize = 16
