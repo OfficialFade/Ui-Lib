@@ -1,7 +1,7 @@
 -- Ocean UI Lib by Fade - single notification showcase
 -- One button, no text boxes, and one clear notification message.
 
-local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/main/ClappedHub.lua?single_notification=" .. os.clock())
+local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/20c2314/ClappedHub.lua?single_notification=" .. os.clock())
 local Library = assert(loadstring(source), "Could not load Ocean UI Lib")()
 
 local UI = Library.new({
