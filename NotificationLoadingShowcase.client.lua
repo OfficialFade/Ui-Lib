@@ -1,6 +1,6 @@
 -- Ocean UI Lib by Fade - notification and loading showcase
 
-local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/9ee282b/ClappedHub.lua?notification_loading=" .. os.clock())
+local source = game:HttpGet("https://raw.githubusercontent.com/OfficialFade/Ui-Lib/bbb32a7/ClappedHub.lua?notification_loading=" .. os.clock())
 local Library = assert(loadstring(source), "Could not load Ocean UI Lib")()
 
 local UI = Library.new({
