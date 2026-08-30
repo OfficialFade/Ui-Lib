@@ -81,6 +81,21 @@ section:Button({
 	end,
 })
 
+section:Button({
+	Name = "Custom message example",
+	Text = "SEND",
+	Description = "Displays a notification using a normal sentence.",
+	Callback = function()
+		UI:Notify({
+			Title = "Message",
+			Content = "Cipher is a silly goose!",
+			Color = Color3.fromRGB(80, 175, 255),
+			Icon = "MESSAGE",
+			Duration = 4,
+		})
+	end,
+})
+
 UI:Notify({
 	Title = "Loading complete",
 	Content = "The interface loaded successfully.",

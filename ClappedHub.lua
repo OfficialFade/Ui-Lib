@@ -1290,14 +1290,16 @@ function Library:PlayMusic(config: {[string]: any})
 		panel.Name = "LoadingPanel"
 		panel.AnchorPoint = Vector2.new(0.5, 0.5)
 		panel.Position = UDim2.fromScale(0.5, 0.5)
-		panel.Size = UDim2.fromOffset(304, 58)
+		-- Match the loading panel to the exact final window size so the layout
+		-- does not jump when the loading transition finishes.
+		panel.Size = self.WindowSize
 		panel.BackgroundColor3 = self.Theme.SurfaceRaised
 		panel.BackgroundTransparency = 0.08
 		panel.BorderSizePixel = 0
 		panel.ZIndex = 101
 		panel.ClipsDescendants = true
 		panel.Parent = overlay
-		corner(panel, 12)
+		corner(panel, 20)
 		stroke(panel, self.Theme.Stroke, 0.28)
 		local loadingBackground = Instance.new("ImageLabel")
 		loadingBackground.Name = "LoadingBackground"
@@ -1308,7 +1310,7 @@ function Library:PlayMusic(config: {[string]: any})
 		loadingBackground.ScaleType = Enum.ScaleType.Crop
 		loadingBackground.ZIndex = 101
 		loadingBackground.Parent = panel
-		corner(loadingBackground, 12)
+		corner(loadingBackground, 20)
 		local loadingWash = Instance.new("Frame")
 		loadingWash.Size = UDim2.fromScale(1, 1)
 		loadingWash.BackgroundColor3 = self.Theme.Window
@@ -1316,7 +1318,7 @@ function Library:PlayMusic(config: {[string]: any})
 		loadingWash.BorderSizePixel = 0
 		loadingWash.ZIndex = 102
 		loadingWash.Parent = panel
-		corner(loadingWash, 12)
+		corner(loadingWash, 20)
 		local accentLine = Instance.new("Frame")
 		accentLine.Size = UDim2.new(0, 4, 1, -20)
 		accentLine.Position = UDim2.fromOffset(12, 10)
