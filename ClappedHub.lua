@@ -824,12 +824,16 @@ function Library:_setMinimized(minimized: boolean)
 		self.HeaderControls.Visible = self.EnableMinimize
 		self.TopGlow.Visible = false
 		self.MinimizedHitbox.Visible = false
-		self.BrandMark.AnchorPoint = Vector2.new(0.5, 0.5)
-		self.BrandMark.Position = UDim2.new(0.5, -58, 0.5, 0)
-		self.Brand.AnchorPoint = Vector2.new(0, 0.5)
-		self.Brand.Position = UDim2.new(0.5, -34, 0.5, 0)
-		self.Brand.Size = UDim2.fromOffset(150, 36)
-		self.BrandTitle.TextXAlignment = Enum.TextXAlignment.Center
+		if self.BrandMark then
+			self.BrandMark.AnchorPoint = Vector2.new(0.5, 0.5)
+			self.BrandMark.Position = UDim2.new(0.5, -58, 0.5, 0)
+		end
+		if self.Brand then
+			self.Brand.AnchorPoint = Vector2.new(0, 0.5)
+			self.Brand.Position = UDim2.new(0.5, -34, 0.5, 0)
+			self.Brand.Size = UDim2.fromOffset(150, 36)
+		end
+		if self.BrandTitle then self.BrandTitle.TextXAlignment = Enum.TextXAlignment.Center end
 		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 58)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		tween(self.BrandSubtitle, 0.18, {TextTransparency = 1})
 		tween(self.Window, 0.36, {Size = UDim2.fromOffset(320, 58)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
@@ -840,12 +844,16 @@ function Library:_setMinimized(minimized: boolean)
 		self.Body.Visible = true
 		self.MinimizedHitbox.Visible = false
 		if self.WindowSizeConstraint then self.WindowSizeConstraint.Parent = self.Window end
-		self.BrandMark.AnchorPoint = Vector2.new(0, 0)
-		self.BrandMark.Position = UDim2.fromOffset(0, 0)
-		self.Brand.AnchorPoint = Vector2.new(0, 0)
-		self.Brand.Position = UDim2.fromOffset(52, 0)
-		self.Brand.Size = UDim2.new(0.55, 0, 1, 0)
-		self.BrandTitle.TextXAlignment = Enum.TextXAlignment.Left
+		if self.BrandMark then
+			self.BrandMark.AnchorPoint = Vector2.new(0, 0)
+			self.BrandMark.Position = UDim2.fromOffset(0, 0)
+		end
+		if self.Brand then
+			self.Brand.AnchorPoint = Vector2.new(0, 0)
+			self.Brand.Position = UDim2.fromOffset(52, 0)
+			self.Brand.Size = UDim2.new(0.55, 0, 1, 0)
+		end
+		if self.BrandTitle then self.BrandTitle.TextXAlignment = Enum.TextXAlignment.Left end
 		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 68)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		tween(self.BrandSubtitle, 0.18, {TextTransparency = 0.08})
 		tween(self.Window, 0.42, {Size = self.WindowSize}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
