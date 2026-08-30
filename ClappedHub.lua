@@ -76,7 +76,7 @@ local function text(parent: Instance, value: string, size: number, color: Color3
 	item.Text = value
 	item.TextColor3 = color
 	item.TextSize = size
-	item.Font = font or Enum.Font.Gotham
+	item.Font = font or Enum.Font.GothamMedium
 	item.TextTransparency = transparency or 0
 	item.TextXAlignment = Enum.TextXAlignment.Left
 	item.TextYAlignment = Enum.TextYAlignment.Center
@@ -1499,7 +1499,7 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 	titleLabel.Size = UDim2.fromOffset(0, 20)
 	titleLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	if descriptionValue then
-		local descriptionLabel = text(row, descriptionValue, 9, self.Theme.TextMuted, Enum.Font.Gotham)
+	local descriptionLabel = text(row, descriptionValue, 9, self.Theme.TextMuted, Enum.Font.GothamMedium)
 		descriptionLabel.Position = UDim2.fromOffset(16, 31)
 		descriptionLabel.Size = UDim2.fromOffset(0, 18)
 		descriptionLabel.TextTransparency = 0.08
@@ -1634,7 +1634,7 @@ function Library:TextBox(config: {[string]: any})
 	input.PlaceholderColor3 = self.Theme.TextMuted
 	input.TextColor3 = self.Theme.Text
 	input.TextSize = 10
-	input.Font = Enum.Font.Gotham
+	input.Font = Enum.Font.GothamSemibold
 	input.TextXAlignment = Enum.TextXAlignment.Left
 	input.TextWrapped = false
 	input.TextTruncate = Enum.TextTruncate.AtEnd
