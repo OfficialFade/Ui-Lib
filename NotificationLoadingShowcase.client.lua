@@ -61,6 +61,7 @@ section:Button({
 			Content = messageBox.Get(),
 			Color = Color3.fromRGB(75, 205, 145),
 			ShowIcon = false,
+			ShowAccentBar = true,
 			Duration = 4,
 		})
 	end,
@@ -76,6 +77,7 @@ section:Button({
 			Content = "Something went wrong. Please try again.",
 			Color = Color3.fromRGB(235, 92, 112),
 			ShowIcon = false,
+			ShowAccentBar = true,
 			Duration = 4,
 		})
 	end,
@@ -85,5 +87,6 @@ UI:Notify({
 	Title = "Loading complete",
 	Content = "The interface loaded successfully.",
 	ShowIcon = false,
+	ShowAccentBar = true,
 	Duration = 4,
 })

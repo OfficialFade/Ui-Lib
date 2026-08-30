@@ -1160,7 +1160,7 @@ function Library:Notify(config: {[string]: any})
 	bar.BackgroundColor3 = config.Color or self.Theme.Accent
 	bar.BorderSizePixel = 0
 	bar.ZIndex = 2
-	bar.Visible = config.ShowIcon ~= false
+	bar.Visible = config.ShowAccentBar ~= false
 	bar.Parent = card
 	corner(bar, 2)
 	local glyphText = tostring(config.Icon or "✦")

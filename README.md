@@ -350,8 +350,19 @@ UI:Notify({
     Title = "Configuration saved",
     Content = "Your preferences were saved successfully.",
     Icon = "✓",
+    ShowAccentBar = true,
     Color = Color3.fromRGB(74, 205, 143),
     Duration = 3,
+})
+```
+
+`ShowAccentBar` controls the colored vertical line on the left side of each notification. It is enabled by default and can be disabled per notification:
+
+```lua
+UI:Notify({
+    Title = "Minimal notification",
+    Content = "This notification has no accent line.",
+    ShowAccentBar = false,
 })
 ```
 
