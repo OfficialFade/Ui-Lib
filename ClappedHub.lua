@@ -2164,13 +2164,13 @@ function Library:Button(config: {[string]: any})
 	local button = Instance.new("TextButton")
 	button.AutoButtonColor = false
 	button.Text = config.Text or "EXECUTE"
-	button.TextSize = 10
-	button.Font = Enum.Font.GothamBold
+	button.TextSize = 12
+	button.Font = Enum.Font.GothamBlack
 	button.TextTruncate = Enum.TextTruncate.AtEnd
 	button.TextWrapped = false
 	button.TextColor3 = Color3.fromRGB(255, 255, 255)
 	button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-	button.TextStrokeTransparency = 0.2
+	button.TextStrokeTransparency = 0.05
 	local buttonColor = self.Theme.AccentDeep:Lerp(self.Theme.Accent, 0.22)
 	button.BackgroundColor3 = buttonColor
 	button.BackgroundTransparency = 0.08
