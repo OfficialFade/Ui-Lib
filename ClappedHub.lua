@@ -1160,16 +1160,19 @@ function Library:Notify(config: {[string]: any})
 	bar.BackgroundColor3 = config.Color or self.Theme.Accent
 	bar.BorderSizePixel = 0
 	bar.ZIndex = 2
+	bar.Visible = config.ShowIcon ~= false
 	bar.Parent = card
 	corner(bar, 2)
 	local glyphText = tostring(config.Icon or "✦")
-	local wordIcon = #glyphText > 2
+	local showIcon = config.ShowIcon ~= false
+	local wordIcon = showIcon and #glyphText > 2
 	local glyph = icon(card, glyphText, wordIcon and 9 or 16, config.Color or self.Theme.AccentBright)
 	glyph.Position = UDim2.fromOffset(27, 14)
 	glyph.Size = UDim2.fromOffset(wordIcon and 50 or 28, 24)
+	glyph.Visible = showIcon
 	glyph.ZIndex = 3
-	local textOffset = wordIcon and 84 or 61
-	local title = text(card, config.Title or "Notification", 11, self.Theme.Text, Enum.Font.GothamBold)
+	local textOffset = not showIcon and 18 or (wordIcon and 84 or 61)
+	local title = text(card, config.Title or "Notification", 12, self.Theme.Text, Enum.Font.GothamBlack)
 	title.Position = UDim2.fromOffset(textOffset, 10)
 	title.Size = UDim2.new(1, -textOffset - 14, 0, 20)
 	title.TextColor3 = self.Theme.Text
@@ -1177,7 +1180,7 @@ function Library:Notify(config: {[string]: any})
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextTruncate = Enum.TextTruncate.AtEnd
 	title.ZIndex = 3
-	local message = text(card, config.Content or config.Text or "Notification", 10, self.Theme.TextMuted, Enum.Font.Gotham)
+	local message = text(card, config.Content or config.Text or "Notification", 10, self.Theme.TextMuted, Enum.Font.GothamSemibold)
 	message.Position = UDim2.fromOffset(textOffset, 30)
 	message.Size = UDim2.new(1, -textOffset - 14, 0, 30)
 	message.TextColor3 = self.Theme.TextMuted

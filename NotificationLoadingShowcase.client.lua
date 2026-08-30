@@ -60,7 +60,7 @@ section:Button({
 			Title = titleBox.Get(),
 			Content = messageBox.Get(),
 			Color = Color3.fromRGB(75, 205, 145),
-			Icon = "MESSAGE",
+			ShowIcon = false,
 			Duration = 4,
 		})
 	end,
@@ -75,7 +75,7 @@ section:Button({
 			Title = "Action failed",
 			Content = "Something went wrong. Please try again.",
 			Color = Color3.fromRGB(235, 92, 112),
-			Icon = "ERROR",
+			ShowIcon = false,
 			Duration = 4,
 		})
 	end,
@@ -84,6 +84,6 @@ section:Button({
 UI:Notify({
 	Title = "Loading complete",
 	Content = "The interface loaded successfully.",
-	Icon = "READY",
+	ShowIcon = false,
 	Duration = 4,
 })
