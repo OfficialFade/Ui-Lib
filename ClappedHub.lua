@@ -1688,7 +1688,7 @@ function Library:Dropdown(config: {[string]: any})
 	corner(button, 8)
 	local dropdownStroke = stroke(button, self.Theme.AccentDeep, 0.24, 1.15)
 	local dropdownGradient = Instance.new("UIGradient")
-	dropdownGradient.Color = ColorSequence.new({self.Theme.SurfaceRaised, self.Theme.StrokeSoft})
+	dropdownGradient.Color = ColorSequence.new(self.Theme.SurfaceRaised, self.Theme.StrokeSoft)
 	dropdownGradient.Rotation = 90
 	dropdownGradient.Parent = button
 	button.MouseEnter:Connect(function()
@@ -2135,7 +2135,7 @@ function Library:Button(config: {[string]: any})
 	corner(button, 9)
 	local buttonStroke = stroke(button, self.Theme.AccentBright, 0.68, 1)
 	local buttonGradient = Instance.new("UIGradient")
-	buttonGradient.Color = ColorSequence.new({self.Theme.Accent, self.Theme.AccentDeep})
+	buttonGradient.Color = ColorSequence.new(self.Theme.Accent, self.Theme.AccentDeep)
 	buttonGradient.Rotation = 90
 	buttonGradient.Parent = button
 	button.MouseEnter:Connect(function()
