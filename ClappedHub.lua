@@ -827,13 +827,13 @@ function Library:_setMinimized(minimized: boolean)
 		self.TopGlow.Visible = false
 		self.MinimizedHitbox.Visible = false
 		if self.BrandMark then
-			self.BrandMark.AnchorPoint = Vector2.new(0.5, 0.5)
-			self.BrandMark.Position = UDim2.new(0.5, -67, 0.5, 0)
+			self.BrandMark.AnchorPoint = Vector2.new(0, 0.5)
+			self.BrandMark.Position = UDim2.fromOffset(18, 29)
 		end
 		if self.Brand then
 			self.Brand.AnchorPoint = Vector2.new(0, 0.5)
-			self.Brand.Position = UDim2.new(0.5, -45, 0.5, 0)
-			self.Brand.Size = UDim2.fromOffset(102, 36)
+			self.Brand.Position = UDim2.fromOffset(62, 29)
+			self.Brand.Size = UDim2.fromOffset(150, 36)
 		end
 		if self.BrandTitle then self.BrandTitle.TextXAlignment = Enum.TextXAlignment.Center end
 		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 58)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
