@@ -28,7 +28,7 @@ end
 local exampleTab = UI:Tab({Name = "Examples", Icon = "◆", Description = "Every control available in Ocean UI Lib."})
 local examples = UI:Section({Tab = exampleTab, Name = "Control examples", Description = "Generic components ready to copy into any script."})
 examples:Label({Title = "Example label", Text = "READY"})
-examples:Button({Name = "Example button", Text = "TEST", Width = 190, Height = 42, Description = "A polished button with hover feedback and callbacks.", Callback = function()
+examples:Button({Name = "Example button", Text = "TEST", Description = "A polished button with hover feedback and callbacks.", Callback = function()
 	notify("Example button", "The button callback ran successfully.")
 end})
 examples:Toggle({Name = "Example toggle", Description = "A smooth on/off control.", Flag = "ExampleToggle", Default = true, Callback = function(value)
