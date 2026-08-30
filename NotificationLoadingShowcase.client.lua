@@ -34,16 +34,33 @@ section:Label({
 	Text = "ENABLED",
 })
 
+local titleBox = section:TextBox({
+	Name = "Notification title",
+	Description = "Write any title you want to display.",
+	Flag = "NotificationTitle",
+	Placeholder = "Type a title...",
+	Default = "Action complete",
+	Width = 175,
+})
+local messageBox = section:TextBox({
+	Name = "Notification message",
+	Description = "Write any message or sentence you want.",
+	Flag = "NotificationMessage",
+	Placeholder = "Type a message...",
+	Default = "Executed successfully.",
+	Width = 175,
+})
+
 section:Button({
-	Name = "Execute example",
+	Name = "Send custom notification",
 	Text = "EXECUTE",
-	Description = "Shows a notification with a title and message.",
+	Description = "Displays the exact text written in the fields above.",
 	Callback = function()
 		UI:Notify({
-			Title = "Action complete",
-			Content = "Executed successfully.",
+			Title = titleBox.Get(),
+			Content = messageBox.Get(),
 			Color = Color3.fromRGB(75, 205, 145),
-			Icon = "✓",
+			Icon = "SUCCESS",
 			Duration = 4,
 		})
 	end,
@@ -58,7 +75,7 @@ section:Button({
 			Title = "Action failed",
 			Content = "Something went wrong. Please try again.",
 			Color = Color3.fromRGB(235, 92, 112),
-			Icon = "!",
+			Icon = "ERROR",
 			Duration = 4,
 		})
 	end,
@@ -67,6 +84,6 @@ section:Button({
 UI:Notify({
 	Title = "Loading complete",
 	Content = "The interface loaded successfully.",
-	Icon = "✓",
+	Icon = "READY",
 	Duration = 4,
 })

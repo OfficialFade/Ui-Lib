@@ -1162,17 +1162,20 @@ function Library:Notify(config: {[string]: any})
 	bar.ZIndex = 2
 	bar.Parent = card
 	corner(bar, 2)
-	local glyph = icon(card, config.Icon or "✦", 16, config.Color or self.Theme.AccentBright)
+	local glyphText = tostring(config.Icon or "✦")
+	local wordIcon = #glyphText > 2
+	local glyph = icon(card, glyphText, wordIcon and 9 or 16, config.Color or self.Theme.AccentBright)
 	glyph.Position = UDim2.fromOffset(27, 14)
-	glyph.Size = UDim2.fromOffset(28, 24)
+	glyph.Size = UDim2.fromOffset(wordIcon and 50 or 28, 24)
 	glyph.ZIndex = 3
+	local textOffset = wordIcon and 84 or 61
 	local title = text(card, config.Title or "Notification", 11, self.Theme.Text, Enum.Font.GothamBold)
-	title.Position = UDim2.fromOffset(61, 10)
-	title.Size = UDim2.new(1, -75, 20, 0)
+	title.Position = UDim2.fromOffset(textOffset, 10)
+	title.Size = UDim2.new(1, textOffset - 14, 20, 0)
 	title.ZIndex = 3
 	local message = text(card, config.Content or config.Text or "Notification", 10, self.Theme.TextMuted, Enum.Font.Gotham)
-	message.Position = UDim2.fromOffset(61, 30)
-	message.Size = UDim2.new(1, -75, 30, 0)
+	message.Position = UDim2.fromOffset(textOffset, 30)
+	message.Size = UDim2.new(1, textOffset - 14, 30, 0)
 	message.TextWrapped = true
 	message.ZIndex = 3
 	local function animateNotification(visible: boolean)

@@ -343,7 +343,7 @@ Users can click the displayed key to rebind it. Escape cancels rebinding.
 
 ## Notifications
 
-Notifications support a title, body text, icon, color, and duration.
+Notifications support any title, body text, optional word/icon label, color, and duration. `Title`, `Content`, and `Icon` are user-provided strings; they are not limited to preset words or checkmarks.
 
 ```lua
 UI:Notify({
@@ -352,6 +352,18 @@ UI:Notify({
     Icon = "✓",
     Color = Color3.fromRGB(74, 205, 143),
     Duration = 3,
+})
+```
+
+Custom notification text:
+
+```lua
+UI:Notify({
+    Title = "Custom title written by your script",
+    Content = "You can display any message here.",
+    Icon = "READY", -- Optional; words and symbols are both supported.
+    Color = Color3.fromRGB(80, 175, 255),
+    Duration = 4,
 })
 ```
 
