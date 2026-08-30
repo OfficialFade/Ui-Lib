@@ -1290,16 +1290,16 @@ function Library:PlayMusic(config: {[string]: any})
 		panel.Name = "LoadingPanel"
 		panel.AnchorPoint = Vector2.new(0.5, 0.5)
 		panel.Position = UDim2.fromScale(0.5, 0.5)
-		-- Match the loading panel to the exact final window size so the layout
-		-- does not jump when the loading transition finishes.
-		panel.Size = self.WindowSize
+		-- Keep the loading card compact; the main window uses self.WindowSize
+		-- after the loading transition is complete.
+		panel.Size = UDim2.fromOffset(304, 58)
 		panel.BackgroundColor3 = self.Theme.SurfaceRaised
 		panel.BackgroundTransparency = 0.08
 		panel.BorderSizePixel = 0
 		panel.ZIndex = 101
 		panel.ClipsDescendants = true
 		panel.Parent = overlay
-		corner(panel, 20)
+		corner(panel, 12)
 		stroke(panel, self.Theme.Stroke, 0.28)
 		local loadingBackground = Instance.new("ImageLabel")
 		loadingBackground.Name = "LoadingBackground"
@@ -1310,7 +1310,7 @@ function Library:PlayMusic(config: {[string]: any})
 		loadingBackground.ScaleType = Enum.ScaleType.Crop
 		loadingBackground.ZIndex = 101
 		loadingBackground.Parent = panel
-		corner(loadingBackground, 20)
+		corner(loadingBackground, 12)
 		local loadingWash = Instance.new("Frame")
 		loadingWash.Size = UDim2.fromScale(1, 1)
 		loadingWash.BackgroundColor3 = self.Theme.Window
@@ -1318,7 +1318,7 @@ function Library:PlayMusic(config: {[string]: any})
 		loadingWash.BorderSizePixel = 0
 		loadingWash.ZIndex = 102
 		loadingWash.Parent = panel
-		corner(loadingWash, 20)
+		corner(loadingWash, 12)
 		local accentLine = Instance.new("Frame")
 		accentLine.Size = UDim2.new(0, 4, 1, -20)
 		accentLine.Position = UDim2.fromOffset(12, 10)
@@ -1674,6 +1674,18 @@ function Library:TextBox(config: {[string]: any})
 	corner(input, 8)
 	local inputStroke = stroke(input, self.Theme.AccentDeep, 0.35)
 	padding(input, 10, 10, 0, 0)
+	local textLabels = {}
+	for _, child in ipairs(row:GetChildren()) do
+		if child:IsA("TextLabel") then table.insert(textLabels, child) end
+	end
+	local function updateTextBoxLabelWidths()
+		local reserved = (config.Width or 142) + 38
+		local available = math.max(0, row.AbsoluteSize.X - reserved)
+		if textLabels[1] then textLabels[1].Size = UDim2.fromOffset(available, 20) end
+		if textLabels[2] then textLabels[2].Size = UDim2.fromOffset(available, 18) end
+	end
+	row:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateTextBoxLabelWidths)
+	updateTextBoxLabelWidths()
 	input.Focused:Connect(function()
 		tween(input, 0.16, {BackgroundTransparency = 0.12})
 		tween(inputStroke, 0.16, {Transparency = 0.05, Color = self.Theme.Accent})
