@@ -691,11 +691,6 @@ function Library.new(options: {[string]: any}?)
 	minimize.MouseButton1Click:Connect(function()
 		self:_setMinimized(not self.Minimized)
 	end)
-	header.InputEnded:Connect(function(input)
-		if self.Minimized and input.UserInputType == Enum.UserInputType.MouseButton1 then
-			self:_setMinimized(false)
-		end
-	end)
 	sidebar.MouseEnter:Connect(function()
 		self.SidebarCollapseToken += 1
 		if self.AutoCollapseSidebar then self:_setSidebarExpanded(true) end
@@ -714,21 +709,25 @@ function Library.new(options: {[string]: any}?)
 	end)
 
 	if self.EnableDragging then
-		local dragging, dragStart, startPosition
+		local dragging, dragStart, startPosition, dragMoved
 		header.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				if self.Minimized then return end
 				dragging = true
 				dragStart = input.Position
 				startPosition = window.Position
+				dragMoved = false
 			end
 		end)
 		header.InputEnded:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				dragging = false
+				if self.Minimized and not dragMoved then self:_setMinimized(false) end
+			end
 		end)
 		self.WindowDragConnection = UserInputService.InputChanged:Connect(function(input)
 			if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 				local delta = input.Position - dragStart
+				dragMoved = math.abs(delta.X) > 3 or math.abs(delta.Y) > 3
 				local nextPosition = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
 				window.Position = nextPosition
 				shadow.Position = nextPosition
@@ -818,21 +817,25 @@ function Library:_setMinimized(minimized: boolean)
 	self.Minimized = minimized
 	if minimized then
 		if self.WindowAspectConstraint then self.WindowAspectConstraint.Parent = nil end
+		if self.WindowSizeConstraint then self.WindowSizeConstraint.Parent = nil end
 		self.Body.Visible = false
 		self.HeaderControls.Visible = false
 		self.TopGlow.Visible = false
-		self.MinimizedHitbox.Visible = true
+		self.MinimizedHitbox.Visible = false
 		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 58)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		tween(self.BrandSubtitle, 0.18, {TextTransparency = 1})
 		tween(self.Window, 0.36, {Size = UDim2.fromOffset(238, 58)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		if self.AmbientShadow then tween(self.AmbientShadow, 0.36, {Size = UDim2.fromOffset(238, 58)}) end
 	else
 		self.HeaderControls.Visible = true
 		self.TopGlow.Visible = true
 		self.Body.Visible = true
 		self.MinimizedHitbox.Visible = false
+		if self.WindowSizeConstraint then self.WindowSizeConstraint.Parent = self.Window end
 		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 68)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		tween(self.BrandSubtitle, 0.18, {TextTransparency = 0.08})
 		tween(self.Window, 0.42, {Size = self.WindowSize}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		if self.AmbientShadow then tween(self.AmbientShadow, 0.42, {Size = self.WindowSize}) end
 		task.delay(0.44, function()
 			if not self.Destroyed and not self.Minimized and self.UseAspectRatio and self.WindowAspectConstraint then
 				self.WindowAspectConstraint.Parent = self.Window
@@ -1672,12 +1675,14 @@ function Library:Dropdown(config: {[string]: any})
 	button.Name = "DropdownButton"
 	button.AutoButtonColor = false
 	button.Text = value
-	button.TextSize = 10
+	button.TextSize = 11
 	button.Font = Enum.Font.GothamBold
 	button.TextXAlignment = Enum.TextXAlignment.Center
 	button.TextTruncate = Enum.TextTruncate.AtEnd
 	button.TextWrapped = false
-	button.TextColor3 = self.Theme.Text
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+	button.TextStrokeTransparency = 0.72
 	button.BackgroundColor3 = self.Theme.StrokeSoft
 	button.BackgroundTransparency = 0.08
 	button.BorderSizePixel = 0
@@ -1742,9 +1747,11 @@ function Library:Dropdown(config: {[string]: any})
 		optionButton.Name = tostring(option) .. "Option"
 		optionButton.AutoButtonColor = false
 		optionButton.Text = tostring(option)
-		optionButton.TextSize = 10
-		optionButton.Font = Enum.Font.GothamMedium
-		optionButton.TextColor3 = library.Theme.Text
+		optionButton.TextSize = 11
+		optionButton.Font = Enum.Font.GothamSemibold
+		optionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		optionButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+		optionButton.TextStrokeTransparency = 0.72
 		optionButton.BackgroundColor3 = library.Theme.Surface
 		optionButton.BackgroundTransparency = 0.25
 		optionButton.BorderSizePixel = 0
