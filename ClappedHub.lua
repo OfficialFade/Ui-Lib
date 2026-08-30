@@ -2171,9 +2171,9 @@ function Library:Button(config: {[string]: any})
 	button.BorderSizePixel = 0
 	button.AnchorPoint = Vector2.new(1, 0.5)
 	button.Position = UDim2.new(1, -14, 0.5, 0)
-	button.Size = UDim2.fromOffset(config.Width or 112, 32)
+	button.Size = UDim2.fromOffset(config.Width or 180, config.Height or 42)
 	button.Parent = row
-	corner(button, 9)
+	corner(button, 12)
 	local buttonStroke = stroke(button, self.Theme.AccentBright, 0.68, 1)
 	button.MouseEnter:Connect(function()
 		tween(buttonStroke, 0.16, {Transparency = 0.28})
