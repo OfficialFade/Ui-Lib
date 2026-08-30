@@ -1172,10 +1172,18 @@ function Library:Notify(config: {[string]: any})
 	local title = text(card, config.Title or "Notification", 11, self.Theme.Text, Enum.Font.GothamBold)
 	title.Position = UDim2.fromOffset(textOffset, 10)
 	title.Size = UDim2.new(1, -textOffset - 14, 20, 0)
+	title.TextColor3 = self.Theme.Text
+	title.TextTransparency = 0
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextTruncate = Enum.TextTruncate.AtEnd
 	title.ZIndex = 3
 	local message = text(card, config.Content or config.Text or "Notification", 10, self.Theme.TextMuted, Enum.Font.Gotham)
 	message.Position = UDim2.fromOffset(textOffset, 30)
 	message.Size = UDim2.new(1, -textOffset - 14, 30, 0)
+	message.TextColor3 = self.Theme.TextMuted
+	message.TextTransparency = 0
+	message.TextXAlignment = Enum.TextXAlignment.Left
+	message.TextTruncate = Enum.TextTruncate.AtEnd
 	message.TextWrapped = true
 	message.ZIndex = 3
 	local function animateNotification(visible: boolean)
