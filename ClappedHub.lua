@@ -1708,7 +1708,7 @@ function Library:Dropdown(config: {[string]: any})
 	button.TextColor3 = Color3.fromRGB(255, 255, 255)
 	button.TextTransparency = 0
 	button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-	button.TextStrokeTransparency = 0
+	button.TextStrokeTransparency = 0.2
 	button.BackgroundColor3 = self.Theme.StrokeSoft
 	button.BackgroundTransparency = 0.08
 	button.BorderSizePixel = 0
@@ -2165,10 +2165,12 @@ function Library:Button(config: {[string]: any})
 	button.AutoButtonColor = false
 	button.Text = config.Text or "EXECUTE"
 	button.TextSize = 10
-	button.Font = Enum.Font.GothamSemibold
+	button.Font = Enum.Font.GothamBold
 	button.TextTruncate = Enum.TextTruncate.AtEnd
 	button.TextWrapped = false
-	button.TextColor3 = self.Theme.Text
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+	button.TextStrokeTransparency = 0.2
 	local buttonColor = self.Theme.AccentDeep:Lerp(self.Theme.Accent, 0.22)
 	button.BackgroundColor3 = buttonColor
 	button.BackgroundTransparency = 0.08
