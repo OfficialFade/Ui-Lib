@@ -1171,11 +1171,11 @@ function Library:Notify(config: {[string]: any})
 	local textOffset = wordIcon and 84 or 61
 	local title = text(card, config.Title or "Notification", 11, self.Theme.Text, Enum.Font.GothamBold)
 	title.Position = UDim2.fromOffset(textOffset, 10)
-	title.Size = UDim2.new(1, textOffset - 14, 20, 0)
+	title.Size = UDim2.new(1, -textOffset - 14, 20, 0)
 	title.ZIndex = 3
 	local message = text(card, config.Content or config.Text or "Notification", 10, self.Theme.TextMuted, Enum.Font.Gotham)
 	message.Position = UDim2.fromOffset(textOffset, 30)
-	message.Size = UDim2.new(1, textOffset - 14, 30, 0)
+	message.Size = UDim2.new(1, -textOffset - 14, 30, 0)
 	message.TextWrapped = true
 	message.ZIndex = 3
 	local function animateNotification(visible: boolean)
@@ -1533,7 +1533,7 @@ function Library:_controlRow(parent: Instance, titleValue: string, descriptionVa
 		descriptionLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	end
 	local function updateLabelWidths()
-		local available = math.max(0, row.AbsoluteSize.X - 160)
+		local available = math.max(0, row.AbsoluteSize.X - 210)
 		titleLabel.Size = UDim2.fromOffset(available, 20)
 		if descriptionValue then
 			local descriptionLabel = row:FindFirstChildWhichIsA("TextLabel")
