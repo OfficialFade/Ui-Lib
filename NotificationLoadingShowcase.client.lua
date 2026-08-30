@@ -39,7 +39,7 @@ local titleBox = section:TextBox({
 	Description = "Write any title you want to display.",
 	Flag = "NotificationTitle",
 	Placeholder = "Type a title...",
-	Default = "Action complete",
+	Default = "Message",
 	Width = 175,
 })
 local messageBox = section:TextBox({
@@ -47,20 +47,20 @@ local messageBox = section:TextBox({
 	Description = "Write any message or sentence you want.",
 	Flag = "NotificationMessage",
 	Placeholder = "Type a message...",
-	Default = "Executed successfully.",
+	Default = "Cipher is a silly goose!",
 	Width = 175,
 })
 
 section:Button({
-	Name = "Send custom notification",
+	Name = "Send notification",
 	Text = "EXECUTE",
-	Description = "Displays the exact text written in the fields above.",
+	Description = "Displays the requested message immediately.",
 	Callback = function()
 		UI:Notify({
 			Title = titleBox.Get(),
 			Content = messageBox.Get(),
 			Color = Color3.fromRGB(75, 205, 145),
-			Icon = "SUCCESS",
+			Icon = "MESSAGE",
 			Duration = 4,
 		})
 	end,
@@ -76,21 +76,6 @@ section:Button({
 			Content = "Something went wrong. Please try again.",
 			Color = Color3.fromRGB(235, 92, 112),
 			Icon = "ERROR",
-			Duration = 4,
-		})
-	end,
-})
-
-section:Button({
-	Name = "Custom message example",
-	Text = "SEND",
-	Description = "Displays a notification using a normal sentence.",
-	Callback = function()
-		UI:Notify({
-			Title = "Message",
-			Content = "Cipher is a silly goose!",
-			Color = Color3.fromRGB(80, 175, 255),
-			Icon = "MESSAGE",
 			Duration = 4,
 		})
 	end,
