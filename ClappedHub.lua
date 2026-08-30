@@ -828,11 +828,11 @@ function Library:_setMinimized(minimized: boolean)
 		self.MinimizedHitbox.Visible = false
 		if self.BrandMark then
 			self.BrandMark.AnchorPoint = Vector2.new(0.5, 0.5)
-			self.BrandMark.Position = UDim2.new(0.5, -80, 0.5, 0)
+			self.BrandMark.Position = UDim2.new(0.5, -71, 0.5, 0)
 		end
 		if self.Brand then
 			self.Brand.AnchorPoint = Vector2.new(0, 0.5)
-			self.Brand.Position = UDim2.new(0.5, -34, 0.5, 0)
+			self.Brand.Position = UDim2.new(0.5, -25, 0.5, 0)
 			self.Brand.Size = UDim2.fromOffset(114, 36)
 		end
 		if self.BrandTitle then self.BrandTitle.TextXAlignment = Enum.TextXAlignment.Center end
