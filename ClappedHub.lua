@@ -672,6 +672,7 @@ function Library.new(options: {[string]: any}?)
 	self.SearchResultsEmpty = searchEmpty
 	self.Header = header
 	self.HeaderControls = controls
+	self.MinimizeButton = minimize
 	self.BrandTitle = title
 	self.BrandSubtitle = subtitle
 	self.BrandMark = brandMark
@@ -822,16 +823,17 @@ function Library:_setMinimized(minimized: boolean)
 		if self.WindowSizeConstraint then self.WindowSizeConstraint.Parent = nil end
 		self.Body.Visible = false
 		self.HeaderControls.Visible = self.EnableMinimize
+		self.MinimizeButton.Text = "+"
 		self.TopGlow.Visible = false
 		self.MinimizedHitbox.Visible = false
 		if self.BrandMark then
 			self.BrandMark.AnchorPoint = Vector2.new(0.5, 0.5)
-			self.BrandMark.Position = UDim2.new(0.5, -58, 0.5, 0)
+			self.BrandMark.Position = UDim2.new(0.5, -80, 0.5, 0)
 		end
 		if self.Brand then
 			self.Brand.AnchorPoint = Vector2.new(0, 0.5)
 			self.Brand.Position = UDim2.new(0.5, -34, 0.5, 0)
-			self.Brand.Size = UDim2.fromOffset(150, 36)
+			self.Brand.Size = UDim2.fromOffset(114, 36)
 		end
 		if self.BrandTitle then self.BrandTitle.TextXAlignment = Enum.TextXAlignment.Center end
 		tween(self.Header, 0.28, {Size = UDim2.new(1, 0, 0, 58)}, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
@@ -840,6 +842,7 @@ function Library:_setMinimized(minimized: boolean)
 		if self.AmbientShadow then tween(self.AmbientShadow, 0.36, {Size = UDim2.fromOffset(320, 58)}) end
 	else
 		self.HeaderControls.Visible = true
+		self.MinimizeButton.Text = "—"
 		self.TopGlow.Visible = true
 		self.Body.Visible = true
 		self.MinimizedHitbox.Visible = false
